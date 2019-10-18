@@ -1,6 +1,7 @@
 import { FC } from "react"
 import { IconButton } from "@material-ui/core"
 import FormatBold from "@material-ui/icons/FormatBold"
+import FormatListNumbered from "@material-ui/icons/FormatListNumbered"
 import React from "react"
 import { useSlateMui } from "./context"
 
@@ -27,7 +28,7 @@ export const MarkupButton: FC = () => {
 }
 
 export const BlockButton: FC = () => {
-  const type = EBlocks.h1
+  const type = EBlocks.list_numbered
   const slateMui = useSlateMui()
 
   let isActive = slateMui.hasBlock(type)
@@ -47,9 +48,9 @@ export const BlockButton: FC = () => {
   return (
     <IconButton
       color={isActive ? "primary" : "default"}
-      onMouseDown={() => slateMui.editor.toggleMark(type)}
+      onMouseDown={() => slateMui.toggleBlock(type)}
     >
-      <FormatBold />
+      <FormatListNumbered />
     </IconButton>
   )
 }

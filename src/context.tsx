@@ -34,7 +34,7 @@ export class SlateMui {
     return this.value.blocks.some(node => (node ? node.type === type : false))
   }
 
-  onClickBlock = (type: string) => {
+  toggleBlock = (type: string) => {
     const { editor } = this
     const { value } = editor
     const { document } = value

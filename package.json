@@ -1,0 +1,48 @@
+{
+  "author": "Palessit",
+  "devDependencies": {
+    "@types/node": "^12.7.11",
+    "@types/react-dom": "^16.9.0",
+    "@types/react-router-dom": "^5.1.0",
+    "@types/webpack": "^4.39.1",
+    "@types/webpack-dev-server": "^3.1.7",
+    "dotenv": "^8.1.0",
+    "immutable": "^4.0.0-rc.12",
+    "react": "^16.10.2",
+    "react-dom": "^16.10.2",
+    "slate": "^0.47.8",
+    "slate-react": "^0.22.9",
+    "ts-loader": "^6.0.4",
+    "ts-node": "^8.3.0",
+    "ts-node-dev": "^1.0.0-pre.43",
+    "tslib": "^1.10.0",
+    "typescript": "^3.6.3",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.8",
+    "webpack-dev-server": "^3.8.2"
+  },
+  "files": [
+    "dist/*(*.ts|*.js)",
+    "package.json",
+    "LICENSE",
+    "README.md"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "name": "slate-mui",
+  "peerDependencies": {
+    "react": ">=16.8",
+    "react-dom": ">=16.8"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -r dist",
+    "example:server": "cd example && ts-node-dev --respawn --transpileOnly server.ts",
+    "example:wds": "cd example && TS_NODE_PROJECT=\"tsconfig.json\" webpack-dev-server --config webpack.config.ts",
+    "pack:dry": "npm pack && tar -xvzf *.tgz && rm -rf package *.tgz"
+  },
+  "sideEffects": false,
+  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "version": "0.7.0"
+}

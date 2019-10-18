@@ -1,6 +1,7 @@
 import { Plugin, EventHook } from "slate-react"
 import React from "react"
 import { isKeyHotkey } from "is-hotkey"
+import { EBlocks } from "./button"
 
 const isBoldHotkey = isKeyHotkey("mod+b")
 const isItalicHotkey = isKeyHotkey("mod+i")
@@ -13,15 +14,15 @@ export const renderBlock: Plugin["renderBlock"] = (props, _editor, next) => {
   switch (node.type) {
     case "block-quote":
       return <blockquote {...attributes}>{children}</blockquote>
-    case "bulleted-list":
-      return <ul {...attributes}>{children}</ul>
-    case "heading-one":
+    case EBlocks.h1:
       return <h1 {...attributes}>{children}</h1>
     case "heading-two":
       return <h2 {...attributes}>{children}</h2>
-    case "list-item":
+    case EBlocks.list_item:
       return <li {...attributes}>{children}</li>
-    case "numbered-list":
+    case EBlocks.list_bulleted:
+      return <ul {...attributes}>{children}</ul>
+    case EBlocks.list_numbered:
       return <ol {...attributes}>{children}</ol>
     default:
       return next()

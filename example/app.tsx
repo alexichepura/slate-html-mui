@@ -1,5 +1,15 @@
 import React from "react"
 import { render } from "react-dom"
-import { App } from "./editor"
+import { SlateMuiEditor } from "../src/editor"
+import { SlateMuiContext, SlateMui } from "../src/context"
+import { Value } from "slate"
 
-render(<App />, document.getElementById("app"))
+const value = Value.fromJSON({})
+const slateMui = new SlateMui(value)
+
+render(
+  <SlateMuiContext.Provider value={slateMui}>
+    <SlateMuiEditor />
+  </SlateMuiContext.Provider>,
+  document.getElementById("app")
+)

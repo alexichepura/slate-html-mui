@@ -1,6 +1,9 @@
 {
   "author": "Palessit",
   "devDependencies": {
+    "@material-ui/core": "^4.5.1",
+    "@material-ui/icons": "^4.5.1",
+    "@types/is-hotkey": "^0.1.1",
     "@types/node": "^12.7.11",
     "@types/react-dom": "^16.9.0",
     "@types/react-router-dom": "^5.1.0",
@@ -10,6 +13,7 @@
     "@types/webpack-dev-server": "^3.1.7",
     "dotenv": "^8.1.0",
     "immutable": "^4.0.0-rc.12",
+    "is-hotkey": "^0.1.6",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
     "slate": "^0.47.8",

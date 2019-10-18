@@ -147,6 +147,23 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
+"@types/slate-react@^0.22.5":
+  version "0.22.5"
+  resolved "https://registry.yarnpkg.com/@types/slate-react/-/slate-react-0.22.5.tgz#a10796758aa6b3133e1c777959facbf8806959f7"
+  integrity sha512-WKJic5LlNRNUCnD6lEdlOZCcXWoDN8Ais2CmwVMn8pdt5Kh8hJsTYhXawNxOShPIOLVB+G+aVZNAXAAubEOpaw==
+  dependencies:
+    "@types/react" "*"
+    "@types/slate" "*"
+    immutable "^3.8.2"
+
+"@types/slate@*", "@types/slate@^0.47.2":
+  version "0.47.2"
+  resolved "https://registry.yarnpkg.com/@types/slate/-/slate-0.47.2.tgz#54c57c223919bb70b3047600ab6b0ccf800bff77"
+  integrity sha512-1qwuAtuJ2Tnhewr2tz3OsDeM9xIC1ttTkBuSuf2P4Dy7K9I/I8HVeVowpo8k2vzVX7UMkc3OHo0RpC7V6pWCBw==
+  dependencies:
+    "@types/react" "*"
+    immutable "^3.8.2"
+
 "@types/source-list-map@*":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@types/source-list-map/-/source-list-map-0.1.2.tgz#0078836063ffaf17412349bba364087e0ac02ec9"
@@ -2065,6 +2082,11 @@ ignore-walk@^3.0.1:
   integrity sha512-m7o6xuOaT1aqheYHKf8W6J5pYH85ZI9w077erOzLje3JsB1gkafkAhHHY19dqjulgIZHFm32Cp5uNZgcQqdJKw==
   dependencies:
     minimatch "^3.0.4"
+
+immutable@^3.8.2:
+  version "3.8.2"
+  resolved "https://registry.yarnpkg.com/immutable/-/immutable-3.8.2.tgz#c2439951455bb39913daf281376f1530e104adf3"
+  integrity sha1-wkOZUUVbs5kT2vKBN28VMOEErfM=
 
 immutable@^4.0.0-rc.12:
   version "4.0.0-rc.12"

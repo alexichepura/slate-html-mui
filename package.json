@@ -4,6 +4,8 @@
     "@types/node": "^12.7.11",
     "@types/react-dom": "^16.9.0",
     "@types/react-router-dom": "^5.1.0",
+    "@types/slate": "^0.47.2",
+    "@types/slate-react": "^0.22.5",
     "@types/webpack": "^4.39.1",
     "@types/webpack-dev-server": "^3.1.7",
     "dotenv": "^8.1.0",

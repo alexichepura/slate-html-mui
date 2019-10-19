@@ -1,7 +1,7 @@
 import { Value } from "slate"
 import React, { useContext } from "react"
 import { Editor } from "slate-react"
-import { EBlocks } from "./button"
+import { EBlock } from "./button"
 
 const DEFAULT_NODE = "paragraph"
 
@@ -40,21 +40,21 @@ export class SlateMui {
     const { document } = value
 
     // Handle everything but list buttons.
-    if (type !== EBlocks.list_bulleted && type !== EBlocks.list_numbered) {
+    if (type !== EBlock.list_bulleted && type !== EBlock.list_numbered) {
       const isActive = this.hasBlock(type)
-      const isList = this.hasBlock(EBlocks.list_item)
+      const isList = this.hasBlock(EBlock.list_item)
 
       if (isList) {
         editor
           .setBlocks(isActive ? DEFAULT_NODE : type)
-          .unwrapBlock(EBlocks.list_bulleted)
-          .unwrapBlock(EBlocks.list_numbered)
+          .unwrapBlock(EBlock.list_bulleted)
+          .unwrapBlock(EBlock.list_numbered)
       } else {
         editor.setBlocks(isActive ? DEFAULT_NODE : type)
       }
     } else {
       // Handle the extra wrapping required for list buttons.
-      const isList = this.hasBlock(EBlocks.list_item)
+      const isList = this.hasBlock(EBlock.list_item)
       const isType = value.blocks.some(block => {
         if (!block) {
           return false
@@ -67,16 +67,14 @@ export class SlateMui {
       if (isList && isType) {
         editor
           .setBlocks(DEFAULT_NODE)
-          .unwrapBlock(EBlocks.list_bulleted)
-          .unwrapBlock(EBlocks.list_numbered)
+          .unwrapBlock(EBlock.list_bulleted)
+          .unwrapBlock(EBlock.list_numbered)
       } else if (isList) {
         editor
-          .unwrapBlock(
-            type === EBlocks.list_bulleted ? EBlocks.list_numbered : EBlocks.list_bulleted
-          )
+          .unwrapBlock(type === EBlock.list_bulleted ? EBlock.list_numbered : EBlock.list_bulleted)
           .wrapBlock(type)
       } else {
-        editor.setBlocks(EBlocks.list_item).wrapBlock(type)
+        editor.setBlocks(EBlock.list_item).wrapBlock(type)
       }
     }
   }

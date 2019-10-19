@@ -1,7 +1,7 @@
 import { Plugin, EventHook } from "slate-react"
 import React from "react"
 import { isKeyHotkey } from "is-hotkey"
-import { EBlocks } from "./button"
+import { EBlock, EMark } from "./button"
 
 const isBoldHotkey = isKeyHotkey("mod+b")
 const isItalicHotkey = isKeyHotkey("mod+i")
@@ -12,17 +12,17 @@ export const renderBlock: Plugin["renderBlock"] = (props, _editor, next) => {
   const { attributes, children, node } = props
 
   switch (node.type) {
-    case "block-quote":
-      return <blockquote {...attributes}>{children}</blockquote>
-    case EBlocks.h1:
+    case EBlock.h1:
       return <h1 {...attributes}>{children}</h1>
-    case "heading-two":
+    case EBlock.h2:
       return <h2 {...attributes}>{children}</h2>
-    case EBlocks.list_item:
+    case EBlock.blockquote:
+      return <blockquote {...attributes}>{children}</blockquote>
+    case EBlock.list_item:
       return <li {...attributes}>{children}</li>
-    case EBlocks.list_bulleted:
+    case EBlock.list_bulleted:
       return <ul {...attributes}>{children}</ul>
-    case EBlocks.list_numbered:
+    case EBlock.list_numbered:
       return <ol {...attributes}>{children}</ol>
     default:
       return next()
@@ -33,13 +33,13 @@ export const renderMark: Plugin["renderMark"] = (props, _editor, next) => {
   const { children, mark, attributes } = props
 
   switch (mark.type) {
-    case "bold":
+    case EMark.bold:
       return <strong {...attributes}>{children}</strong>
-    case "code":
+    case EMark.code:
       return <code {...attributes}>{children}</code>
-    case "italic":
+    case EMark.italic:
       return <em {...attributes}>{children}</em>
-    case "underlined":
+    case EMark.underlined:
       return <u {...attributes}>{children}</u>
     default:
       return next()
@@ -51,13 +51,13 @@ export const onKeyDown: EventHook = (_event, editor, next) => {
   let mark
 
   if (isBoldHotkey(event)) {
-    mark = "bold"
+    mark = EMark.bold
   } else if (isItalicHotkey(event)) {
-    mark = "italic"
+    mark = EMark.italic
   } else if (isUnderlinedHotkey(event)) {
-    mark = "underlined"
+    mark = EMark.underlined
   } else if (isCodeHotkey(event)) {
-    mark = "code"
+    mark = EMark.code
   } else {
     return next()
   }

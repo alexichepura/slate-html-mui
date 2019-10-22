@@ -5,10 +5,10 @@ import FormatItalicTwoTone from "@material-ui/icons/FormatItalicTwoTone"
 import FormatUnderlinedTwoTone from "@material-ui/icons/FormatUnderlinedTwoTone"
 import CodeTwoTone from "@material-ui/icons/CodeTwoTone"
 import React from "react"
-import { useSlateMui } from "./context"
 import { MarkPlugin } from "./mark-plugin"
 import { Plugin } from "slate-react"
 import { Value } from "slate"
+import { useSlateEditor } from "./editor"
 
 // MARKS
 export enum EHtmlMark {
@@ -22,13 +22,13 @@ export const hasMark = (value: Value, type: string) => {
   return value.activeMarks.some(mark => (mark ? mark.type === type : false))
 }
 export const MarkButton: FC<{ type: string }> = ({ type, ...rest }) => {
-  const slateMui = useSlateMui()
-  const isActive = hasMark(slateMui.value, type)
+  const editor = useSlateEditor()
+  const isActive = hasMark(editor.value, type)
 
   return (
     <IconButton
       color={isActive ? "primary" : "default"}
-      onClick={() => slateMui.editor.toggleMark(type)}
+      onClick={() => editor.toggleMark(type)}
       {...rest}
     />
   )

@@ -3,10 +3,10 @@ import { IconButton } from "@material-ui/core"
 import FormatListNumbered from "@material-ui/icons/FormatListNumbered"
 import FormatListBulleted from "@material-ui/icons/FormatListBulleted"
 import React from "react"
-import { useSlateMui } from "./context"
 import { BlockPlugin } from "./block-plugin"
 import { Plugin, Editor } from "slate-react"
 import { Value } from "slate"
+import { useSlateEditor } from "./editor"
 
 export enum EHtmlBlock {
   "p" = "p",
@@ -32,7 +32,7 @@ type TBlockButtonProps = {
   isActive?: boolean
 }
 export const BlockButton: FC<TBlockButtonProps> = ({ type, isActive, toggle, ...rest }) => {
-  const { editor } = useSlateMui()
+  const editor = useSlateEditor()
 
   if (isActive === undefined) {
     isActive = hasBlock(editor.value, type)
@@ -48,7 +48,7 @@ export const BlockButton: FC<TBlockButtonProps> = ({ type, isActive, toggle, ...
 }
 
 const useIsListActive = (type: string, childType: string): boolean => {
-  const { editor } = useSlateMui()
+  const editor = useSlateEditor()
   const { value } = editor
   const { document, blocks } = value
 

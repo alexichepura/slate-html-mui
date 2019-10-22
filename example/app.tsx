@@ -1,16 +1,19 @@
 import React from "react"
 import { render } from "react-dom"
-import { SlateMuiEditor } from "../src/editor"
+import { plugins } from "../src/editor"
 import { initial } from "./initial"
-import { SlateMuiContext, SlateMui } from "../src/context"
 import { Value } from "slate"
+import { Editor } from "slate-react"
 
 const value = Value.fromJSON(initial)
-const slateMui = new SlateMui(value)
 
 render(
-  <SlateMuiContext.Provider value={slateMui}>
-    <SlateMuiEditor />
-  </SlateMuiContext.Provider>,
+  <Editor
+    placeholder="Enter some rich text..."
+    value={value}
+    plugins={plugins}
+    spellCheck
+    autoFocus
+  />,
   document.getElementById("app")
 )

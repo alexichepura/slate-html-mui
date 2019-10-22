@@ -18,6 +18,7 @@ export enum EHtmlMark {
   "em" = "em",
   "u" = "u",
 }
+
 export const hasMark = (value: Value, type: string) => {
   return value.activeMarks.some(mark => (mark ? mark.type === type : false))
 }

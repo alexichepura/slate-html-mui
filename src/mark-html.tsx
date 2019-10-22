@@ -8,7 +8,7 @@ import React from "react"
 import { MarkPlugin } from "./mark-plugin"
 import { Plugin } from "slate-react"
 import { Value } from "slate"
-import { useSlateEditor } from "./editor"
+import { useSlateEditor, useSlateEditorValue } from "./editor"
 
 // MARKS
 export enum EHtmlMark {
@@ -23,15 +23,12 @@ export const hasMark = (value: Value, type: string) => {
 }
 export const MarkButton: FC<{ type: string }> = ({ type, ...rest }) => {
   const editor = useSlateEditor()
-  const isActive = hasMark(editor.value, type)
-
-  return (
-    <IconButton
-      color={isActive ? "primary" : "default"}
-      onClick={() => editor.toggleMark(type)}
-      {...rest}
-    />
-  )
+  const value = useSlateEditorValue()
+  const isActive = hasMark(value, type)
+  const onClick = () => {
+    editor.toggleMark(type)
+  }
+  return <IconButton color={isActive ? "primary" : "default"} onClick={onClick} {...rest} />
 }
 
 export const MarkBoldButton: FC = () => <MarkButton type={EHtmlMark.b} children={<FormatBold />} />

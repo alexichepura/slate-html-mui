@@ -7,7 +7,7 @@ export const initial: ValueJSON = {
     nodes: [
       {
         object: "block",
-        type: "paragraph",
+        type: "p",
         nodes: [
           {
             object: "text",
@@ -16,7 +16,7 @@ export const initial: ValueJSON = {
           {
             object: "text",
             text: "rich",
-            marks: [{ type: "bold" }],
+            marks: [{ type: "b" }],
           },
           {
             object: "text",
@@ -25,7 +25,7 @@ export const initial: ValueJSON = {
           {
             object: "text",
             text: "much",
-            marks: [{ type: "italic" }],
+            marks: [{ type: "em" }],
           },
           {
             object: "text",
@@ -44,7 +44,7 @@ export const initial: ValueJSON = {
       },
       {
         object: "block",
-        type: "paragraph",
+        type: "p",
         nodes: [
           {
             object: "text",
@@ -52,8 +52,8 @@ export const initial: ValueJSON = {
           },
           {
             object: "text",
-            text: "bold",
-            marks: [{ type: "bold" }],
+            text: "strong",
+            marks: [{ type: "strong" }],
           },
           {
             object: "text",
@@ -64,7 +64,7 @@ export const initial: ValueJSON = {
       },
       {
         object: "block",
-        type: "block-quote",
+        type: "blockquote",
         nodes: [
           {
             object: "text",
@@ -74,7 +74,7 @@ export const initial: ValueJSON = {
       },
       {
         object: "block",
-        type: "paragraph",
+        type: "p",
         nodes: [
           {
             object: "text",

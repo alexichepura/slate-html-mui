@@ -19,23 +19,28 @@ import {
   BlockUlButton,
   BlockLiButton,
 } from "./block-html"
+import { Value } from "slate"
 
 export const SlateEditorContext = React.createContext<SlateReactEditor>(
   (null as any) as SlateReactEditor
 )
 export const useSlateEditor = (): SlateReactEditor => useContext(SlateEditorContext)
 
+export const SlateEditorValueContext = React.createContext<Value>((null as any) as Value)
+export const useSlateEditorValue = (): Value => useContext(SlateEditorValueContext)
+
 export const EditorPlugin: Plugin = {
   renderEditor: (_props, _editor, next) => {
     const editor = (_editor as any) as SlateReactEditor
     const children = next()
-
     return (
       <SlateEditorContext.Provider value={editor}>
-        <div>
-          <Toolbar />
-          <div>{children}</div>
-        </div>
+        <SlateEditorValueContext.Provider value={editor.value}>
+          <div>
+            <Toolbar />
+            <div>{children}</div>
+          </div>
+        </SlateEditorValueContext.Provider>
       </SlateEditorContext.Provider>
     )
   },

@@ -1,10 +1,29 @@
-import { Editor } from "slate-react"
+import { Editor, Plugin } from "slate-react"
 import { Value } from "slate"
 
 import React, { useState, FC } from "react"
-import { BlockButton, MarkupButton } from "./button"
-import { renderBlock, renderMark, onKeyDown } from "./render"
+import {
+  MarkBoldButton,
+  MarkStrongButton,
+  MarkCodeButton,
+  MarkEmphasisButton,
+  MarkUnderlinedButton,
+  MarkPlugins,
+} from "./mark-html"
+import {
+  BlockPlugins,
+  BlockH1Button,
+  BlockH2Button,
+  BlockH3Button,
+  BlockH4Button,
+  BlockBlockquoteButton,
+  BlockOlButton,
+  BlockUlButton,
+  BlockLiButton,
+} from "./block-html"
 import { useSlateMui } from "./context"
+
+const plugins: Plugin[] = [...MarkPlugins, ...BlockPlugins]
 
 export const SlateMuiEditor: FC = () => {
   const slateMui = useSlateMui()
@@ -13,12 +32,22 @@ export const SlateMuiEditor: FC = () => {
   return (
     <div>
       <div>
-        <MarkupButton />
-        <BlockButton />
+        <MarkBoldButton />
+        <MarkStrongButton />
+        <MarkCodeButton />
+        <MarkEmphasisButton />
+        <MarkUnderlinedButton />
+
+        <BlockH1Button />
+        <BlockH2Button />
+        <BlockH3Button />
+        <BlockH4Button />
+        <BlockBlockquoteButton />
+        <BlockOlButton />
+        <BlockUlButton />
+        <BlockLiButton />
       </div>
       <Editor
-        spellCheck
-        autoFocus
         placeholder="Enter some rich text..."
         ref={slateMui.ref}
         value={value}
@@ -27,9 +56,9 @@ export const SlateMuiEditor: FC = () => {
           slateMui.setValue(value)
           setValue(value)
         }}
-        onKeyDown={onKeyDown}
-        renderBlock={renderBlock}
-        renderMark={renderMark}
+        plugins={plugins}
+        spellCheck
+        autoFocus
       />
     </div>
   )

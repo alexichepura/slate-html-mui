@@ -1,5 +1,4 @@
 import { FC } from "react"
-import { IconButton } from "@material-ui/core"
 import FormatBold from "@material-ui/icons/FormatBold"
 import FormatItalicTwoTone from "@material-ui/icons/FormatItalicTwoTone"
 import FormatUnderlinedTwoTone from "@material-ui/icons/FormatUnderlinedTwoTone"
@@ -9,8 +8,9 @@ import { MarkPlugin } from "./mark-plugin"
 import { Plugin } from "slate-react"
 import { Value } from "slate"
 import { useSlateEditor, useSlateEditorValue } from "./editor"
+import { ButtonProps } from "@material-ui/core/Button"
+import { ToolbarButton } from "./toolbar-button"
 
-// MARKS
 export enum EHtmlMark {
   "b" = "b",
   "strong" = "strong",
@@ -22,17 +22,30 @@ export enum EHtmlMark {
 export const hasMark = (value: Value, type: string) => {
   return value.activeMarks.some(mark => (mark ? mark.type === type : false))
 }
-export const MarkButton: FC<{ type: string }> = ({ type, ...rest }) => {
+
+type TMarkButtonProps = {
+  markType: string
+} & ButtonProps
+export const MarkButton: FC<TMarkButtonProps> = ({ markType: type, ...rest }) => {
   const editor = useSlateEditor()
   const value = useSlateEditorValue()
   const isActive = hasMark(value, type)
   const onClick = () => {
     editor.toggleMark(type)
   }
-  return <IconButton color={isActive ? "primary" : "default"} onClick={onClick} {...rest} />
+  return (
+    <ToolbarButton
+      color={isActive ? "primary" : "default"}
+      variant={isActive ? "contained" : "text"}
+      onClick={onClick}
+      {...rest}
+    />
+  )
 }
 
-export const MarkBoldButton: FC = () => <MarkButton type={EHtmlMark.b} children={<FormatBold />} />
+export const MarkBoldButton: FC = () => (
+  <MarkButton markType={EHtmlMark.b} children={<FormatBold />} />
+)
 export const MarkBoldPlugin = MarkPlugin({
   type: EHtmlMark.b,
   component: EHtmlMark.b,
@@ -40,7 +53,7 @@ export const MarkBoldPlugin = MarkPlugin({
 })
 
 export const MarkStrongButton: FC = () => (
-  <MarkButton type={EHtmlMark.strong} children={<FormatBold />} />
+  <MarkButton markType={EHtmlMark.strong} children={<strong>S</strong>} />
 )
 export const MarkStrongPlugin = MarkPlugin({
   type: EHtmlMark.strong,
@@ -48,7 +61,7 @@ export const MarkStrongPlugin = MarkPlugin({
 })
 
 export const MarkCodeButton: FC = () => (
-  <MarkButton type={EHtmlMark.code} children={<CodeTwoTone />} />
+  <MarkButton markType={EHtmlMark.code} children={<CodeTwoTone />} />
 )
 export const MarkCodePlugin = MarkPlugin({
   type: EHtmlMark.code,
@@ -57,7 +70,7 @@ export const MarkCodePlugin = MarkPlugin({
 })
 
 export const MarkEmphasisButton: FC = () => (
-  <MarkButton type={EHtmlMark.em} children={<FormatItalicTwoTone />} />
+  <MarkButton markType={EHtmlMark.em} children={<FormatItalicTwoTone />} />
 )
 export const MarkEmphasisPlugin = MarkPlugin({
   type: EHtmlMark.em,
@@ -66,7 +79,7 @@ export const MarkEmphasisPlugin = MarkPlugin({
 })
 
 export const MarkUnderlinedButton: FC = () => (
-  <MarkButton type={EHtmlMark.u} children={<FormatUnderlinedTwoTone />} />
+  <MarkButton markType={EHtmlMark.u} children={<FormatUnderlinedTwoTone />} />
 )
 export const MarkUnderlinePlugin = MarkPlugin({
   type: EHtmlMark.u,

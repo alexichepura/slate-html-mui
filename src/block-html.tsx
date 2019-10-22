@@ -1,12 +1,15 @@
 import { FC } from "react"
-import { IconButton } from "@material-ui/core"
+
 import FormatListNumbered from "@material-ui/icons/FormatListNumbered"
 import FormatListBulleted from "@material-ui/icons/FormatListBulleted"
+import FormatQuote from "@material-ui/icons/FormatQuote"
 import React from "react"
 import { BlockPlugin } from "./block-plugin"
 import { Plugin, Editor } from "slate-react"
 import { Value } from "slate"
 import { useSlateEditor } from "./editor"
+import { ButtonProps } from "@material-ui/core/Button"
+import { ToolbarButton } from "./toolbar-button"
 
 export enum EHtmlBlock {
   "p" = "p",
@@ -27,11 +30,16 @@ export const hasBlock = (value: Value, type: string) => {
 const DEFAULT_NODE = EHtmlBlock.p
 
 type TBlockButtonProps = {
-  type: string
+  blockType: string
   toggle: (editor: Editor, type: string) => void
   isActive?: boolean
-}
-export const BlockButton: FC<TBlockButtonProps> = ({ type, isActive, toggle, ...rest }) => {
+} & ButtonProps
+export const BlockButton: FC<TBlockButtonProps> = ({
+  blockType: type,
+  isActive,
+  toggle,
+  ...rest
+}) => {
   const editor = useSlateEditor()
 
   if (isActive === undefined) {
@@ -39,8 +47,9 @@ export const BlockButton: FC<TBlockButtonProps> = ({ type, isActive, toggle, ...
   }
 
   return (
-    <IconButton
+    <ToolbarButton
       color={isActive ? "primary" : "default"}
+      variant={isActive ? "contained" : "text"}
       onClick={() => toggle(editor, type)}
       {...rest}
     />
@@ -104,7 +113,7 @@ const useToggleBlock = (editor: Editor, type: string) => {
 
 export const BlockH1Button: FC = () => {
   const type = EHtmlBlock.h1
-  return <BlockButton type={type} toggle={useToggleBlock} children={type} />
+  return <BlockButton blockType={type} toggle={useToggleBlock} children={type.toUpperCase()} />
 }
 export const BlockH1Plugin = BlockPlugin({
   type: EHtmlBlock.h1,
@@ -113,7 +122,7 @@ export const BlockH1Plugin = BlockPlugin({
 
 export const BlockH2Button: FC = () => {
   const type = EHtmlBlock.h2
-  return <BlockButton type={type} toggle={useToggleBlock} children={type} />
+  return <BlockButton blockType={type} toggle={useToggleBlock} children={type.toUpperCase()} />
 }
 export const BlockH2Plugin = BlockPlugin({
   type: EHtmlBlock.h2,
@@ -122,7 +131,7 @@ export const BlockH2Plugin = BlockPlugin({
 
 export const BlockH3Button: FC = () => {
   const type = EHtmlBlock.h3
-  return <BlockButton type={type} toggle={useToggleBlock} children={type} />
+  return <BlockButton blockType={type} toggle={useToggleBlock} children={type.toUpperCase()} />
 }
 export const BlockH3Plugin = BlockPlugin({
   type: EHtmlBlock.h3,
@@ -131,7 +140,7 @@ export const BlockH3Plugin = BlockPlugin({
 
 export const BlockH4Button: FC = () => {
   const type = EHtmlBlock.h4
-  return <BlockButton type={type} toggle={useToggleBlock} children={type} />
+  return <BlockButton blockType={type} toggle={useToggleBlock} children={type.toUpperCase()} />
 }
 export const BlockH4Plugin = BlockPlugin({
   type: EHtmlBlock.h4,
@@ -140,7 +149,7 @@ export const BlockH4Plugin = BlockPlugin({
 
 export const BlockBlockquoteButton: FC = () => {
   const type = EHtmlBlock.blockquote
-  return <BlockButton type={type} toggle={useToggleBlock} children={'""'} />
+  return <BlockButton blockType={type} toggle={useToggleBlock} children={<FormatQuote />} />
 }
 export const BlockBlockquotePlugin = BlockPlugin({
   type: EHtmlBlock.blockquote,
@@ -152,7 +161,7 @@ export const BlockOlButton: FC = () => {
   const isActive = useIsListActive(type, EHtmlBlock.li)
   return (
     <BlockButton
-      type={type}
+      blockType={type}
       isActive={isActive}
       toggle={useToggleListBlock}
       children={<FormatListNumbered />}
@@ -168,7 +177,7 @@ export const BlockUlButton: FC = () => {
   const isActive = useIsListActive(type, EHtmlBlock.li)
   return (
     <BlockButton
-      type={type}
+      blockType={type}
       isActive={isActive}
       toggle={useToggleListBlock}
       children={<FormatListBulleted />}
@@ -181,7 +190,7 @@ export const BlockUlPlugin = BlockPlugin({
 })
 export const BlockLiButton: FC = () => {
   const type = EHtmlBlock.li
-  return <BlockButton type={type} toggle={useToggleBlock} children={type} />
+  return <BlockButton blockType={type} toggle={useToggleBlock} children={type} />
 }
 export const BlockLiPlugin = BlockPlugin({
   type: EHtmlBlock.li,

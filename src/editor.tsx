@@ -17,7 +17,6 @@ import {
   BlockBlockquoteButton,
   BlockOlButton,
   BlockUlButton,
-  BlockLiButton,
 } from "./block-html"
 import { Value } from "slate"
 
@@ -63,7 +62,6 @@ export const Toolbar: FC = () => {
       <BlockBlockquoteButton />
       <BlockOlButton />
       <BlockUlButton />
-      <BlockLiButton />
     </div>
   )
 }

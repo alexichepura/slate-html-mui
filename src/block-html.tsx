@@ -8,8 +8,7 @@ import { BlockPlugin } from "./block-plugin"
 import { Plugin, Editor } from "slate-react"
 import { Value } from "slate"
 import { useSlateEditor } from "./editor"
-import { ButtonProps } from "@material-ui/core/Button"
-import { ToolbarButton } from "./toolbar-button"
+import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
 export enum EHtmlBlock {
   "p" = "p",
@@ -33,7 +32,7 @@ type TBlockButtonProps = {
   blockType: string
   toggle: (editor: Editor, type: string) => void
   isActive?: boolean
-} & ButtonProps
+} & TToolbarButtonProps
 export const BlockButton: FC<TBlockButtonProps> = ({ blockType, isActive, toggle, ...rest }) => {
   const editor = useSlateEditor()
 
@@ -108,7 +107,14 @@ const useToggleBlock = (editor: Editor, type: string) => {
 
 export const BlockH1Button: FC = () => {
   const type = EHtmlBlock.h1
-  return <BlockButton blockType={type} toggle={useToggleBlock} children={type.toUpperCase()} />
+  return (
+    <BlockButton
+      tooltipTitle="Heading 1"
+      blockType={type}
+      toggle={useToggleBlock}
+      children={type.toUpperCase()}
+    />
+  )
 }
 export const BlockH1Plugin = BlockPlugin({
   type: EHtmlBlock.h1,
@@ -117,7 +123,14 @@ export const BlockH1Plugin = BlockPlugin({
 
 export const BlockH2Button: FC = () => {
   const type = EHtmlBlock.h2
-  return <BlockButton blockType={type} toggle={useToggleBlock} children={type.toUpperCase()} />
+  return (
+    <BlockButton
+      tooltipTitle="Heading 2"
+      blockType={type}
+      toggle={useToggleBlock}
+      children={type.toUpperCase()}
+    />
+  )
 }
 export const BlockH2Plugin = BlockPlugin({
   type: EHtmlBlock.h2,
@@ -126,7 +139,14 @@ export const BlockH2Plugin = BlockPlugin({
 
 export const BlockH3Button: FC = () => {
   const type = EHtmlBlock.h3
-  return <BlockButton blockType={type} toggle={useToggleBlock} children={type.toUpperCase()} />
+  return (
+    <BlockButton
+      tooltipTitle="Heading 3"
+      blockType={type}
+      toggle={useToggleBlock}
+      children={type.toUpperCase()}
+    />
+  )
 }
 export const BlockH3Plugin = BlockPlugin({
   type: EHtmlBlock.h3,
@@ -135,7 +155,14 @@ export const BlockH3Plugin = BlockPlugin({
 
 export const BlockH4Button: FC = () => {
   const type = EHtmlBlock.h4
-  return <BlockButton blockType={type} toggle={useToggleBlock} children={type.toUpperCase()} />
+  return (
+    <BlockButton
+      tooltipTitle="Heading 4"
+      blockType={type}
+      toggle={useToggleBlock}
+      children={type.toUpperCase()}
+    />
+  )
 }
 export const BlockH4Plugin = BlockPlugin({
   type: EHtmlBlock.h4,
@@ -144,7 +171,14 @@ export const BlockH4Plugin = BlockPlugin({
 
 export const BlockBlockquoteButton: FC = () => {
   const type = EHtmlBlock.blockquote
-  return <BlockButton blockType={type} toggle={useToggleBlock} children={<FormatQuote />} />
+  return (
+    <BlockButton
+      tooltipTitle="Blockquote"
+      blockType={type}
+      toggle={useToggleBlock}
+      children={<FormatQuote />}
+    />
+  )
 }
 export const BlockBlockquotePlugin = BlockPlugin({
   type: EHtmlBlock.blockquote,
@@ -156,6 +190,7 @@ export const BlockOlButton: FC = () => {
   const isActive = useIsListActive(type, EHtmlBlock.li)
   return (
     <BlockButton
+      tooltipTitle="Numbered (ordered) list"
       blockType={type}
       isActive={isActive}
       toggle={useToggleListBlock}
@@ -172,6 +207,7 @@ export const BlockUlButton: FC = () => {
   const isActive = useIsListActive(type, EHtmlBlock.li)
   return (
     <BlockButton
+      tooltipTitle="Bulleted (unordered) list"
       blockType={type}
       isActive={isActive}
       toggle={useToggleListBlock}
@@ -183,10 +219,17 @@ export const BlockUlPlugin = BlockPlugin({
   type: EHtmlBlock.ul,
   component: EHtmlBlock.ul,
 })
-export const BlockLiButton: FC = () => {
-  const type = EHtmlBlock.li
-  return <BlockButton blockType={type} toggle={useToggleBlock} children={type} />
-}
+// export const BlockLiButton: FC = () => {
+//   const type = EHtmlBlock.li
+//   return (
+//     <BlockButton
+//       tooltipTitle="List item"
+//       blockType={type}
+//       toggle={useToggleBlock}
+//       children={type}
+//     />
+//   )
+// }
 export const BlockLiPlugin = BlockPlugin({
   type: EHtmlBlock.li,
   component: EHtmlBlock.li,

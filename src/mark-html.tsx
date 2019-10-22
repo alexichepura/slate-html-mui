@@ -8,8 +8,7 @@ import { MarkPlugin } from "./mark-plugin"
 import { Plugin } from "slate-react"
 import { Value } from "slate"
 import { useSlateEditor, useSlateEditorValue } from "./editor"
-import { ButtonProps } from "@material-ui/core/Button"
-import { ToolbarButton } from "./toolbar-button"
+import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
 export enum EHtmlMark {
   "b" = "b",
@@ -25,7 +24,7 @@ export const hasMark = (value: Value, type: string) => {
 
 type TMarkButtonProps = {
   markType: string
-} & ButtonProps
+} & TToolbarButtonProps
 export const MarkButton: FC<TMarkButtonProps> = ({ markType, ...rest }) => {
   const editor = useSlateEditor()
   const value = useSlateEditorValue()
@@ -44,7 +43,7 @@ export const MarkButton: FC<TMarkButtonProps> = ({ markType, ...rest }) => {
 }
 
 export const MarkBoldButton: FC = () => (
-  <MarkButton markType={EHtmlMark.b} children={<FormatBold />} />
+  <MarkButton tooltipTitle="Bold" markType={EHtmlMark.b} children={<FormatBold />} />
 )
 export const MarkBoldPlugin = MarkPlugin({
   type: EHtmlMark.b,
@@ -53,7 +52,7 @@ export const MarkBoldPlugin = MarkPlugin({
 })
 
 export const MarkStrongButton: FC = () => (
-  <MarkButton markType={EHtmlMark.strong} children={<strong>S</strong>} />
+  <MarkButton tooltipTitle="Strong" markType={EHtmlMark.strong} children={<strong>S</strong>} />
 )
 export const MarkStrongPlugin = MarkPlugin({
   type: EHtmlMark.strong,
@@ -61,7 +60,11 @@ export const MarkStrongPlugin = MarkPlugin({
 })
 
 export const MarkCodeButton: FC = () => (
-  <MarkButton markType={EHtmlMark.code} children={<CodeTwoTone />} />
+  <MarkButton
+    tooltipTitle="Code (monospace)"
+    markType={EHtmlMark.code}
+    children={<CodeTwoTone />}
+  />
 )
 export const MarkCodePlugin = MarkPlugin({
   type: EHtmlMark.code,
@@ -70,7 +73,11 @@ export const MarkCodePlugin = MarkPlugin({
 })
 
 export const MarkEmphasisButton: FC = () => (
-  <MarkButton markType={EHtmlMark.em} children={<FormatItalicTwoTone />} />
+  <MarkButton
+    tooltipTitle="Italic (emphasis)"
+    markType={EHtmlMark.em}
+    children={<FormatItalicTwoTone />}
+  />
 )
 export const MarkEmphasisPlugin = MarkPlugin({
   type: EHtmlMark.em,
@@ -79,7 +86,11 @@ export const MarkEmphasisPlugin = MarkPlugin({
 })
 
 export const MarkUnderlinedButton: FC = () => (
-  <MarkButton markType={EHtmlMark.u} children={<FormatUnderlinedTwoTone />} />
+  <MarkButton
+    tooltipTitle="Underline"
+    markType={EHtmlMark.u}
+    children={<FormatUnderlinedTwoTone />}
+  />
 )
 export const MarkUnderlinePlugin = MarkPlugin({
   type: EHtmlMark.u,

@@ -1,10 +1,14 @@
 import { ButtonProps } from "@material-ui/core/Button"
 import React, { FC } from "react"
-import { Button } from "@material-ui/core"
+import { Button, Tooltip } from "@material-ui/core"
 
-type TToolbarButtonProps = {} & ButtonProps
-export const ToolbarButton: FC<TToolbarButtonProps> = props => {
+export type TToolbarButtonProps = { tooltipTitle: string } & ButtonProps
+export const ToolbarButton: FC<TToolbarButtonProps> = ({ tooltipTitle, ...rest }) => {
   return (
-    <Button size="small" style={{ minWidth: 0, width: 30, height: 30, padding: 0 }} {...props} />
+    <Tooltip title={tooltipTitle}>
+      <span>
+        <Button size="small" style={{ minWidth: 0, width: 30, height: 30, padding: 0 }} {...rest} />
+      </span>
+    </Tooltip>
   )
 }

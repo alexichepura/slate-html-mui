@@ -34,23 +34,18 @@ type TBlockButtonProps = {
   toggle: (editor: Editor, type: string) => void
   isActive?: boolean
 } & ButtonProps
-export const BlockButton: FC<TBlockButtonProps> = ({
-  blockType: type,
-  isActive,
-  toggle,
-  ...rest
-}) => {
+export const BlockButton: FC<TBlockButtonProps> = ({ blockType, isActive, toggle, ...rest }) => {
   const editor = useSlateEditor()
 
   if (isActive === undefined) {
-    isActive = hasBlock(editor.value, type)
+    isActive = hasBlock(editor.value, blockType)
   }
 
   return (
     <ToolbarButton
       color={isActive ? "primary" : "default"}
       variant={isActive ? "contained" : "text"}
-      onClick={() => toggle(editor, type)}
+      onClick={() => toggle(editor, blockType)}
       {...rest}
     />
   )

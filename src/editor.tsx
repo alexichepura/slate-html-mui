@@ -1,5 +1,6 @@
 import { Editor as SlateReactEditor, Plugin } from "slate-react"
 import React, { FC, useContext } from "react"
+import { UndoButton, RedoButton } from "./history"
 import {
   MarkBoldButton,
   MarkStrongButton,
@@ -49,6 +50,8 @@ export const plugins: Plugin[] = [EditorPlugin, ...MarkPlugins, ...BlockPlugins]
 export const Toolbar: FC = () => {
   return (
     <div>
+      <UndoButton />
+      <RedoButton />
       <MarkBoldButton />
       <MarkStrongButton />
       <MarkCodeButton />

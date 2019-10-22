@@ -26,12 +26,12 @@ export const hasMark = (value: Value, type: string) => {
 type TMarkButtonProps = {
   markType: string
 } & ButtonProps
-export const MarkButton: FC<TMarkButtonProps> = ({ markType: type, ...rest }) => {
+export const MarkButton: FC<TMarkButtonProps> = ({ markType, ...rest }) => {
   const editor = useSlateEditor()
   const value = useSlateEditorValue()
-  const isActive = hasMark(value, type)
+  const isActive = hasMark(value, markType)
   const onClick = () => {
-    editor.toggleMark(type)
+    editor.toggleMark(markType)
   }
   return (
     <ToolbarButton

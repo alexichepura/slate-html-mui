@@ -175,6 +175,11 @@
   resolved "https://registry.yarnpkg.com/@types/is-hotkey/-/is-hotkey-0.1.1.tgz#802e294c2a02f26fbcbe8639c77ef05e38cfdc8c"
   integrity sha512-QzVKww91fJv/KzARJBS/Im5GS2A8iE64E1HxOed72EmYOvPLG4PBw77QCIUjFl7VwWB3G/SVrxsHedJD/wtn1A==
 
+"@types/is-url@^1.2.28":
+  version "1.2.28"
+  resolved "https://registry.yarnpkg.com/@types/is-url/-/is-url-1.2.28.tgz#914dabd50546d9b0142806e42c72bc7c2b7e0787"
+  integrity sha1-kU2r1QVG2bAUKAbkLHK8fCt+B4c=
+
 "@types/mime@*":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-2.0.1.tgz#dc488842312a7f075149312905b5e3c0b054c79d"
@@ -2526,6 +2531,11 @@ is-stream@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-stream/-/is-stream-1.1.0.tgz#12d4a3dd4e68e0b79ceb8dbc84173ae80d91ca44"
   integrity sha1-EtSj3U5o4Lec6428hBc66A2RykQ=
+
+is-url@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/is-url/-/is-url-1.2.4.tgz#04a4df46d28c4cff3d73d01ff06abeb318a1aa52"
+  integrity sha512-ITvGim8FhRiYe4IQ5uHSkj7pVaPDrCTkNd3yq3cV7iZAcJdHTUMPMEHcqSOy9xZ9qFenQCvi+2wjH9a1nXqHww==
 
 is-utf8@^0.2.0:
   version "0.2.1"

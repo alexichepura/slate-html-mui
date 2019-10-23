@@ -20,6 +20,7 @@ import {
   BlockUlButton,
 } from "./block-html"
 import { Value } from "slate"
+import { LinkButton, LinkPlugin } from "./link"
 
 export const SlateEditorContext = React.createContext<SlateReactEditor>(
   (null as any) as SlateReactEditor
@@ -45,18 +46,21 @@ export const EditorPlugin: Plugin = {
     )
   },
 }
-export const plugins: Plugin[] = [EditorPlugin, ...MarkPlugins, ...BlockPlugins]
+export const plugins: Plugin[] = [EditorPlugin, ...MarkPlugins, ...BlockPlugins, LinkPlugin]
 
 export const Toolbar: FC = () => {
   return (
     <div>
       <UndoButton />
       <RedoButton />
+
       <MarkBoldButton />
       <MarkStrongButton />
       <MarkCodeButton />
       <MarkEmphasisButton />
       <MarkUnderlinedButton />
+
+      <LinkButton />
 
       <BlockH1Button />
       <BlockH2Button />

@@ -1,4 +1,4 @@
-import { Value } from "slate"
+import { Value, Inline } from "slate"
 import { TToolbarButtonProps, ToolbarButton } from "./toolbar-button"
 import Link from "@material-ui/icons/Link"
 import React, { FC, useState } from "react"
@@ -16,24 +16,50 @@ import {
 
 const LINK_INLINE_TYPE = "a"
 
-export const hasLinks = (value: Value) => {
+const hasLinks = (value: Value) => {
   return value.inlines.some(inline => Boolean(inline && inline.type === LINK_INLINE_TYPE))
+}
+const findLink = (value: Value): Inline | null =>
+  value.inlines.find(inline => Boolean(inline && inline.type === LINK_INLINE_TYPE))
+
+const getLinkData = (value: Value): TLinkData & { text: string } => {
+  const link = findLink(value)
+  const text = value.selection.isExpanded ? value.fragment.text : link ? link.text : ""
+  return {
+    href: link ? link.data.get("href") : "",
+    title: link ? link.data.get("title") : "",
+    target: link ? link.data.get("target") : "",
+    text,
+  }
+}
+
+type TLinkData = {
+  href: string
+  title: string
+  target: string
+}
+type TLinkButtonState = {
+  open: boolean
+  text: string
+} & TLinkData
+const defaults: TLinkButtonState = {
+  open: false,
+  href: "",
+  text: "",
+  title: "",
+  target: "",
 }
 
 type TLinkButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">
 export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
-  // const editor = useSlateEditor()
   const value = useSlateEditorValue()
   const isActive = hasLinks(value)
+  const [state, setState] = useState<TLinkButtonState>(defaults)
+  const mergeState = (partState: Partial<TLinkButtonState>) => setState({ ...state, ...partState })
 
-  const [open, setOpen] = React.useState(false)
-
-  const handleClickOpen = () => {
-    setOpen(true)
-  }
-
-  const handleClose = () => {
-    setOpen(false)
+  const handleOpen = () => {
+    const linkData = getLinkData(value)
+    mergeState({ open: true, ...linkData })
   }
 
   return (
@@ -42,49 +68,15 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
         tooltipTitle="Link"
         color={isActive ? "primary" : "default"}
         variant={isActive ? "contained" : "text"}
-        onClick={handleClickOpen}
-        // onClick={() => onClickLink(editor)}
+        onClick={handleOpen}
         {...rest}
       >
         <Link />
       </ToolbarButton>
-      <LinkFormDialog open={open} handleClose={handleClose} />
+      <LinkFormDialog state={state} mergeState={mergeState} />
     </>
   )
 }
-
-// const onClickLink = (editor: Editor) => {
-//   const { value } = editor
-
-//   if (hasLinks(value)) {
-//     editor.command(unwrapLink)
-//   } else if (value.selection.isExpanded) {
-//     const href = window.prompt("Enter the URL of the link:")
-
-//     if (href == null) {
-//       return
-//     }
-
-//     editor.command(wrapLink, href)
-//   } else {
-//     const href = window.prompt("Enter the URL of the link:")
-
-//     if (href == null) {
-//       return
-//     }
-
-//     const text = window.prompt("Enter the text for the link:")
-
-//     if (text == null) {
-//       return
-//     }
-
-//     editor
-//       .insertText(text)
-//       .moveFocusBackward(text.length)
-//       .command(wrapLink, href)
-//   }
-// }
 
 type TLinkPluginOptions = {
   nodeType: string
@@ -97,7 +89,13 @@ export const CreateLinkPlugin = (options: TLinkPluginOptions): Plugin => {
       if (node.type === options.nodeType) {
         const { data } = node
         const href = data.get("href")
-        return React.createElement(nodeType, { ...attributes, href }, children)
+        const target = data.get("target")
+        const title = data.get("title")
+        return React.createElement(
+          nodeType,
+          { ...attributes, href, target: target || undefined, title: title || undefined },
+          children
+        )
       } else {
         return next()
       }
@@ -106,9 +104,10 @@ export const CreateLinkPlugin = (options: TLinkPluginOptions): Plugin => {
       if (editor.value.selection.isCollapsed) return next()
 
       const transfer = (getEventTransfer(event) as any) as {
+        // TODO should be fixed in types
         type: SlateType
         text: string
-      } // TODO should be fixed in types
+      }
 
       const { type, text } = transfer
       if (type !== "text" && type !== "html") return next()
@@ -118,7 +117,7 @@ export const CreateLinkPlugin = (options: TLinkPluginOptions): Plugin => {
         editor.command(unwrapLink)
       }
 
-      editor.command(wrapLink, text)
+      editor.command(wrapLink, { href: text })
     },
   }
   return plugin
@@ -126,12 +125,11 @@ export const CreateLinkPlugin = (options: TLinkPluginOptions): Plugin => {
 
 export const LinkPlugin = CreateLinkPlugin({ nodeType: LINK_INLINE_TYPE })
 
-const wrapLink = (editor: Editor, href: string) => {
+const wrapLink = (editor: Editor, data: TLinkData) => {
   editor.wrapInline({
     type: LINK_INLINE_TYPE,
-    data: { href },
+    data,
   })
-
   editor.moveToEnd()
 }
 
@@ -140,21 +138,21 @@ const unwrapLink = (editor: Editor) => {
 }
 
 type TLinkFormDialogProps = {
-  open: boolean
-  handleClose(): void
+  state: TLinkButtonState
+  mergeState(state: Partial<TLinkButtonState>): void
 }
-export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ open, handleClose }) => {
+export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) => {
   const editor = useSlateEditor()
-  const [text, setText] = useState<string>("")
-  const [title, setTitle] = useState<string>("")
-  const [href, setHref] = useState<string>("")
-  const [target, setTarget] = useState<string>("")
+
+  const handleClose = () => {
+    mergeState(defaults)
+  }
 
   const handleOk = () => {
     editor
-      .insertText(text)
-      .moveFocusBackward(text.length)
-      .command(wrapLink, href)
+      .insertText(state.text)
+      .moveFocusBackward(state.text.length)
+      .command(wrapLink, { href: state.href, title: state.title, target: state.target })
     handleClose()
   }
 
@@ -163,32 +161,32 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ open, handleClose }) 
     handleClose()
   }
   return (
-    <Dialog open={open} onClose={handleClose} aria-labelledby="link-form-dialog-title">
+    <Dialog open={state.open} onClose={handleClose} aria-labelledby="link-form-dialog-title">
       <DialogTitle id="link-form-dialog-title">Insert/Edit Link</DialogTitle>
       <DialogContent>
         <TextField
           label="Text to display"
-          value={text}
-          onChange={e => setText(e.target.value)}
+          value={state.text}
+          onChange={e => mergeState({ text: e.target.value })}
           autoFocus
           fullWidth
         />
         <TextField
           label="Attribute: title"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
+          value={state.title}
+          onChange={e => mergeState({ title: e.target.value })}
           fullWidth
         />
         <TextField
           label="Attribute: href"
-          value={href}
-          onChange={e => setHref(e.target.value)}
+          value={state.href}
+          onChange={e => mergeState({ href: e.target.value })}
           fullWidth
         />
         <TextField
           label="Attribute: target"
-          value={target}
-          onChange={e => setTarget(e.target.value)}
+          value={state.target}
+          onChange={e => mergeState({ target: e.target.value })}
           fullWidth
         />
       </DialogContent>

@@ -14,7 +14,7 @@ import {
   Button,
 } from "@material-ui/core"
 
-const LINK_INLINE_TYPE = "a"
+export const LINK_INLINE_TYPE = "a"
 
 const hasLinks = (value: Value) => {
   return value.inlines.some(inline => Boolean(inline && inline.type === LINK_INLINE_TYPE))

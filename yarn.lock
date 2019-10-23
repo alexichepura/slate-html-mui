@@ -252,6 +252,14 @@
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
 
+"@types/slate-html-serializer@^0.6.3":
+  version "0.6.3"
+  resolved "https://registry.yarnpkg.com/@types/slate-html-serializer/-/slate-html-serializer-0.6.3.tgz#f18da3c68ccc5b25b12eb4f709b2120b2d2d954e"
+  integrity sha512-edpVOozSya2XkGtJ0qKeP986hOutGS1jff+G1ysv6tPYl+ix0JNDtwjiBJ8iofl07SBghNB0kUr82CI8i+Za2g==
+  dependencies:
+    "@types/react" "*"
+    "@types/slate" "*"
+
 "@types/slate-react@^0.22.5":
   version "0.22.5"
   resolved "https://registry.yarnpkg.com/@types/slate-react/-/slate-react-0.22.5.tgz#a10796758aa6b3133e1c777959facbf8806959f7"
@@ -4146,6 +4154,13 @@ slate-hotkeys@^0.2.9:
   dependencies:
     is-hotkey "0.1.4"
     slate-dev-environment "^0.2.2"
+
+slate-html-serializer@^0.8.10:
+  version "0.8.10"
+  resolved "https://registry.yarnpkg.com/slate-html-serializer/-/slate-html-serializer-0.8.10.tgz#b1a34c840051f6aaf634ab949c92742eac750450"
+  integrity sha512-mWJeMLlIvuwGTbk73itvFtZtRFV0+LRvJeBlGb5NNnBsD27nJNax72mfDjb9tsM1PfYSK1JeMd087mQY1+74cg==
+  dependencies:
+    type-of "^2.0.1"
 
 slate-plain-serializer@^0.7.10:
   version "0.7.10"

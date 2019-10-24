@@ -1,8 +1,6 @@
 {
   "author": "Palessit",
   "devDependencies": {
-    "@material-ui/core": "^4.5.1",
-    "@material-ui/icons": "^4.5.1",
     "@types/is-hotkey": "^0.1.1",
     "@types/is-url": "^1.2.28",
     "@types/node": "^12.7.11",
@@ -14,14 +12,6 @@
     "@types/webpack": "^4.39.1",
     "@types/webpack-dev-server": "^3.1.7",
     "dotenv": "^8.1.0",
-    "immutable": "^4.0.0-rc.12",
-    "is-hotkey": "^0.1.6",
-    "is-url": "^1.2.4",
-    "react": "^16.10.2",
-    "react-dom": "^16.10.2",
-    "slate": "^0.47.8",
-    "slate-html-serializer": "^0.8.10",
-    "slate-react": "^0.22.9",
     "ts-loader": "^6.0.4",
     "ts-node": "^8.3.0",
     "ts-node-dev": "^1.0.0-pre.43",
@@ -40,9 +30,17 @@
   "license": "MIT",
   "main": "dist/index.js",
   "name": "slate-mui",
-  "peerDependencies": {
+  "dependencies": {
     "react": ">=16.8",
-    "react-dom": ">=16.8"
+    "react-dom": ">=16.8",
+    "@material-ui/core": ">=4.5.1",
+    "@material-ui/icons": ">=4.5.1",
+    "immutable": ">=4.0.0-rc.12",
+    "slate": ">=0.47.8",
+    "slate-html-serializer": ">=0.8.10",
+    "is-url": ">=1.2.4",
+    "is-hotkey": ">=0.1.6",
+    "slate-react": ">=0.22.9"
   },
   "scripts": {
     "build": "tsc",

@@ -22,14 +22,17 @@ const hasLinks = (value: Value) => {
 const findLink = (value: Value): Inline | null =>
   value.inlines.find(inline => Boolean(inline && inline.type === LINK_INLINE_TYPE))
 
-const getLinkData = (value: Value): TLinkData & { text: string } => {
+const getLinkData = (value: Value): TLinkData & TLinkSelection => {
   const link = findLink(value)
-  const text = value.selection.isExpanded ? value.fragment.text : link ? link.text : ""
+  const isExpanded = value.selection.isExpanded
+  const text = isExpanded ? value.fragment.text : link ? link.text : ""
   return {
+    isExpanded,
+    link,
+    text,
     href: link ? link.data.get("href") : "",
     title: link ? link.data.get("title") : "",
     target: link ? link.data.get("target") : "",
-    text,
   }
 }
 
@@ -38,12 +41,20 @@ type TLinkData = {
   title: string
   target: string
 }
+type TLinkSelection = {
+  isExpanded: boolean
+  link: Inline | null
+  text: string
+}
 type TLinkButtonState = {
   open: boolean
-  text: string
-} & TLinkData
+} & TLinkSelection &
+  TLinkData
+
 const defaults: TLinkButtonState = {
   open: false,
+  isExpanded: false,
+  link: null,
   href: "",
   text: "",
   title: "",
@@ -88,14 +99,8 @@ export const CreateLinkPlugin = (options: TLinkPluginOptions): Plugin => {
       const { attributes, children, node } = props
       if (node.type === options.nodeType) {
         const { data } = node
-        const href = data.get("href")
-        const target = data.get("target")
-        const title = data.get("title")
-        return React.createElement(
-          nodeType,
-          { ...attributes, href, target: target || undefined, title: title || undefined },
-          children
-        )
+        const dataJson = data.toJS()
+        return React.createElement(nodeType, { ...attributes, ...dataJson }, children)
       } else {
         return next()
       }
@@ -144,15 +149,21 @@ type TLinkFormDialogProps = {
 export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) => {
   const editor = useSlateEditor()
 
+  const wrap = () =>
+    editor.command(wrapLink, { href: state.href, title: state.title, target: state.target })
+
   const handleClose = () => {
     mergeState(defaults)
   }
 
   const handleOk = () => {
-    editor
-      .insertText(state.text)
-      .moveFocusBackward(state.text.length)
-      .command(wrapLink, { href: state.href, title: state.title, target: state.target })
+    if (state.link) {
+      editor.command(unwrapLink)
+    }
+    if (!state.isExpanded) {
+      editor.insertText(state.text).moveFocusBackward(state.text.length)
+    }
+    wrap()
     handleClose()
   }
 

@@ -26,13 +26,11 @@ const MyEditor: FC = () => {
   }
   return (
     <div>
-      <Button variant="contained" color="primary">
-        Load example
-      </Button>
-      <Button variant="contained" color="primary" onClick={loadFromLocalstorage}>
+      <Button color="primary">Load example</Button>
+      <Button color="primary" onClick={loadFromLocalstorage}>
         Load from localstorage
       </Button>
-      <Button variant="contained" color="primary" onClick={saveToLocalstorage}>
+      <Button color="primary" onClick={saveToLocalstorage}>
         Save to localstorage
       </Button>
       <Editor

@@ -35,8 +35,8 @@ export const HTML_RULES: Rule[] = [
       return undefined
     },
     serialize(obj, children) {
-      if (obj.object === "block" || obj.object === "mark") {
-        const attributes = {}
+      if (obj.object === "block" || obj.object === "mark" || obj.object === "inline") {
+        const attributes = obj.data.toJSON()
         return createElement(obj.type, attributes, children)
       }
       return undefined

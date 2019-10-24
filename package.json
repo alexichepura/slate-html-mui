@@ -47,8 +47,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -r dist",
-    "example:server": "cd example && ts-node-dev --respawn --transpileOnly server.ts",
-    "example:wds": "cd example && TS_NODE_PROJECT=\"tsconfig.json\" webpack-dev-server --config webpack.config.ts",
+    "example": "cd example && TS_NODE_PROJECT=\"tsconfig.json\" webpack-dev-server --config webpack.config.ts",
     "pack:dry": "npm pack && tar -xvzf *.tgz && rm -rf package *.tgz"
   },
   "sideEffects": false,

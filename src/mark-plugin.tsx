@@ -26,7 +26,8 @@ export const MarkPlugin = (options: TMarkPluginOptions): Plugin => {
   if (hotkey) {
     const isHotKey = isKeyHotkey(hotkey)
     plugin.onKeyDown = (event, editor, next) => {
-      if (isHotKey(event as KeyboardEvent)) {
+      if (isHotKey(event as any)) {
+        // TODO fix a type error
         event.preventDefault()
         editor.toggleMark(type)
       } else {

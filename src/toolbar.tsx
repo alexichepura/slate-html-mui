@@ -7,7 +7,7 @@ import FormatUnderlinedTwoTone from "@material-ui/icons/FormatUnderlinedTwoTone"
 import CodeTwoTone from "@material-ui/icons/CodeTwoTone"
 import React, { FC } from "react"
 import { UndoButton, RedoButton } from "./history"
-import { LinkButton, LinkPlugin } from "./link"
+import { LinkButton } from "./link"
 import { FormatButton } from "./toolbar-button"
 import { EHtmlBlockFormat, EHtmlTextFormat } from "./format"
 

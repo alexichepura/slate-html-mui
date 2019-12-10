@@ -8,7 +8,7 @@
     "importHelpers": true,
     "incremental": true,
     "jsx": "react",
-    "lib": ["esnext", "dom"],
+    "lib": ["esnext", "dom", "es2015.iterable"],
     "module": "commonjs",
     // "moduleResolution": "node",
     "noEmitHelpers": true,
@@ -19,7 +19,7 @@
     "outDir": "dist",
     "sourceMap": true,
     "strict": true,
-    "target": "es2015"
+    "target": "esnext"
   },
   "exclude": ["node_modules", "dist"],
   "include": ["src"]

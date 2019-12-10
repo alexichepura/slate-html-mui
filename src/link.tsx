@@ -46,7 +46,7 @@ const isLinkActive = (editor: Editor) => {
   return !!link
 }
 const findLink = (editor: Editor): NodeEntry => {
-  const [link] = Editor.nodes(editor, { match: { type: LINK_INLINE_TYPE } })
+  const [link] = Array.from(Editor.nodes(editor, { match: { type: LINK_INLINE_TYPE } }))
   return link
 }
 

@@ -9,9 +9,13 @@ const formatToString = (node: Node, children: string) => {
   return `<${node.type}>${children}</${node.type}>`
 }
 
-export const serialize = (node: Node): string => {
+export const serialize = (node: Node | Node[]): string => {
   if (Text.isText(node)) {
     return escapeHtml(node.text)
+  }
+
+  if (Array.isArray(node)) {
+    return node.map(serialize).join()
   }
 
   const children = Array.from(node.children)

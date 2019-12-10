@@ -67,12 +67,12 @@ export const Toolbar: FC = () => {
       />
       <FormatButton
         tooltipTitle="Numbered (ordered) list"
-        format={EHtmlBlockFormat.blockquote}
+        format={EHtmlBlockFormat.ol}
         children={<FormatListNumbered />}
       />
       <FormatButton
         tooltipTitle="Bulleted (unordered) list"
-        format={EHtmlBlockFormat.blockquote}
+        format={EHtmlBlockFormat.ul}
         children={<FormatListBulleted />}
       />
     </div>

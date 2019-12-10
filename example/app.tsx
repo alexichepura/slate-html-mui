@@ -21,7 +21,8 @@ const MyEditor: FC = () => {
   const loadFromLocalstorage = () => {
     const savedStr = localStorage.getItem("slate-mui-value") || ""
     const document = new DOMParser().parseFromString(savedStr, "text/html")
-    const savedValue = deserialize(document)
+    const savedValue = deserialize(document.body)
+
     setValue(savedValue as any)
   }
   const editor = useMemo(() => withLinks(withRichText(withHistory(withReact(createEditor())))), [])

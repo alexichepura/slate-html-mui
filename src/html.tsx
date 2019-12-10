@@ -15,7 +15,7 @@ export const serialize = (node: Node | Node[]): string => {
   }
 
   if (Array.isArray(node)) {
-    return node.map(serialize).join()
+    return node.map(serialize).join("")
   }
 
   const children = Array.from(node.children)
@@ -37,7 +37,7 @@ export const serialize = (node: Node | Node[]): string => {
 import { jsx } from "slate-hyperscript"
 
 export const deserialize = (
-  el: Element | Document | ChildNode
+  el: Element | ChildNode
 ): SlateElement | string | null | Descendant[] => {
   if (el.nodeType === 3) {
     return el.textContent
@@ -52,29 +52,25 @@ export const deserialize = (
     return jsx("element", { type: nodeNameLowerCase }, children)
   }
 
-  switch (el.nodeName) {
-    case "BODY":
+  switch (nodeNameLowerCase) {
+    case "body":
       return jsx("fragment", {}, children)
-    case "BR":
+    case "br":
       return "\n"
-    case "A":
-      return jsx("element", { type: "link", url: (el as Element).getAttribute("href") }, children)
+    case "a":
+      return jsx(
+        "element",
+        {
+          type: LINK_INLINE_TYPE,
+          attributes: {
+            href: (el as Element).getAttribute("href"),
+            title: (el as Element).getAttribute("title"),
+            target: (el as Element).getAttribute("target"),
+          },
+        },
+        children
+      )
     default:
       return el.textContent
   }
 }
-
-//       } else if (tag === LINK_INLINE_TYPE) {
-//         return {
-//           object: "inline",
-//           type: tag,
-//           nodes: next(el.childNodes),
-//           data: {
-//             href: el.getAttribute("href"),
-//             title: el.getAttribute("title"),
-//             target: el.getAttribute("target"),
-//           },
-//         }
-//       }
-//       return undefined
-//     },

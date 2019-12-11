@@ -1,5 +1,5 @@
-import React from "react"
-import { Editor } from "slate"
+import React, { FC } from "react"
+import { Editor, Element } from "slate"
 import { RenderElementProps, RenderLeafProps } from "slate-react"
 
 export enum EHtmlTextFormat {
@@ -29,9 +29,11 @@ export enum EHtmlListFormat {
 
 export const DEFAULT_NODE_FORMAT = EHtmlBlockFormat.p
 
-export const Element = ({ attributes, children, element }: RenderElementProps) => {
-  const type = element.type in EHtmlBlockFormat ? element.type : DEFAULT_NODE_FORMAT
-  return React.createElement(type, attributes, children)
+export const isHtmlBlockElement = (element: Element) => {
+  return element.type in EHtmlBlockFormat
+}
+export const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
+  return React.createElement(element.type, attributes, children)
 }
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {

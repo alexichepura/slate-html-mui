@@ -3,13 +3,23 @@ import React, { FC, useCallback, useMemo, useState } from "react"
 import { render } from "react-dom"
 import { createEditor, Range, Node } from "slate"
 import { withHistory } from "slate-history"
-import { Editable, Slate, withReact, RenderElementProps, RenderLeafProps } from "slate-react"
+import { Editable, Slate, withReact, RenderElementProps } from "slate-react"
 import { Toolbar } from "../src/toolbar"
 import { deserialize, serialize } from "../src/html"
 import { initial } from "./initial"
 import { withRichText } from "../src/with-rich-text"
-import { Element, Leaf } from "../src/format"
-import { withLinks } from "../src/link"
+import { isHtmlBlockElement, Leaf, HtmlBlockElement } from "../src/format"
+import { withLink, isHtmlAnchorElement, HtmlAnchorElement } from "../src/link"
+
+const RenderElement = (props: RenderElementProps) => {
+  if (isHtmlBlockElement(props.element)) {
+    return <HtmlBlockElement {...props} />
+  }
+  if (isHtmlAnchorElement(props.element)) {
+    return <HtmlAnchorElement {...props} />
+  }
+  return <p>INVALID ELEMENT</p>
+}
 
 const MyEditor: FC = () => {
   const [value, setValue] = useState<Node[]>(initial)
@@ -25,9 +35,9 @@ const MyEditor: FC = () => {
 
     setValue(savedValue as any)
   }
-  const editor = useMemo(() => withLinks(withRichText(withHistory(withReact(createEditor())))), [])
-  const renderElement = useCallback((props: RenderElementProps) => <Element {...props} />, [])
-  const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, [])
+  const editor = useMemo(() => withRichText(withLink(withHistory(withReact(createEditor())))), [])
+  const renderElement = useCallback(RenderElement, [])
+  const renderLeaf = useCallback(Leaf, [])
   return (
     <div>
       <Button color="primary">Load example</Button>

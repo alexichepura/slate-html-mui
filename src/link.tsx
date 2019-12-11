@@ -9,17 +9,28 @@ import {
 import Link from "@material-ui/icons/Link"
 import isUrl from "is-url"
 import React, { FC, useState } from "react"
-import { Editor, Element as SlateElement, Node, NodeEntry, Range } from "slate"
-import { useSlate } from "slate-react"
+import { Editor, Element as SlateElement, Node, Range, Command } from "slate"
+import { useSlate, RenderElementProps } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
 export const LINK_INLINE_TYPE = "a"
+export const SET_LINK_COMMAND = "set_link"
 
 type TLinkAttributes = {
   href: string
   title: string
   target: string
 }
+type TSetLinkCommand = {
+  type: Command["type"]
+  attributes: TLinkAttributes
+  text: string
+}
+
+const isCommand_set_link = (command: Command): command is TSetLinkCommand => {
+  return command.type === SET_LINK_COMMAND
+}
+
 type TLinkSelection = {
   isExpanded: boolean
   link: Node | null
@@ -41,19 +52,19 @@ const defaults: TLinkButtonState = {
 }
 
 const isLinkActive = (editor: Editor) => {
-  const link = findLink(editor)
-  return !!link
+  return !!findLink(editor)
 }
-const findLink = (editor: Editor): NodeEntry => {
-  const [link] = Editor.nodes(editor, { match: { type: LINK_INLINE_TYPE } })
-  return link
+const findLink = (editor: Editor): Node | null => {
+  const [linkEntry] = Editor.nodes(editor, { match: { type: LINK_INLINE_TYPE } })
+  return linkEntry ? linkEntry[0] : null
 }
 
 const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
-  const { value } = editor
-  const [link] = findLink(value)
+  const link = findLink(editor)
+
   const isExpanded = editor.selection ? Range.isExpanded(editor.selection) : false
-  const text = isExpanded ? value.fragment.text : link ? link.text : ""
+  const text =
+    editor.selection && isExpanded ? Editor.text(editor, editor.selection) : link ? link.text : ""
   return {
     isExpanded,
     link,
@@ -62,6 +73,13 @@ const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
     title: link ? link.data.get("title") : "",
     target: link ? link.data.get("target") : "",
   }
+}
+
+export const isHtmlAnchorElement = (element: SlateElement) => {
+  return element.type === LINK_INLINE_TYPE
+}
+export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children }) => {
+  return React.createElement(LINK_INLINE_TYPE, attributes, children)
 }
 
 type TLinkButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">
@@ -92,7 +110,7 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
   )
 }
 
-export const withLinks = (editor: Editor) => {
+export const withLink = (editor: Editor) => {
   const { exec, isInline } = editor
 
   editor.isInline = element => {
@@ -100,26 +118,23 @@ export const withLinks = (editor: Editor) => {
   }
 
   editor.exec = command => {
-    if (command.type === "insert_link") {
-      const { url } = command
-
+    if (isCommand_set_link(command)) {
       if (editor.selection) {
-        wrapLink(editor, url)
+        wrapLink(editor, command)
       }
 
       return
     }
 
-    let text
-
+    let insertText
     if (command.type === "insert_data") {
-      text = command.data.getData("text/plain")
+      insertText = command.data.getData("text/plain")
     } else if (command.type === "insert_text") {
-      text = command.text
+      insertText = command.text
     }
 
-    if (text && isUrl(text)) {
-      wrapLink(editor, text)
+    if (insertText && isUrl(insertText)) {
+      wrapLink(editor, insertText)
     } else {
       exec(command)
     }
@@ -132,12 +147,17 @@ const unwrapLink = (editor: Editor) => {
   Editor.unwrapNodes(editor, { match: { type: LINK_INLINE_TYPE } })
 }
 
-const wrapLink = (editor: Editor, attributes: TLinkAttributes) => {
+const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
   if (isLinkActive(editor)) {
     unwrapLink(editor)
   }
 
-  const link: SlateElement = { type: LINK_INLINE_TYPE, attributes, children: [] }
+  const link: SlateElement = {
+    type: LINK_INLINE_TYPE,
+    attributes: command.attributes,
+    children: [],
+    // children: [{ text: command.text }],
+  }
   Editor.wrapNodes(editor, link, { split: true })
   Editor.collapse(editor, { edge: "end" })
 }
@@ -149,21 +169,15 @@ type TLinkFormDialogProps = {
 export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) => {
   const editor = useSlate()
 
-  const wrap = () =>
-    wrapLink(editor, { href: state.href, title: state.title, target: state.target })
-
   const handleClose = () => {
     mergeState(defaults)
   }
 
   const handleOk = () => {
-    if (state.link) {
-      unwrapLink(editor)
-    }
-    if (!state.isExpanded) {
-      editor.insertText(state.text).moveFocusBackward(state.text.length)
-    }
-    wrap()
+    editor.exec({
+      type: SET_LINK_COMMAND,
+      attributes: { href: state.href, title: state.title, target: state.target },
+    })
     handleClose()
   }
 

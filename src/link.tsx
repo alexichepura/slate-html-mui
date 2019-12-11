@@ -9,7 +9,7 @@ import {
 import Link from "@material-ui/icons/Link"
 import isUrl from "is-url"
 import React, { FC, useState } from "react"
-import { Editor, Element as SlateElement, Text, Range, Command } from "slate"
+import { Editor, Element as SlateElement, Text, Node, Range, Command } from "slate"
 import { useSlate, RenderElementProps } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
@@ -17,9 +17,9 @@ export const LINK_INLINE_TYPE = "a"
 export const SET_LINK_COMMAND = "set_link"
 
 type TLinkAttributes = {
-  href: string
-  title: string
-  target: string
+  href?: string
+  title?: string
+  target?: string
 }
 type TSetLinkCommand = {
   type: Command["type"]
@@ -29,7 +29,7 @@ type TSetLinkCommand = {
 type THtmlLinkSlateElement = {
   type: SlateElement["type"]
   text: Text["text"]
-  attributes: Partial<TLinkAttributes>
+  attributes: TLinkAttributes
 }
 
 const isCommand_set_link = (command: Command): command is TSetLinkCommand => {
@@ -68,9 +68,12 @@ const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
   const link = findLink(editor)
 
   const isExpanded = editor.selection ? Range.isExpanded(editor.selection) : false
+
   const text =
-    editor.selection && isExpanded ? Editor.text(editor, editor.selection) : link ? link.text : ""
-  console.log("getLinkData link", link)
+    editor.selection && isExpanded
+      ? Editor.text(editor, editor.selection)
+      : (link && Node.text(link)) || ""
+
   return {
     isExpanded,
     link,

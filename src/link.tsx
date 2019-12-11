@@ -9,8 +9,7 @@ import {
 import Link from "@material-ui/icons/Link"
 import isUrl from "is-url"
 import React, { FC, useState } from "react"
-import { Editor, Node, NodeEntry, Range } from "slate"
-import { Element as SlateElement } from "slate"
+import { Editor, Element as SlateElement, Node, NodeEntry, Range } from "slate"
 import { useSlate } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
@@ -46,7 +45,7 @@ const isLinkActive = (editor: Editor) => {
   return !!link
 }
 const findLink = (editor: Editor): NodeEntry => {
-  const [link] = Array.from(Editor.nodes(editor, { match: { type: LINK_INLINE_TYPE } }))
+  const [link] = Editor.nodes(editor, { match: { type: LINK_INLINE_TYPE } })
   return link
 }
 
@@ -55,7 +54,6 @@ const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
   const [link] = findLink(value)
   const isExpanded = editor.selection ? Range.isExpanded(editor.selection) : false
   const text = isExpanded ? value.fragment.text : link ? link.text : ""
-  console.log(link)
   return {
     isExpanded,
     link,
@@ -74,7 +72,7 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
   const mergeState = (partState: Partial<TLinkButtonState>) => setState({ ...state, ...partState })
 
   const handleOpen = () => {
-    const linkData = getLinkData(editor.value)
+    const linkData = getLinkData(editor)
     mergeState({ open: true, ...linkData })
   }
 

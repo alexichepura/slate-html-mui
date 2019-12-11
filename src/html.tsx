@@ -18,9 +18,7 @@ export const serialize = (node: Node | Node[]): string => {
     return node.map(serialize).join("")
   }
 
-  const children = Array.from(node.children)
-    .map(n => serialize(n))
-    .join("")
+  const children = node.children.map(n => serialize(n)).join("")
 
   if (node.type in EHtmlBlockFormat || node.type in EHtmlTextFormat) {
     return formatToString(node, children)

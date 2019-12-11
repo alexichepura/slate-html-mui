@@ -45,23 +45,19 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
 
 export const isFormatActive = (editor: Editor, format: string) => {
   if (format in EHtmlTextFormat) {
-    const [match] = Array.from(
-      Editor.nodes(editor, {
-        match: { [format]: true },
-        mode: "all",
-      })
-    )
+    const [match] = Editor.nodes(editor, {
+      match: { [format]: true },
+      mode: "all",
+    })
 
     return !!match
   }
 
   if (format in EHtmlBlockFormat) {
-    const [match] = Array.from(
-      Editor.nodes(editor, {
-        match: { type: format },
-        mode: "all",
-      })
-    )
+    const [match] = Editor.nodes(editor, {
+      match: { type: format },
+      mode: "all",
+    })
 
     return !!match
   }

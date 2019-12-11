@@ -9,7 +9,7 @@ import {
 import Link from "@material-ui/icons/Link"
 import isUrl from "is-url"
 import React, { FC, useState } from "react"
-import { Editor, Element as SlateElement, Node, Range, Command } from "slate"
+import { Editor, Element as SlateElement, Text, Range, Command } from "slate"
 import { useSlate, RenderElementProps } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
@@ -26,6 +26,11 @@ type TSetLinkCommand = {
   attributes: TLinkAttributes
   text: string
 }
+type THtmlLinkSlateElement = {
+  type: SlateElement["type"]
+  text: Text["text"]
+  attributes: Partial<TLinkAttributes>
+}
 
 const isCommand_set_link = (command: Command): command is TSetLinkCommand => {
   return command.type === SET_LINK_COMMAND
@@ -33,7 +38,7 @@ const isCommand_set_link = (command: Command): command is TSetLinkCommand => {
 
 type TLinkSelection = {
   isExpanded: boolean
-  link: Node | null
+  link: THtmlLinkSlateElement | null
   text: string
 }
 type TLinkButtonState = {
@@ -54,9 +59,9 @@ const defaults: TLinkButtonState = {
 const isLinkActive = (editor: Editor) => {
   return !!findLink(editor)
 }
-const findLink = (editor: Editor): Node | null => {
+const findLink = (editor: Editor): THtmlLinkSlateElement | null => {
   const [linkEntry] = Editor.nodes(editor, { match: { type: LINK_INLINE_TYPE } })
-  return linkEntry ? linkEntry[0] : null
+  return linkEntry ? ((linkEntry[0] as unknown) as THtmlLinkSlateElement) : null
 }
 
 const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
@@ -65,21 +70,23 @@ const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
   const isExpanded = editor.selection ? Range.isExpanded(editor.selection) : false
   const text =
     editor.selection && isExpanded ? Editor.text(editor, editor.selection) : link ? link.text : ""
+  console.log("getLinkData link", link)
   return {
     isExpanded,
     link,
     text,
-    href: link ? link.data.get("title") : "",
-    title: link ? link.data.get("title") : "",
-    target: link ? link.data.get("target") : "",
+    href: (link && link.attributes.href) || "",
+    title: (link && link.attributes.title) || "",
+    target: (link && link.attributes.target) || "",
   }
 }
 
 export const isHtmlAnchorElement = (element: SlateElement) => {
   return element.type === LINK_INLINE_TYPE
 }
-export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children }) => {
-  return React.createElement(LINK_INLINE_TYPE, attributes, children)
+export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
+  // console.log("HtmlAnchorElement", attributes, children, element)
+  return React.createElement(LINK_INLINE_TYPE, { ...attributes, ...element.attributes }, children)
 }
 
 type TLinkButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">

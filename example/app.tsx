@@ -1,15 +1,22 @@
 import { Button } from "@material-ui/core"
 import React, { FC, useCallback, useMemo, useState } from "react"
 import { render } from "react-dom"
-import { createEditor, Range, Node } from "slate"
+import { createEditor, Node, Range } from "slate"
 import { withHistory } from "slate-history"
-import { Editable, Slate, withReact, RenderElementProps } from "slate-react"
-import { Toolbar } from "../src/toolbar"
-import { deserialize, serialize } from "../src/html"
+import { Editable, RenderElementProps, Slate, withReact } from "slate-react"
+import {
+  deserializeHtml,
+  HtmlAnchorElement,
+  HtmlBlockElement,
+  isHtmlAnchorElement,
+  isHtmlBlockElement,
+  Leaf,
+  serializeHtml,
+  Toolbar,
+  withLink,
+  withRichText,
+} from "../src"
 import { initial } from "./initial"
-import { withRichText } from "../src/with-rich-text"
-import { isHtmlBlockElement, Leaf, HtmlBlockElement } from "../src/format"
-import { withLink, isHtmlAnchorElement, HtmlAnchorElement } from "../src/link"
 
 const RenderElement = (props: RenderElementProps) => {
   if (isHtmlBlockElement(props.element)) {
@@ -25,13 +32,13 @@ const MyEditor: FC = () => {
   const [value, setValue] = useState<Node[]>(initial)
   const [selection, setSelection] = useState<Range | null>(null)
   const saveToLocalstorage = () => {
-    const str = serialize(value)
+    const str = serializeHtml(value)
     localStorage.setItem("slate-mui-value", str)
   }
   const loadFromLocalstorage = () => {
     const savedStr = localStorage.getItem("slate-mui-value") || ""
     const document = new DOMParser().parseFromString(savedStr, "text/html")
-    const savedValue = deserialize(document.body)
+    const savedValue = deserializeHtml(document.body)
 
     setValue(savedValue as any)
   }

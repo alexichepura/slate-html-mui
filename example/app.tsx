@@ -14,7 +14,7 @@ import {
   serializeHtml,
   Toolbar,
   withLink,
-  withRichText,
+  withHtml,
 } from "../src"
 import { initial } from "./initial"
 
@@ -42,7 +42,7 @@ const MyEditor: FC = () => {
 
     setValue(savedValue as any)
   }
-  const editor = useMemo(() => withRichText(withLink(withHistory(withReact(createEditor())))), [])
+  const editor = useMemo(() => withHtml(withLink(withHistory(withReact(createEditor())))), [])
   const renderElement = useCallback(RenderElement, [])
   const renderLeaf = useCallback(Leaf, [])
   return (

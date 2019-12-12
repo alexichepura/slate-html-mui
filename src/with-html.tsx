@@ -1,4 +1,4 @@
-import { Editor } from "slate"
+import { Editor, Node } from "slate"
 import {
   isFormatActive,
   EHtmlListFormat,
@@ -6,10 +6,11 @@ import {
   EHtmlBlockFormat,
   DEFAULT_NODE_FORMAT,
 } from "./format"
+import { deserialize } from "./html"
 
 export const TOGGLE_FORMAT_COMMAND = "toggle_format"
 
-export const withRichText = (editor: Editor) => {
+export const withHtml = (editor: Editor) => {
   const { exec } = editor
 
   editor.exec = command => {
@@ -38,6 +39,16 @@ export const withRichText = (editor: Editor) => {
         if (!isActive && isList) {
           Editor.wrapNodes(editor, { type: format, children: [] })
         }
+      }
+    } else if (command.type === "insert_data") {
+      const html = command.data.getData("text/html")
+
+      if (html) {
+        const parsed = new DOMParser().parseFromString(html, "text/html")
+        const fragment = deserialize(parsed.body) as Node[]
+        console.log(fragment)
+        Editor.insertFragment(editor, fragment)
+        return
       }
     } else {
       exec(command)

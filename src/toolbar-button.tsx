@@ -3,7 +3,7 @@ import { ButtonProps } from "@material-ui/core/Button"
 import React, { FC } from "react"
 import { useSlate } from "slate-react"
 import { isFormatActive } from "./format"
-import { TOGGLE_FORMAT_COMMAND } from "./with-rich-text"
+import { TOGGLE_FORMAT_COMMAND } from "./with-html"
 
 export type TToolbarButtonProps = { tooltipTitle: string } & ButtonProps
 export const ToolbarButton: FC<TToolbarButtonProps> = ({ tooltipTitle, ...rest }) => {

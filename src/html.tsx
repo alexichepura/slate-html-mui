@@ -73,7 +73,7 @@ export const deserialize = (
       return jsx("fragment", {}, children)
     case "br":
       return "\n"
-    case "a":
+    case LINK_INLINE_TYPE:
       const linkElement: THtmlLinkJsxElement = {
         type: LINK_INLINE_TYPE,
         attributes: {

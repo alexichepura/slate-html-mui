@@ -161,9 +161,10 @@ export const withLink = (editor: Editor) => {
     }
 
     let insertText
-    if (command.type === "insert_data") {
-      insertText = command.data.getData("text/plain")
-    } else if (command.type === "insert_text") {
+    // if (command.type === "insert_data") {
+    //   insertText = command.data.getData("text/plain")
+    // } else
+    if (command.type === "insert_text") {
       insertText = command.text
     }
 

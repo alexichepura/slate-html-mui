@@ -35,18 +35,17 @@
   "name": "slate-mui",
   "dependencies": {
     "escape-html": "^1.0.3",
-    "immutable": ">=4.0.0-rc.12",
-    "is-hotkey": ">=0.1.6",
-    "is-url": ">=1.2.4",
-    "slate": ">=0.53.0",
+    "is-hotkey": "^0.1.6",
+    "is-url": "^1.2.4",
+    "slate": "^0.53.0",
     "slate-hyperscript": "^0.53.0",
-    "slate-react": ">=0.53.0"
+    "slate-react": "^0.53.0"
   },
   "peerDependencies": {
-    "@material-ui/core": "4.x",
-    "@material-ui/icons": "4.x",
-    "react": "16.x",
-    "react-dom": "16.x"
+    "@material-ui/core": "^4",
+    "@material-ui/icons": "^4",
+    "react": "^16",
+    "react-dom": "^16"
   },
   "scripts": {
     "build": "tsc",
@@ -57,5 +56,5 @@
   "sideEffects": false,
   "types": "dist/index.d.ts",
   "typings": "dist/index.d.ts",
-  "version": "0.1.2"
+  "version": "0.2.0"
 }

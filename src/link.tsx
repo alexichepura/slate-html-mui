@@ -40,6 +40,7 @@ export type THtmlLinkJsxElement = {
     target: string | null
   }
 }
+type TAttributes = Record<string, string | undefined | null>
 
 const isCommand_set_link = (command: Command): command is TSetLinkCommand => {
   return command.type === SET_LINK_COMMAND
@@ -96,9 +97,19 @@ const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
 export const isHtmlAnchorElement = (element: SlateElement): element is THtmlLinkSlateElement => {
   return element.type === LINK_INLINE_TYPE
 }
+const cleanAttributesMutate = (attributes: TAttributes) =>
+  Object.keys(attributes).forEach(key => {
+    return (attributes[key] === null || attributes[key] === undefined) && delete attributes[key]
+  })
 export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
-  // console.log("HtmlAnchorElement", attributes, children, element)
-  return React.createElement(LINK_INLINE_TYPE, { ...attributes, ...element.attributes }, children)
+  const resultAttributes: TAttributes & TLinkAttributes = {
+    ...attributes,
+    ...element.attributes,
+    target: element.attributes.target || null,
+    title: element.attributes.title || null,
+  }
+  cleanAttributesMutate(resultAttributes)
+  return React.createElement(LINK_INLINE_TYPE, resultAttributes, children)
 }
 
 type TLinkButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">
@@ -175,7 +186,6 @@ const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
     type: LINK_INLINE_TYPE,
     attributes: command.attributes,
     children: [],
-    // children: [{ text: command.text }],
   }
   Editor.wrapNodes(editor, link, { split: true })
   Editor.collapse(editor, { edge: "end" })
@@ -193,9 +203,15 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
   }
 
   const handleOk = () => {
+    const attributes = {
+      href: state.href,
+      title: state.title || null,
+      target: state.target || null,
+    }
+    cleanAttributesMutate(attributes)
     editor.exec({
       type: SET_LINK_COMMAND,
-      attributes: { href: state.href, title: state.title, target: state.target },
+      attributes,
     })
     handleClose()
   }

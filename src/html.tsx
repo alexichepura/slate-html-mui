@@ -5,13 +5,14 @@ import { Node, Text, Descendant } from "slate"
 import { EHtmlBlockFormat, EHtmlTextFormat } from "./format"
 import { Element as SlateElement } from "slate"
 
-type TAttributes = Record<string, string | undefined> | null
+type TAttributes = Record<string, string | undefined | null> | null
 
 const attributes2String = (attributes: TAttributes): string => {
   if (!attributes) {
     return ""
   }
   const attributesString = Object.entries(attributes)
+    .filter(([_k, v]) => v !== undefined && v !== null)
     .map(([k, v]) => {
       return `${k}="${v}"`
     })
@@ -41,7 +42,7 @@ export const serialize = (node: Node | Node[]): string => {
   if (isHtmlAnchorElement(node)) {
     const attributes = {
       ...node.attributes,
-      href: escapeHtml(node.attributes.href || ""),
+      href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
     }
     return formatToString(node, attributes, children)
   }
@@ -81,7 +82,6 @@ export const deserialize = (
           target: (el as Element).getAttribute("target"),
         },
       }
-      console.log(linkElement, el, (el as Element).getAttribute("href"))
       return jsx("element", linkElement, children)
     default:
       return el.textContent

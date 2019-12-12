@@ -9,7 +9,7 @@ import {
 import Link from "@material-ui/icons/Link"
 import isUrl from "is-url"
 import React, { FC, useState } from "react"
-import { Editor, Element as SlateElement, Text, Node, Range, Command } from "slate"
+import { Editor, Element as SlateElement, Text, Node, Range, Command, Path } from "slate"
 import { useSlate, RenderElementProps } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
@@ -17,7 +17,7 @@ export const LINK_INLINE_TYPE = "a"
 export const SET_LINK_COMMAND = "set_link"
 
 type TLinkAttributes = {
-  href?: string
+  href: string
   title?: string
   target?: string
 }
@@ -69,9 +69,13 @@ const defaults: TLinkButtonState = {
 const isLinkActive = (editor: Editor) => {
   return !!findLink(editor)
 }
-const findLink = (editor: Editor): THtmlLinkSlateElement | null => {
+const findLinkEntry = (editor: Editor): [THtmlLinkSlateElement, Path] => {
   const [linkEntry] = Editor.nodes(editor, { match: { type: LINK_INLINE_TYPE } })
-  return linkEntry ? ((linkEntry[0] as unknown) as THtmlLinkSlateElement) : null
+  return linkEntry as [THtmlLinkSlateElement, Path]
+}
+const findLink = (editor: Editor): THtmlLinkSlateElement | null => {
+  const linkEntry = findLinkEntry(editor)
+  return linkEntry ? linkEntry[0] : null
 }
 
 const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
@@ -178,17 +182,30 @@ const unwrapLink = (editor: Editor) => {
 }
 
 const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
-  if (isLinkActive(editor)) {
-    unwrapLink(editor)
-  }
+  const { selection } = editor
+  const foundLinkEntry = findLinkEntry(editor)
+  // if (foundLink) {
+  //   unwrapLink(editor)
+  // }
+  const isCollapsed = selection && Range.isCollapsed(selection)
 
   const link: SlateElement = {
     type: LINK_INLINE_TYPE,
     attributes: command.attributes,
-    children: [],
+    children: [{ text: command.text }],
   }
-  Editor.wrapNodes(editor, link, { split: true })
-  Editor.collapse(editor, { edge: "end" })
+
+  if (!foundLinkEntry && isCollapsed) {
+    Editor.insertNodes(editor, [link])
+  } else {
+    if (isCollapsed) {
+      const path = foundLinkEntry[1]
+      Editor.setNodes(editor, link, { at: path, split: true })
+    } else {
+      Editor.wrapNodes(editor, link, { split: true })
+    }
+    Editor.collapse(editor, { edge: "end" })
+  }
 }
 
 type TLinkFormDialogProps = {
@@ -205,14 +222,16 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
   const handleOk = () => {
     const attributes = {
       href: state.href,
-      title: state.title || null,
-      target: state.target || null,
+      title: state.title || undefined,
+      target: state.target || undefined,
     }
     cleanAttributesMutate(attributes)
-    editor.exec({
+    const command: TSetLinkCommand = {
       type: SET_LINK_COMMAND,
       attributes,
-    })
+      text: state.text,
+    }
+    editor.exec(command)
     handleClose()
   }
 

@@ -26,10 +26,19 @@ type TSetLinkCommand = {
   attributes: TLinkAttributes
   text: string
 }
-type THtmlLinkSlateElement = {
+export type THtmlLinkSlateElement = {
   type: SlateElement["type"]
+  children: SlateElement["children"]
   text: Text["text"]
   attributes: TLinkAttributes
+}
+export type THtmlLinkJsxElement = {
+  type: SlateElement["type"]
+  attributes: {
+    href: string | null
+    title: string | null
+    target: string | null
+  }
 }
 
 const isCommand_set_link = (command: Command): command is TSetLinkCommand => {
@@ -84,7 +93,7 @@ const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
   }
 }
 
-export const isHtmlAnchorElement = (element: SlateElement) => {
+export const isHtmlAnchorElement = (element: SlateElement): element is THtmlLinkSlateElement => {
   return element.type === LINK_INLINE_TYPE
 }
 export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
@@ -203,7 +212,6 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
           label="Text to display"
           value={state.text}
           onChange={e => mergeState({ text: e.target.value })}
-          autoFocus
           fullWidth
         />
         <TextField

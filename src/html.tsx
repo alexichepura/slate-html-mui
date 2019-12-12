@@ -1,12 +1,26 @@
-import { LINK_INLINE_TYPE } from "./link"
+import { LINK_INLINE_TYPE, isHtmlAnchorElement, THtmlLinkJsxElement } from "./link"
 
 import escapeHtml from "escape-html"
 import { Node, Text, Descendant } from "slate"
 import { EHtmlBlockFormat, EHtmlTextFormat } from "./format"
 import { Element as SlateElement } from "slate"
 
-const formatToString = (node: Node, children: string) => {
-  return `<${node.type}>${children}</${node.type}>`
+type TAttributes = Record<string, string | undefined> | null
+
+const attributes2String = (attributes: TAttributes): string => {
+  if (!attributes) {
+    return ""
+  }
+  const attributesString = Object.entries(attributes)
+    .map(([k, v]) => {
+      return `${k}="${v}"`
+    })
+    .join(" ")
+  return attributesString.length > 0 ? " " + attributesString : ""
+}
+
+const formatToString = (node: Node, attributes: TAttributes, children: string) => {
+  return `<${node.type}${attributes2String(attributes)}>${children}</${node.type}>`
 }
 
 export const serialize = (node: Node | Node[]): string => {
@@ -21,12 +35,15 @@ export const serialize = (node: Node | Node[]): string => {
   const children = node.children.map(n => serialize(n)).join("")
 
   if (node.type in EHtmlBlockFormat || node.type in EHtmlTextFormat) {
-    return formatToString(node, children)
+    return formatToString(node, null, children)
   }
 
-  if (node.type === LINK_INLINE_TYPE) {
-    // `<a href="${escapeHtml(node.url)}">${children}</a>`
-    return formatToString(node, children)
+  if (isHtmlAnchorElement(node)) {
+    const attributes = {
+      ...node.attributes,
+      href: escapeHtml(node.attributes.href || ""),
+    }
+    return formatToString(node, attributes, children)
   }
 
   return children
@@ -56,18 +73,16 @@ export const deserialize = (
     case "br":
       return "\n"
     case "a":
-      return jsx(
-        "element",
-        {
-          type: LINK_INLINE_TYPE,
-          attributes: {
-            href: (el as Element).getAttribute("href"),
-            title: (el as Element).getAttribute("title"),
-            target: (el as Element).getAttribute("target"),
-          },
+      const linkElement: THtmlLinkJsxElement = {
+        type: LINK_INLINE_TYPE,
+        attributes: {
+          href: (el as Element).getAttribute("href"),
+          title: (el as Element).getAttribute("title"),
+          target: (el as Element).getAttribute("target"),
         },
-        children
-      )
+      }
+      console.log(linkElement, el, (el as Element).getAttribute("href"))
+      return jsx("element", linkElement, children)
     default:
       return el.textContent
   }

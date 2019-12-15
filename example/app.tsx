@@ -1,7 +1,7 @@
 import { Button } from "@material-ui/core"
 import React, { FC, useCallback, useMemo, useState } from "react"
 import { render } from "react-dom"
-import { createEditor, Node, Range } from "slate"
+import { createEditor, Node } from "slate"
 import { withHistory } from "slate-history"
 import { Editable, RenderElementProps, Slate, withReact } from "slate-react"
 import {
@@ -30,7 +30,6 @@ const RenderElement = (props: RenderElementProps) => {
 
 const MyEditor: FC = () => {
   const [value, setValue] = useState<Node[]>(initial)
-  const [selection, setSelection] = useState<Range | null>(null)
   const saveToLocalstorage = () => {
     const str = serializeHtml(value)
     localStorage.setItem("slate-mui-value", str)
@@ -57,12 +56,10 @@ const MyEditor: FC = () => {
       <Slate
         editor={editor}
         defaultValue={value}
-        onChange={(value, selection) => {
+        onChange={value => {
           setValue(value)
-          setSelection(selection)
         }}
         value={value}
-        selection={selection}
       >
         <>
           <Toolbar />

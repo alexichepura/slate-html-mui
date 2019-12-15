@@ -6,20 +6,27 @@ import { isFormatActive } from "./format"
 import { TOGGLE_FORMAT_COMMAND } from "./with-html"
 
 export type TToolbarButtonProps = { tooltipTitle: string } & ButtonProps
-export const ToolbarButton: FC<TToolbarButtonProps> = ({ tooltipTitle, ...rest }) => {
-  return (
-    <Tooltip title={tooltipTitle}>
-      <span>
-        <Button size="small" style={{ minWidth: 0, width: 30, height: 30, padding: 0 }} {...rest} />
-      </span>
-    </Tooltip>
-  )
-}
+export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
+  ({ tooltipTitle, ...rest }, ref) => {
+    return (
+      <Tooltip title={tooltipTitle}>
+        <span>
+          <Button
+            ref={ref}
+            size="small"
+            style={{ minWidth: 0, width: 30, height: 30, padding: 0 }}
+            {...rest}
+          />
+        </span>
+      </Tooltip>
+    )
+  }
+)
 
 type TFormatButtonProps = {
   format: string
 } & TToolbarButtonProps
-export const FormatButton: FC<TFormatButtonProps> = ({ format, ...rest }) => {
+export const FormatButton: FC<TFormatButtonProps> = React.forwardRef(({ format, ...rest }, ref) => {
   const slate = useSlate()
   const isActive = isFormatActive(slate, format)
   const onClick = () => {
@@ -27,10 +34,11 @@ export const FormatButton: FC<TFormatButtonProps> = ({ format, ...rest }) => {
   }
   return (
     <ToolbarButton
+      ref={ref}
       color={isActive ? "primary" : "default"}
       variant={isActive ? "contained" : "text"}
       onClick={onClick}
       {...rest}
     />
   )
-}
+})

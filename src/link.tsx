@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  MenuItem,
 } from "@material-ui/core"
 import Link from "@material-ui/icons/Link"
 import isUrl from "is-url"
@@ -25,6 +26,7 @@ type TSetLinkCommand = {
   type: Command["type"]
   attributes: TLinkAttributes
   text: string
+  range: Range
 }
 export type THtmlLinkSlateElement = {
   type: SlateElement["type"]
@@ -47,6 +49,7 @@ const isCommand_set_link = (command: Command): command is TSetLinkCommand => {
 }
 
 type TLinkSelection = {
+  range: Range | null
   isExpanded: boolean
   link: THtmlLinkSlateElement | null
   text: string
@@ -58,6 +61,7 @@ type TLinkButtonState = {
 
 const defaults: TLinkButtonState = {
   open: false,
+  range: null,
   isExpanded: false,
   link: null,
   href: "",
@@ -92,6 +96,7 @@ const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
     isExpanded,
     link,
     text,
+    range: editor.selection,
     href: (link && link.attributes.href) || "",
     title: (link && link.attributes.title) || "",
     target: (link && link.attributes.target) || "",
@@ -153,7 +158,7 @@ export const withLink = (editor: Editor) => {
 
   editor.exec = command => {
     if (isCommand_set_link(command)) {
-      if (editor.selection) {
+      if (command.range) {
         wrapLink(editor, command)
       }
 
@@ -183,12 +188,13 @@ const unwrapLink = (editor: Editor) => {
 }
 
 const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
-  const { selection } = editor
+  const { range } = command
+  Editor.setSelection(editor, range)
   const foundLinkEntry = findLinkEntry(editor)
   // if (foundLink) {
   //   unwrapLink(editor)
   // }
-  const isCollapsed = selection && Range.isCollapsed(selection)
+  const isCollapsed = range && Range.isCollapsed(range)
 
   const link: SlateElement = {
     type: LINK_INLINE_TYPE,
@@ -197,13 +203,13 @@ const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
   }
 
   if (!foundLinkEntry && isCollapsed) {
-    Editor.insertNodes(editor, [link])
+    Editor.insertNodes(editor, [link], { at: range })
   } else {
     if (isCollapsed) {
       const path = foundLinkEntry[1]
       Editor.setNodes(editor, link, { at: path, split: true })
     } else {
-      Editor.wrapNodes(editor, link, { split: true })
+      Editor.wrapNodes(editor, link, { at: range, split: true })
     }
     Editor.collapse(editor, { edge: "end" })
   }
@@ -227,9 +233,14 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
       target: state.target || undefined,
     }
     cleanAttributesMutate(attributes)
+
+    if (!state.range) {
+      throw new Error("Invalid range. Must be typeof Range.")
+    }
     const command: TSetLinkCommand = {
       type: SET_LINK_COMMAND,
       attributes,
+      range: state.range,
       text: state.text,
     }
     editor.exec(command)
@@ -266,8 +277,15 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
           label="Attribute: target"
           value={state.target}
           onChange={e => mergeState({ target: e.target.value })}
+          select
           fullWidth
-        />
+        >
+          <MenuItem value="">_self (implicit)</MenuItem>
+          <MenuItem value="_self">_self (explicit)</MenuItem>
+          <MenuItem value="_blank">_blank</MenuItem>
+          <MenuItem value="_parent">_parent</MenuItem>
+          <MenuItem value="_top">_top</MenuItem>
+        </TextField>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleRemove} color="secondary">

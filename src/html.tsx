@@ -1,9 +1,8 @@
-import { LINK_INLINE_TYPE, isHtmlAnchorElement, THtmlLinkJsxElement } from "./link"
-
 import escapeHtml from "escape-html"
-import { Node, Text, Descendant } from "slate"
+import { Descendant, Element as SlateElement, Node, Text } from "slate"
+import { jsx as slateJsx } from "slate-hyperscript"
 import { EHtmlBlockFormat, EHtmlTextFormat } from "./format"
-import { Element as SlateElement } from "slate"
+import { isHtmlAnchorElement, LINK_INLINE_TYPE, THtmlLinkJsxElement } from "./link"
 
 type TAttributes = Record<string, string | undefined | null> | null
 
@@ -50,8 +49,6 @@ export const serialize = (node: Node | Node[]): string => {
   return children
 }
 
-import { jsx } from "slate-hyperscript"
-
 export const deserialize = (
   el: Element | ChildNode
 ): SlateElement | string | null | Descendant[] => {
@@ -59,31 +56,44 @@ export const deserialize = (
     return el.textContent
   } else if (el.nodeType !== 1) {
     return null
+  } else if (el.nodeName === "BR") {
+    return "\n"
   }
 
-  const children = Array.from(el.childNodes).map(deserialize)
+  const children = Array.from(el.childNodes)
+    .map(deserialize)
+    .flat()
+
+  if (el.nodeName === "BODY") {
+    const body = slateJsx("fragment", {}, children)
+    return body
+  }
 
   const nodeNameLowerCase = el.nodeName.toLowerCase()
-  if (nodeNameLowerCase in EHtmlBlockFormat || nodeNameLowerCase in EHtmlTextFormat) {
-    return jsx("element", { type: nodeNameLowerCase }, children)
+
+  if (nodeNameLowerCase in EHtmlBlockFormat) {
+    const element = slateJsx("element", { type: nodeNameLowerCase }, children)
+    return element
   }
 
-  switch (nodeNameLowerCase) {
-    case "body":
-      return jsx("fragment", {}, children)
-    case "br":
-      return "\n"
-    case LINK_INLINE_TYPE:
-      const linkElement: THtmlLinkJsxElement = {
-        type: LINK_INLINE_TYPE,
-        attributes: {
-          href: (el as Element).getAttribute("href"),
-          title: (el as Element).getAttribute("title"),
-          target: (el as Element).getAttribute("target"),
-        },
-      }
-      return jsx("element", linkElement, children)
-    default:
-      return el.textContent
+  if (nodeNameLowerCase in EHtmlTextFormat) {
+    const textChildren = children.map(child =>
+      slateJsx("text", { [nodeNameLowerCase]: true }, child)
+    )
+    return textChildren
   }
+
+  if (nodeNameLowerCase === LINK_INLINE_TYPE) {
+    const linkElement: THtmlLinkJsxElement = {
+      type: LINK_INLINE_TYPE,
+      attributes: {
+        href: (el as Element).getAttribute("href"),
+        title: (el as Element).getAttribute("title"),
+        target: (el as Element).getAttribute("target"),
+      },
+    }
+    return slateJsx("element", linkElement, children)
+  }
+
+  return children
 }

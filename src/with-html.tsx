@@ -46,7 +46,6 @@ export const withHtml = (editor: Editor) => {
       if (html) {
         const parsed = new DOMParser().parseFromString(html, "text/html")
         const fragment = deserialize(parsed.body) as Node[]
-        console.log(fragment)
         Editor.insertFragment(editor, fragment)
         return
       }

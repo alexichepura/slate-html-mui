@@ -1,4 +1,4 @@
-import { Editor, Node } from "slate"
+import { Editor, Node, Text } from "slate"
 import {
   isFormatActive,
   EHtmlListFormat,
@@ -23,13 +23,13 @@ export const withHtml = (editor: Editor) => {
         Editor.setNodes(
           editor,
           { [format]: isActive ? null : true },
-          { match: "text", split: true }
+          { match: Text.isText, split: true }
         )
       }
 
       if (format in EHtmlBlockFormat) {
         Object.keys(EHtmlListFormat).forEach(format => {
-          Editor.unwrapNodes(editor, { match: { type: format }, split: true })
+          Editor.unwrapNodes(editor, { match: node => node.type === format, split: true })
         })
 
         Editor.setNodes(editor, {

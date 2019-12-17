@@ -70,11 +70,13 @@ const defaults: TLinkButtonState = {
   target: "",
 }
 
+const match = (node: Node): boolean => node.type === LINK_INLINE_TYPE
+
 const isLinkActive = (editor: Editor) => {
   return !!findLink(editor)
 }
 const findLinkEntry = (editor: Editor): [THtmlLinkSlateElement, Path] => {
-  const [linkEntry] = Editor.nodes(editor, { match: { type: LINK_INLINE_TYPE } })
+  const [linkEntry] = Editor.nodes(editor, { match })
   return linkEntry as [THtmlLinkSlateElement, Path]
 }
 const findLink = (editor: Editor): THtmlLinkSlateElement | null => {
@@ -184,7 +186,7 @@ export const withLink = (editor: Editor) => {
 }
 
 const unwrapLink = (editor: Editor) => {
-  Editor.unwrapNodes(editor, { match: { type: LINK_INLINE_TYPE } })
+  Editor.unwrapNodes(editor, { match })
 }
 
 const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {

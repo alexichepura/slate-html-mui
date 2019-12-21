@@ -1,10 +1,10 @@
-import { Editor, Node, Text, Transforms } from "slate"
+import { Editor, Node, Transforms } from "slate"
 import {
-  isFormatActive,
+  DEFAULT_NODE_FORMAT,
+  EHtmlBlockFormat,
   EHtmlListFormat,
   EHtmlTextFormat,
-  EHtmlBlockFormat,
-  DEFAULT_NODE_FORMAT,
+  isFormatActive,
 } from "./format"
 import { deserialize } from "./html"
 
@@ -16,11 +16,7 @@ export const withHtml = (editor: Editor) => {
     const isList = format in EHtmlListFormat
 
     if (format in EHtmlTextFormat) {
-      Transforms.setNodes(
-        editor,
-        { [format]: isActive ? null : true },
-        { match: Text.isText, split: true }
-      )
+      Editor.addMark(editor, format, true)
     }
 
     if (format in EHtmlBlockFormat) {

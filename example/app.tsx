@@ -25,6 +25,7 @@ const RenderElement = (props: RenderElementProps) => {
   if (isHtmlAnchorElement(props.element)) {
     return <HtmlAnchorElement {...props} />
   }
+  console.warn("INVALID ELEMENT", props)
   return <p>INVALID ELEMENT</p>
 }
 

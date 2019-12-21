@@ -77,7 +77,7 @@ const findLink = (editor: Editor): THtmlLinkSlateElement | null => {
   return linkEntry ? linkEntry[0] : null
 }
 
-const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
+const getInitialLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
   const link = findLink(editor)
 
   const isExpanded = editor.selection ? Range.isExpanded(editor.selection) : false
@@ -91,7 +91,7 @@ const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
     isExpanded,
     link,
     text,
-    range: editor.selection,
+    range: editor.selection ? { ...editor.selection } : null,
     href: (link && link.attributes.href) || "",
     title: (link && link.attributes.title) || "",
     target: (link && link.attributes.target) || "",
@@ -124,7 +124,7 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
   const mergeState = (partState: Partial<TLinkButtonState>) => setState({ ...state, ...partState })
 
   const handleOpen = () => {
-    const linkData = getLinkData(editor)
+    const linkData = getInitialLinkData(editor)
     mergeState({ open: true, ...linkData })
   }
 
@@ -142,12 +142,6 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
       <LinkFormDialog state={state} mergeState={mergeState} />
     </>
   )
-}
-
-const insertLink = (editor: Editor, command: TSetLinkCommand) => {
-  if (editor.selection) {
-    wrapLink(editor, command)
-  }
 }
 
 export const withLink = (editor: Editor) => {
@@ -183,17 +177,18 @@ const unwrapLink = (editor: Editor) => {
 }
 
 const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
-  const { range } = command
-  Transforms.setSelection(editor, range)
+  const { range, attributes, text } = command
   const foundLinkEntry = findLinkEntry(editor)
+  Transforms.setSelection(editor, range)
   // if (foundLink) {
   //   unwrapLink(editor)
   // }
   const isCollapsed = range && Range.isCollapsed(range)
 
   const link: SlateElement = {
-    attributes: command.attributes,
-    children: [{ text: command.text }],
+    type: LINK_INLINE_TYPE,
+    attributes,
+    children: [{ text }],
   }
 
   if (!foundLinkEntry && isCollapsed) {
@@ -236,7 +231,7 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
       range: state.range,
       text: state.text,
     }
-    insertLink(editor, command)
+    wrapLink(editor, command)
     handleClose()
   }
 

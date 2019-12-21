@@ -10,7 +10,7 @@ import {
 import Link from "@material-ui/icons/Link"
 import isUrl from "is-url"
 import React, { FC, useState } from "react"
-import { Editor, Element as SlateElement, Text, Node, Range, Command, Path } from "slate"
+import { Editor, Element as SlateElement, Text, Node, Range, Path, Transforms } from "slate"
 import { useSlate, RenderElementProps } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
@@ -23,19 +23,16 @@ type TLinkAttributes = {
   target?: string
 }
 type TSetLinkCommand = {
-  type: Command["type"]
   attributes: TLinkAttributes
   text: string
   range: Range
 }
 export type THtmlLinkSlateElement = {
-  type: SlateElement["type"]
   children: SlateElement["children"]
   text: Text["text"]
   attributes: TLinkAttributes
 }
 export type THtmlLinkJsxElement = {
-  type: SlateElement["type"]
   attributes: {
     href: string | null
     title: string | null
@@ -43,10 +40,6 @@ export type THtmlLinkJsxElement = {
   }
 }
 type TAttributes = Record<string, string | undefined | null>
-
-const isCommand_set_link = (command: Command): command is TSetLinkCommand => {
-  return command.type === SET_LINK_COMMAND
-}
 
 type TLinkSelection = {
   range: Range | null
@@ -91,8 +84,8 @@ const getLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
 
   const text =
     editor.selection && isExpanded
-      ? Editor.text(editor, editor.selection)
-      : (link && Node.text(link)) || ""
+      ? Editor.string(editor, editor.selection)
+      : (link && Node.string(link)) || ""
 
   return {
     isExpanded,
@@ -151,34 +144,34 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
   )
 }
 
+const insertLink = (editor: Editor, command: TSetLinkCommand) => {
+  if (editor.selection) {
+    wrapLink(editor, command)
+  }
+}
+
 export const withLink = (editor: Editor) => {
-  const { exec, isInline } = editor
+  const { insertData, insertText, isInline } = editor
 
   editor.isInline = element => {
     return element.type === LINK_INLINE_TYPE ? true : isInline(element)
   }
 
-  editor.exec = command => {
-    if (isCommand_set_link(command)) {
-      if (command.range) {
-        wrapLink(editor, command)
-      }
-
-      return
-    }
-
-    let insertText
-    // if (command.type === "insert_data") {
-    //   insertText = command.data.getData("text/plain")
-    // } else
-    if (command.type === "insert_text") {
-      insertText = command.text
-    }
-
-    if (insertText && isUrl(insertText)) {
-      wrapLink(editor, insertText)
+  editor.insertText = text => {
+    if (text && isUrl(text)) {
+      wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
     } else {
-      exec(command)
+      insertText(text)
+    }
+  }
+
+  editor.insertData = (data: DataTransfer) => {
+    const text = data.getData("text/plain")
+
+    if (text && isUrl(text)) {
+      wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
+    } else {
+      insertData(data)
     }
   }
 
@@ -186,12 +179,12 @@ export const withLink = (editor: Editor) => {
 }
 
 const unwrapLink = (editor: Editor) => {
-  Editor.unwrapNodes(editor, { match })
+  Transforms.unwrapNodes(editor, { match })
 }
 
 const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
   const { range } = command
-  Editor.setSelection(editor, range)
+  Transforms.setSelection(editor, range)
   const foundLinkEntry = findLinkEntry(editor)
   // if (foundLink) {
   //   unwrapLink(editor)
@@ -199,21 +192,20 @@ const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
   const isCollapsed = range && Range.isCollapsed(range)
 
   const link: SlateElement = {
-    type: LINK_INLINE_TYPE,
     attributes: command.attributes,
     children: [{ text: command.text }],
   }
 
   if (!foundLinkEntry && isCollapsed) {
-    Editor.insertNodes(editor, [link], { at: range })
+    Transforms.insertNodes(editor, [link], { at: range })
   } else {
     if (isCollapsed) {
       const path = foundLinkEntry[1]
-      Editor.setNodes(editor, link, { at: path, split: true })
+      Transforms.setNodes(editor, link, { at: path, split: true })
     } else {
-      Editor.wrapNodes(editor, link, { at: range, split: true })
+      Transforms.wrapNodes(editor, link, { at: range, split: true })
     }
-    Editor.collapse(editor, { edge: "end" })
+    Transforms.collapse(editor, { edge: "end" })
   }
 }
 
@@ -240,12 +232,11 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
       throw new Error("Invalid range. Must be typeof Range.")
     }
     const command: TSetLinkCommand = {
-      type: SET_LINK_COMMAND,
       attributes,
       range: state.range,
       text: state.text,
     }
-    editor.exec(command)
+    insertLink(editor, command)
     handleClose()
   }
 

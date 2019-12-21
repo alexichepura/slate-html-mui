@@ -2,8 +2,7 @@ import { Button, Tooltip } from "@material-ui/core"
 import { ButtonProps } from "@material-ui/core/Button"
 import React, { FC } from "react"
 import { useSlate } from "slate-react"
-import { isFormatActive } from "./format"
-import { TOGGLE_FORMAT_COMMAND } from "./with-html"
+import { isFormatActive, EHtmlBlockFormat, EHtmlTextFormat } from "./format"
 
 export type TToolbarButtonProps = { tooltipTitle: string } & ButtonProps
 export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
@@ -24,13 +23,13 @@ export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
 )
 
 type TFormatButtonProps = {
-  format: string
+  format: EHtmlBlockFormat | EHtmlTextFormat
 } & TToolbarButtonProps
 export const FormatButton: FC<TFormatButtonProps> = React.forwardRef(({ format, ...rest }, ref) => {
   const slate = useSlate()
   const isActive = isFormatActive(slate, format)
   const onClick = () => {
-    slate.exec({ type: TOGGLE_FORMAT_COMMAND, format })
+    slate.insertHtml(format)
   }
   return (
     <ToolbarButton

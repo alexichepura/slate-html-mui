@@ -3,7 +3,7 @@ import React, { FC, useCallback, useMemo, useState } from "react"
 import { render } from "react-dom"
 import { createEditor, Node } from "slate"
 import { withHistory } from "slate-history"
-import { Editable, RenderElementProps, Slate, withReact } from "slate-react"
+import { Editable, RenderElementProps, Slate, withReact, ReactEditor } from "slate-react"
 import {
   deserializeHtml,
   HtmlAnchorElement,
@@ -54,7 +54,7 @@ const MyEditor: FC = () => {
         Save to localstorage
       </Button>
       <Slate
-        editor={editor}
+        editor={editor as ReactEditor}
         defaultValue={value}
         onChange={value => {
           setValue(value)

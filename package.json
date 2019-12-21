@@ -14,7 +14,7 @@
     "dotenv": "^8.1.0",
     "react": ">=16.12.0",
     "react-dom": ">=16.12.0",
-    "slate-history": "^0.55.3",
+    "slate-history": "^0.57.1",
     "ts-loader": "^6.2.1",
     "ts-node": "^8.5.4",
     "ts-node-dev": "^1.0.0-pre.44",
@@ -37,9 +37,9 @@
     "escape-html": "^1.0.3",
     "is-hotkey": "^0.1.6",
     "is-url": "^1.2.4",
-    "slate": "^0.55.2",
-    "slate-hyperscript": "^0.55.3",
-    "slate-react": "^0.55.3"
+    "slate": "^0.57.1",
+    "slate-hyperscript": "^0.57.1",
+    "slate-react": "^0.57.1"
   },
   "peerDependencies": {
     "@material-ui/core": "^4",

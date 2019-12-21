@@ -85,7 +85,6 @@ export const deserialize = (
 
   if (nodeNameLowerCase === LINK_INLINE_TYPE) {
     const linkElement: THtmlLinkJsxElement = {
-      type: LINK_INLINE_TYPE,
       attributes: {
         href: (el as Element).getAttribute("href"),
         title: (el as Element).getAttribute("title"),

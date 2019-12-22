@@ -2,7 +2,7 @@ import React, { FC } from "react"
 import { Editor, Element } from "slate"
 import { RenderElementProps, RenderLeafProps } from "slate-react"
 
-export enum EHtmlTextFormat {
+export enum EHtmlMarkFormat {
   "b" = "b",
   "strong" = "strong",
   "code" = "code",
@@ -37,7 +37,7 @@ export const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children,
 }
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
-  Object.keys(EHtmlTextFormat).forEach(format => {
+  Object.keys(EHtmlMarkFormat).forEach(format => {
     if (leaf[format]) {
       children = React.createElement(format, {}, children)
     }
@@ -46,19 +46,14 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
 }
 
 export const isFormatActive = (editor: Editor, format: string) => {
-  if (format in EHtmlTextFormat) {
-    const [match] = Editor.nodes(editor, {
-      match: node => node[format] === true,
-      mode: "all",
-    })
-
-    return !!match
+  if (format in EHtmlMarkFormat) {
+    const marks = Editor.marks(editor)
+    return marks ? marks[format] === true : false
   }
 
   if (format in EHtmlBlockFormat) {
     const [match] = Editor.nodes(editor, {
-      match: node => node.type === format,
-      mode: "all",
+      match: n => n.type === format,
     })
 
     return !!match

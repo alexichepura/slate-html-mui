@@ -1,5 +1,6 @@
 export { HtmlBlockElement, isHtmlBlockElement, Leaf } from "./format"
 export { deserialize as deserializeHtml, serialize as serializeHtml } from "./html"
 export { HtmlAnchorElement, isHtmlAnchorElement, withLink } from "./link"
+export { RenderElement } from "./render-element"
 export { Toolbar } from "./toolbar"
 export { withHtml } from "./with-html"

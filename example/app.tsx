@@ -3,31 +3,17 @@ import React, { FC, useCallback, useMemo, useState } from "react"
 import { render } from "react-dom"
 import { createEditor, Node } from "slate"
 import { withHistory } from "slate-history"
-import { Editable, RenderElementProps, Slate, withReact, ReactEditor } from "slate-react"
+import { Editable, ReactEditor, Slate, withReact } from "slate-react"
 import {
   deserializeHtml,
-  HtmlAnchorElement,
-  HtmlBlockElement,
-  isHtmlAnchorElement,
-  isHtmlBlockElement,
   Leaf,
+  RenderElement,
   serializeHtml,
   Toolbar,
-  withLink,
   withHtml,
+  withLink,
 } from "../src"
 import { initial } from "./initial"
-
-const RenderElement = (props: RenderElementProps) => {
-  if (isHtmlBlockElement(props.element)) {
-    return <HtmlBlockElement {...props} />
-  }
-  if (isHtmlAnchorElement(props.element)) {
-    return <HtmlAnchorElement {...props} />
-  }
-  console.warn("INVALID ELEMENT", props)
-  return <p>INVALID ELEMENT</p>
-}
 
 const MyEditor: FC = () => {
   const [value, setValue] = useState<Node[]>(initial)

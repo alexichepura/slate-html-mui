@@ -9,7 +9,7 @@ import React, { FC } from "react"
 import { UndoButton, RedoButton } from "./history"
 import { LinkButton } from "./link"
 import { FormatButton } from "./toolbar-button"
-import { EHtmlBlockFormat, EHtmlTextFormat } from "./format"
+import { EHtmlBlockFormat, EHtmlMarkFormat } from "./format"
 
 export const Toolbar: FC = () => {
   return (
@@ -17,25 +17,25 @@ export const Toolbar: FC = () => {
       <UndoButton />
       <RedoButton />
 
-      <FormatButton tooltipTitle="Bold" format={EHtmlTextFormat.b} children={<FormatBold />} />
+      <FormatButton tooltipTitle="Bold" format={EHtmlMarkFormat.b} children={<FormatBold />} />
       <FormatButton
         tooltipTitle="Strong"
-        format={EHtmlTextFormat.strong}
+        format={EHtmlMarkFormat.strong}
         children={<strong>S</strong>}
       />
       <FormatButton
         tooltipTitle="Code (monospace)"
-        format={EHtmlTextFormat.code}
+        format={EHtmlMarkFormat.code}
         children={<CodeTwoTone />}
       />
       <FormatButton
         tooltipTitle="Italic (emphasis)"
-        format={EHtmlTextFormat.em}
+        format={EHtmlMarkFormat.em}
         children={<FormatItalicTwoTone />}
       />
       <FormatButton
         tooltipTitle="Code (monospace)"
-        format={EHtmlTextFormat.u}
+        format={EHtmlMarkFormat.u}
         children={<FormatUnderlinedTwoTone />}
       />
       <LinkButton />

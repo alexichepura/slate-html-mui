@@ -1,7 +1,7 @@
 import escapeHtml from "escape-html"
 import { Descendant, Element as SlateElement, Node, Text } from "slate"
 import { jsx as slateJsx } from "slate-hyperscript"
-import { EHtmlBlockFormat, EHtmlTextFormat } from "./format"
+import { EHtmlBlockFormat, EHtmlMarkFormat } from "./format"
 import { isHtmlAnchorElement, LINK_INLINE_TYPE, THtmlLinkJsxElement } from "./link"
 
 type TAttributes = Record<string, string | undefined | null> | null
@@ -34,7 +34,7 @@ export const serialize = (node: Node | Node[]): string => {
 
   const children = node.children.map(n => serialize(n)).join("")
 
-  if (node.type in EHtmlBlockFormat || node.type in EHtmlTextFormat) {
+  if (node.type in EHtmlBlockFormat || node.type in EHtmlMarkFormat) {
     return formatToString(node, null, children)
   }
 
@@ -72,11 +72,14 @@ export const deserialize = (
   const nodeNameLowerCase = el.nodeName.toLowerCase()
 
   if (nodeNameLowerCase in EHtmlBlockFormat) {
+    if (children.length === 0) {
+      children.push({ text: "" })
+    }
     const element = slateJsx("element", { type: nodeNameLowerCase }, children)
     return element
   }
 
-  if (nodeNameLowerCase in EHtmlTextFormat) {
+  if (nodeNameLowerCase in EHtmlMarkFormat) {
     const textChildren = children.map(child =>
       slateJsx("text", { [nodeNameLowerCase]: true }, child)
     )

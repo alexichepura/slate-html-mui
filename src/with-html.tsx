@@ -3,7 +3,7 @@ import {
   DEFAULT_NODE_FORMAT,
   EHtmlBlockFormat,
   EHtmlListFormat,
-  EHtmlTextFormat,
+  EHtmlMarkFormat,
   isFormatActive,
 } from "./format"
 import { deserialize } from "./html"
@@ -11,11 +11,11 @@ import { deserialize } from "./html"
 export const withHtml = (editor: Editor) => {
   const { insertData } = editor
 
-  editor.insertHtml = (format: EHtmlBlockFormat | EHtmlTextFormat) => {
+  editor.insertHtml = (format: EHtmlBlockFormat | EHtmlMarkFormat) => {
     const isActive = isFormatActive(editor, format)
     const isList = format in EHtmlListFormat
 
-    if (format in EHtmlTextFormat) {
+    if (format in EHtmlMarkFormat) {
       Editor.addMark(editor, format, true)
     }
 

@@ -4,7 +4,7 @@ import { jsx as slateJsx } from "slate-hyperscript"
 import { EHtmlBlockFormat, EHtmlMarkFormat } from "./format"
 import { isHtmlAnchorElement, LINK_INLINE_TYPE, THtmlLinkJsxElement } from "./link"
 
-type TAttributes = Record<string, string | undefined | null> | null
+type TAttributes = Record<string, any> | null
 
 const attributes2String = (attributes: TAttributes): string => {
   if (!attributes) {
@@ -13,7 +13,7 @@ const attributes2String = (attributes: TAttributes): string => {
   const attributesString = Object.entries(attributes)
     .filter(([_k, v]) => v !== undefined && v !== null)
     .map(([k, v]) => {
-      return `${k}="${v}"`
+      return `${k}="${String(v)}"`
     })
     .join(" ")
   return attributesString.length > 0 ? " " + attributesString : ""

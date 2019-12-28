@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core"
 import Link from "@material-ui/icons/Link"
 import isUrl from "is-url"
-import React, { FC, useState } from "react"
+import React, { FC, useState, AnchorHTMLAttributes } from "react"
 import { Editor, Element as SlateElement, Text, Node, Range, Path, Transforms } from "slate"
 import { useSlate, RenderElementProps } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
@@ -17,20 +17,15 @@ import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 export const LINK_INLINE_TYPE = "a"
 export const SET_LINK_COMMAND = "set_link"
 
-type TLinkAttributes = {
-  href: string
-  title?: string
-  target?: string
-}
 type TSetLinkCommand = {
-  attributes: TLinkAttributes
+  attributes: AnchorHTMLAttributes<any>
   text: string
   range: Range
 }
 export type THtmlLinkSlateElement = {
   children: SlateElement["children"]
   text: Text["text"]
-  attributes: TLinkAttributes
+  attributes: AnchorHTMLAttributes<any>
 }
 export type THtmlLinkJsxElement = {
   attributes: {
@@ -39,7 +34,6 @@ export type THtmlLinkJsxElement = {
     target: string | null
   }
 }
-type TAttributes = Record<string, string | undefined | null>
 
 type TLinkSelection = {
   range: Range | null
@@ -49,18 +43,18 @@ type TLinkSelection = {
 }
 type TLinkButtonState = {
   open: boolean
-} & TLinkSelection &
-  TLinkAttributes
+  attributes: AnchorHTMLAttributes<any>
+} & TLinkSelection
+
+type TLinkButtonStateInitial = Omit<TLinkButtonState, "open">
 
 const defaults: TLinkButtonState = {
   open: false,
   range: null,
   isExpanded: false,
   link: null,
-  href: "",
   text: "",
-  title: "",
-  target: "",
+  attributes: {},
 }
 
 const match = (node: Node): boolean => node.type === LINK_INLINE_TYPE
@@ -77,7 +71,7 @@ const findLink = (editor: Editor): THtmlLinkSlateElement | null => {
   return linkEntry ? linkEntry[0] : null
 }
 
-const getInitialLinkData = (editor: Editor): TLinkAttributes & TLinkSelection => {
+const getInitialLinkData = (editor: Editor): TLinkButtonStateInitial => {
   const link = findLink(editor)
 
   const isExpanded = editor.selection ? Range.isExpanded(editor.selection) : false
@@ -92,21 +86,23 @@ const getInitialLinkData = (editor: Editor): TLinkAttributes & TLinkSelection =>
     link,
     text,
     range: editor.selection ? { ...editor.selection } : null,
-    href: (link && link.attributes.href) || "",
-    title: (link && link.attributes.title) || "",
-    target: (link && link.attributes.target) || "",
+    attributes: {
+      href: (link && link.attributes.href) || "",
+      title: (link && link.attributes.title) || "",
+      target: (link && link.attributes.target) || "",
+    },
   }
 }
 
 export const isHtmlAnchorElement = (element: SlateElement): element is THtmlLinkSlateElement => {
   return element.type === LINK_INLINE_TYPE
 }
-const cleanAttributesMutate = (attributes: TAttributes) =>
-  Object.keys(attributes).forEach(key => {
-    return (attributes[key] === null || attributes[key] === undefined) && delete attributes[key]
+const cleanAttributesMutate = (attributes: AnchorHTMLAttributes<any>) =>
+  Object.entries(attributes).forEach(([key, value]) => {
+    return (value === null || value === undefined) && delete (attributes as any)[key]
   })
 export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
-  const resultAttributes: TAttributes & TLinkAttributes = {
+  const resultAttributes: AnchorHTMLAttributes<any> = {
     ...attributes,
     ...element.attributes,
     target: element.attributes.target || null,
@@ -216,18 +212,13 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
   }
 
   const handleOk = () => {
-    const attributes = {
-      href: state.href,
-      title: state.title || undefined,
-      target: state.target || undefined,
-    }
-    cleanAttributesMutate(attributes)
+    cleanAttributesMutate(state.attributes)
 
     if (!state.range) {
       throw new Error("Invalid range. Must be typeof Range.")
     }
     const command: TSetLinkCommand = {
-      attributes,
+      attributes: state.attributes,
       range: state.range,
       text: state.text,
     }
@@ -251,20 +242,22 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
         />
         <TextField
           label="Attribute: title"
-          value={state.title}
-          onChange={e => mergeState({ title: e.target.value })}
+          value={state.attributes.title}
+          onChange={e => mergeState({ attributes: { ...state.attributes, title: e.target.value } })}
           fullWidth
         />
         <TextField
           label="Attribute: href"
-          value={state.href}
-          onChange={e => mergeState({ href: e.target.value })}
+          value={state.attributes.href}
+          onChange={e => mergeState({ attributes: { ...state.attributes, href: e.target.value } })}
           fullWidth
         />
         <TextField
           label="Attribute: target"
-          value={state.target}
-          onChange={e => mergeState({ target: e.target.value })}
+          value={state.attributes.target}
+          onChange={e =>
+            mergeState({ attributes: { ...state.attributes, target: e.target.value } })
+          }
           select
           fullWidth
         >

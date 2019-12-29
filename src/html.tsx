@@ -6,7 +6,7 @@ import { isHtmlAnchorElement, LINK_INLINE_TYPE } from "./link"
 
 type TSlateHtmlProps = {
   tag: string
-  attributes: NamedNodeMap
+  attributes: Record<string, string>
 }
 
 const slateHtml = (props: TSlateHtmlProps, children: any[]) => slateJsx("element", props, children)
@@ -77,7 +77,14 @@ export const deserialize = (
   }
 
   const tag = el.nodeName.toLowerCase()
-  const attributes = (el as Element).attributes
+  const attributes = Array.from((el as Element).attributes).reduce<Record<string, string>>(
+    (prev, attr) => {
+      prev[attr.name] = attr.value
+      return prev
+    },
+    {}
+  )
+
   if (tag in EHtmlBlockTag) {
     if (children.length === 0) {
       children.push({ text: "" })

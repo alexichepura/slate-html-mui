@@ -14,9 +14,11 @@ import {
   withLink,
 } from "../src"
 import { initial } from "./initial"
+import { test_html_string } from "./html-test"
+import { TTagElement } from "../src/html"
 
 const MyEditor: FC = () => {
-  const [value, setValue] = useState<Node[]>(initial)
+  const [value, setValue] = useState<TTagElement[]>(initial)
   const saveToLocalstorage = () => {
     const str = serializeHtml(value)
     localStorage.setItem("slate-mui-value", str)
@@ -28,25 +30,33 @@ const MyEditor: FC = () => {
 
     setValue(savedValue as any)
   }
+  const loadFromSample = () => {
+    const document = new DOMParser().parseFromString(test_html_string, "text/html")
+    const savedValue = deserializeHtml(document.body)
+
+    setValue(savedValue as any)
+  }
   const editor = useMemo(() => withHtml(withLink(withHistory(withReact(createEditor())))), [])
   const renderElement = useCallback(RenderElement, [])
   const renderLeaf = useCallback(Leaf, [])
   return (
     <div>
-      <Button color="primary">Load example</Button>
       <Button color="primary" onClick={loadFromLocalstorage}>
-        Load from localstorage
+        from localstorage
+      </Button>
+      <Button color="primary" onClick={loadFromSample}>
+        from sample
       </Button>
       <Button color="primary" onClick={saveToLocalstorage}>
-        Save to localstorage
+        to localstorage
       </Button>
       <Slate
         editor={editor as ReactEditor}
         defaultValue={value}
         onChange={value => {
-          setValue(value)
+          setValue(value as TTagElement[])
         }}
-        value={value}
+        value={value as Node[]}
       >
         <>
           <Toolbar />

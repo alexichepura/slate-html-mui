@@ -8,8 +8,8 @@ import CodeTwoTone from "@material-ui/icons/CodeTwoTone"
 import React, { FC } from "react"
 import { UndoButton, RedoButton } from "./history"
 import { LinkButton } from "./link"
-import { FormatButton } from "./toolbar-button"
-import { EHtmlBlockFormat, EHtmlMarkFormat } from "./format"
+import { TagButton } from "./toolbar-button"
+import { EHtmlBlockTag, EHtmlMarkTag } from "./format"
 
 export const Toolbar: FC = () => {
   return (
@@ -17,62 +17,58 @@ export const Toolbar: FC = () => {
       <UndoButton />
       <RedoButton />
 
-      <FormatButton tooltipTitle="Bold" format={EHtmlMarkFormat.b} children={<FormatBold />} />
-      <FormatButton
-        tooltipTitle="Strong"
-        format={EHtmlMarkFormat.strong}
-        children={<strong>S</strong>}
-      />
-      <FormatButton
+      <TagButton tooltipTitle="Bold" tag={EHtmlMarkTag.b} children={<FormatBold />} />
+      <TagButton tooltipTitle="Strong" tag={EHtmlMarkTag.strong} children={<strong>S</strong>} />
+      <TagButton
         tooltipTitle="Code (monospace)"
-        format={EHtmlMarkFormat.code}
+        tag={EHtmlMarkTag.code}
         children={<CodeTwoTone />}
       />
-      <FormatButton
+      <TagButton
         tooltipTitle="Italic (emphasis)"
-        format={EHtmlMarkFormat.em}
+        tag={EHtmlMarkTag.em}
         children={<FormatItalicTwoTone />}
       />
-      <FormatButton
+      <TagButton
         tooltipTitle="Code (monospace)"
-        format={EHtmlMarkFormat.u}
+        tag={EHtmlMarkTag.u}
         children={<FormatUnderlinedTwoTone />}
       />
       <LinkButton />
 
-      <FormatButton
+      <TagButton
         tooltipTitle="Heading 1"
-        format={EHtmlBlockFormat.h1}
-        children={EHtmlBlockFormat.h1.toUpperCase()}
+        tag={EHtmlBlockTag.h1}
+        children={EHtmlBlockTag.h1.toUpperCase()}
       />
-      <FormatButton
+      <TagButton
         tooltipTitle="Heading 2"
-        format={EHtmlBlockFormat.h2}
-        children={EHtmlBlockFormat.h2.toUpperCase()}
+        tag={EHtmlBlockTag.h2}
+        children={EHtmlBlockTag.h2.toUpperCase()}
       />
-      <FormatButton
+      <TagButton
         tooltipTitle="Heading 3"
-        format={EHtmlBlockFormat.h3}
-        children={EHtmlBlockFormat.h3.toUpperCase()}
+        tag={EHtmlBlockTag.h3}
+        children={EHtmlBlockTag.h3.toUpperCase()}
       />
-      <FormatButton
+      <TagButton
         tooltipTitle="Heading 4"
-        format={EHtmlBlockFormat.h4}
-        children={EHtmlBlockFormat.h4.toUpperCase()}
+        tag={EHtmlBlockTag.h4}
+        children={EHtmlBlockTag.h4.toUpperCase()}
       />
-      <FormatButton
+      <TagButton
         tooltipTitle="Blockquote"
-        format={EHtmlBlockFormat.blockquote}
+        tag={EHtmlBlockTag.blockquote}
         children={<FormatQuote />}
       />
-      <FormatButton
+      <TagButton
         tooltipTitle="Numbered (ordered) list"
-        format={EHtmlBlockFormat.ol}
+        tag={EHtmlBlockTag.ol}
         children={<FormatListNumbered />}
       />
-      <FormatButton
+      <TagButton
         tooltipTitle="Bulleted (unordered) list"
-        format={EHtmlBlockFormat.ul}
+        tag={EHtmlBlockTag.ul}
         children={<FormatListBulleted />}
       />
     </div>

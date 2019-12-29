@@ -1,10 +1,21 @@
 import escapeHtml from "escape-html"
-import { Descendant, Element as SlateElement, Node, Text } from "slate"
+import { Descendant, Element as SlateElement, Text } from "slate"
 import { jsx as slateJsx } from "slate-hyperscript"
-import { EHtmlBlockFormat, EHtmlMarkFormat } from "./format"
-import { isHtmlAnchorElement, LINK_INLINE_TYPE, THtmlLinkJsxElement } from "./link"
+import { EHtmlBlockTag, EHtmlMarkTag, EHtmlNontextTag } from "./format"
+import { isHtmlAnchorElement, LINK_INLINE_TYPE } from "./link"
+
+type TSlateHtmlProps = {
+  tag: string
+  attributes: NamedNodeMap
+}
+
+const slateHtml = (props: TSlateHtmlProps, children: any[]) => slateJsx("element", props, children)
 
 type TAttributes = Record<string, any> | null
+export type TTagElement = {
+  tag: string
+  children?: (TTagElement | Text)[]
+}
 
 const attributes2String = (attributes: TAttributes): string => {
   if (!attributes) {
@@ -19,26 +30,24 @@ const attributes2String = (attributes: TAttributes): string => {
   return attributesString.length > 0 ? " " + attributesString : ""
 }
 
-const formatToString = (node: Node, attributes: TAttributes, children: string) => {
-  return `<${node.type}${attributes2String(attributes)}>${children}</${node.type}>`
+const formatToString = (node: TTagElement, attributes: TAttributes, children: string) => {
+  return `<${node.tag}${attributes2String(attributes)}>${children}</${node.tag}>`
 }
 
-export const serialize = (node: Node | Node[]): string => {
+export const serialize = (node: TTagElement | TTagElement[] | Text | Text[]): string => {
   if (Text.isText(node)) {
     return escapeHtml(node.text)
   }
 
   if (Array.isArray(node)) {
-    return node.map(serialize).join("")
+    return (node as (TTagElement | Text)[]).map(serialize).join("")
   }
 
-  const children = node.children.map(n => serialize(n)).join("")
-
-  if (node.type in EHtmlBlockFormat || node.type in EHtmlMarkFormat) {
+  const children = node.children && node.children.map(n => serialize(n)).join("")
+  if ((node.tag in EHtmlBlockTag || node.tag in EHtmlMarkTag) && children) {
     return formatToString(node, null, children)
   }
-
-  if (isHtmlAnchorElement(node)) {
+  if (isHtmlAnchorElement(node) && children) {
     const attributes = {
       ...node.attributes,
       href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
@@ -46,7 +55,7 @@ export const serialize = (node: Node | Node[]): string => {
     return formatToString(node, attributes, children)
   }
 
-  return children
+  return children || ""
 }
 
 export const deserialize = (
@@ -56,8 +65,6 @@ export const deserialize = (
     return el.textContent
   } else if (el.nodeType !== 1) {
     return null
-  } else if (el.nodeName === "BR") {
-    return "\n"
   }
 
   const children = Array.from(el.childNodes)
@@ -69,32 +76,22 @@ export const deserialize = (
     return body
   }
 
-  const nodeNameLowerCase = el.nodeName.toLowerCase()
-
-  if (nodeNameLowerCase in EHtmlBlockFormat) {
+  const tag = el.nodeName.toLowerCase()
+  const attributes = (el as Element).attributes
+  if (tag in EHtmlBlockTag) {
     if (children.length === 0) {
       children.push({ text: "" })
     }
-    const element = slateJsx("element", { type: nodeNameLowerCase }, children)
-    return element
+    return slateHtml({ tag, attributes }, children)
   }
 
-  if (nodeNameLowerCase in EHtmlMarkFormat) {
-    const textChildren = children.map(child =>
-      slateJsx("text", { [nodeNameLowerCase]: true }, child)
-    )
+  if (tag in EHtmlMarkTag) {
+    const textChildren = children.map(child => slateJsx("text", { [tag]: true, attributes }, child))
     return textChildren
   }
 
-  if (nodeNameLowerCase === LINK_INLINE_TYPE) {
-    const linkElement: THtmlLinkJsxElement = {
-      attributes: {
-        href: (el as Element).getAttribute("href"),
-        title: (el as Element).getAttribute("title"),
-        target: (el as Element).getAttribute("target"),
-      },
-    }
-    return slateJsx("element", linkElement, children)
+  if (tag === LINK_INLINE_TYPE || tag in EHtmlNontextTag) {
+    return slateHtml({ tag, attributes }, children)
   }
 
   return children

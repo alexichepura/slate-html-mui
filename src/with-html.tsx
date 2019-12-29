@@ -1,35 +1,32 @@
 import { Editor, Node, Transforms } from "slate"
-import {
-  DEFAULT_NODE_FORMAT,
-  EHtmlBlockFormat,
-  EHtmlListFormat,
-  EHtmlMarkFormat,
-  isFormatActive,
-} from "./format"
-import { deserialize } from "./html"
+import { DEFAULT_TAG, EHtmlBlockTag, EHtmlListTag, EHtmlMarkTag, isTagActive } from "./format"
+import { deserialize, TTagElement } from "./html"
 
 export const withHtml = (editor: Editor) => {
   const { insertData } = editor
 
-  editor.insertHtml = (format: EHtmlBlockFormat | EHtmlMarkFormat) => {
-    const isActive = isFormatActive(editor, format)
-    const isList = format in EHtmlListFormat
+  editor.insertHtml = (tag: EHtmlBlockTag | EHtmlMarkTag) => {
+    const isActive = isTagActive(editor, tag)
+    const isList = tag in EHtmlListTag
 
-    if (format in EHtmlMarkFormat) {
-      Editor.addMark(editor, format, true)
+    if (tag in EHtmlMarkTag) {
+      Editor.addMark(editor, tag, true)
     }
 
-    if (format in EHtmlBlockFormat) {
-      Object.keys(EHtmlListFormat).forEach(format => {
-        Transforms.unwrapNodes(editor, { match: node => node.type === format, split: true })
+    if (tag in EHtmlBlockTag) {
+      Object.keys(EHtmlListTag).forEach(tag => {
+        Transforms.unwrapNodes(editor, {
+          match: node => (node as TTagElement).tag === tag,
+          split: true,
+        })
       })
 
       Transforms.setNodes(editor, {
-        type: isActive ? DEFAULT_NODE_FORMAT : isList ? EHtmlBlockFormat.li : format,
+        type: isActive ? DEFAULT_TAG : isList ? EHtmlBlockTag.li : tag,
       })
 
       if (!isActive && isList) {
-        Transforms.wrapNodes(editor, { type: format, children: [] })
+        Transforms.wrapNodes(editor, { type: tag, children: [] })
       }
     }
   }

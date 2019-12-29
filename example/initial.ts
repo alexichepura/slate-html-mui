@@ -1,9 +1,9 @@
-import { Node } from "slate"
-import { EHtmlBlockFormat } from "../src/format"
+import { EHtmlBlockTag } from "../src/format"
+import { TTagElement } from "../src/html"
 
-export const initial: Node[] = [
+export const initial: TTagElement[] = [
   {
-    type: EHtmlBlockFormat.p,
+    tag: EHtmlBlockTag.p,
     children: [{ text: "A line of text in a paragraph." }],
   },
 ]

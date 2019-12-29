@@ -2,7 +2,7 @@ import { Button, Tooltip } from "@material-ui/core"
 import { ButtonProps } from "@material-ui/core/Button"
 import React, { FC } from "react"
 import { useSlate } from "slate-react"
-import { isFormatActive, EHtmlBlockFormat, EHtmlMarkFormat } from "./format"
+import { isTagActive, EHtmlBlockTag, EHtmlMarkTag } from "./format"
 
 export type TToolbarButtonProps = { tooltipTitle: string } & ButtonProps
 export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
@@ -22,12 +22,12 @@ export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
   }
 )
 
-type TFormatButtonProps = {
-  format: EHtmlBlockFormat | EHtmlMarkFormat
+type TTagButtonProps = {
+  tag: EHtmlBlockTag | EHtmlMarkTag
 } & TToolbarButtonProps
-export const FormatButton: FC<TFormatButtonProps> = React.forwardRef(({ format, ...rest }, ref) => {
+export const TagButton: FC<TTagButtonProps> = React.forwardRef(({ tag, ...rest }, ref) => {
   const slate = useSlate()
-  const isActive = isFormatActive(slate, format)
+  const isActive = isTagActive(slate, tag)
   return (
     <ToolbarButton
       ref={ref}
@@ -35,7 +35,7 @@ export const FormatButton: FC<TFormatButtonProps> = React.forwardRef(({ format, 
       variant={isActive ? "contained" : "text"}
       onMouseDown={event => {
         event.preventDefault()
-        slate.insertHtml(format)
+        slate.insertHtml(tag)
       }}
       {...rest}
     />

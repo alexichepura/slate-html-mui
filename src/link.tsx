@@ -13,6 +13,7 @@ import React, { FC, useState, AnchorHTMLAttributes } from "react"
 import { Editor, Element as SlateElement, Text, Node, Range, Path, Transforms } from "slate"
 import { useSlate, RenderElementProps } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
+import { TTagElement } from "./html"
 
 export const LINK_INLINE_TYPE = "a"
 export const SET_LINK_COMMAND = "set_link"
@@ -22,17 +23,9 @@ type TSetLinkCommand = {
   text: string
   range: Range
 }
-export type THtmlLinkSlateElement = {
-  children: SlateElement["children"]
+export type THtmlLinkSlateElement = TTagElement & {
   text: Text["text"]
   attributes: AnchorHTMLAttributes<any>
-}
-export type THtmlLinkJsxElement = {
-  attributes: {
-    href: string | null
-    title: string | null
-    target: string | null
-  }
 }
 
 type TLinkSelection = {
@@ -57,7 +50,7 @@ const defaults: TLinkButtonState = {
   attributes: {},
 }
 
-const match = (node: Node): boolean => node.type === LINK_INLINE_TYPE
+const match = (node: Node): boolean => (node as TTagElement).tag === LINK_INLINE_TYPE
 
 const isLinkActive = (editor: Editor) => {
   return !!findLink(editor)
@@ -94,8 +87,10 @@ const getInitialLinkData = (editor: Editor): TLinkButtonStateInitial => {
   }
 }
 
-export const isHtmlAnchorElement = (element: SlateElement): element is THtmlLinkSlateElement => {
-  return element.type === LINK_INLINE_TYPE
+export const isHtmlAnchorElement = (
+  element: SlateElement | TTagElement
+): element is THtmlLinkSlateElement => {
+  return element.tag === LINK_INLINE_TYPE
 }
 const cleanAttributesMutate = (attributes: AnchorHTMLAttributes<any>) =>
   Object.entries(attributes).forEach(([key, value]) => {
@@ -144,7 +139,7 @@ export const withLink = (editor: Editor) => {
   const { insertData, insertText, isInline } = editor
 
   editor.isInline = element => {
-    return element.type === LINK_INLINE_TYPE ? true : isInline(element)
+    return (element as TTagElement).tag === LINK_INLINE_TYPE ? true : isInline(element)
   }
 
   editor.insertText = text => {

@@ -1,8 +1,9 @@
 import React, { FC } from "react"
-import { Editor, Element } from "slate"
+import { Editor, Element as SlateElement } from "slate"
 import { RenderElementProps, RenderLeafProps } from "slate-react"
+import { TTagElement } from "./html"
 
-export enum EHtmlMarkFormat {
+export enum EHtmlMarkTag {
   "b" = "b",
   "strong" = "strong",
   "code" = "code",
@@ -10,7 +11,7 @@ export enum EHtmlMarkFormat {
   "u" = "u",
 }
 
-export enum EHtmlBlockFormat {
+export enum EHtmlBlockTag {
   "p" = "p",
   "h1" = "h1",
   "h2" = "h2",
@@ -22,38 +23,50 @@ export enum EHtmlBlockFormat {
   "li" = "li",
 }
 
-export enum EHtmlListFormat {
+export enum EHtmlListTag {
   "ol" = "ol",
   "ul" = "ul",
 }
 
-export const DEFAULT_NODE_FORMAT = EHtmlBlockFormat.p
+export enum EHtmlNontextTag {
+  "br" = "br",
+  "hr" = "hr",
+}
 
-export const isHtmlBlockElement = (element: Element) => {
-  return element.type in EHtmlBlockFormat
+export const DEFAULT_TAG = EHtmlBlockTag.p
+
+export const isHtmlBlockElement = (element: SlateElement | TTagElement) => {
+  return element.tag in EHtmlBlockTag
 }
 export const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
-  return React.createElement(element.type, attributes, children)
+  return React.createElement((element as TTagElement).tag, attributes, children)
+}
+
+export const isHtmlNontextElement = (element: SlateElement | TTagElement) => {
+  return element.tag in EHtmlNontextTag
+}
+export const HtmlNontextElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
+  return React.createElement((element as TTagElement).tag, attributes, children)
 }
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
-  Object.keys(EHtmlMarkFormat).forEach(format => {
-    if (leaf[format]) {
-      children = React.createElement(format, {}, children)
+  Object.keys(EHtmlMarkTag).forEach(tag => {
+    if (leaf[tag]) {
+      children = React.createElement(tag, {}, children)
     }
   })
   return <span {...attributes}>{children}</span>
 }
 
-export const isFormatActive = (editor: Editor, format: string) => {
-  if (format in EHtmlMarkFormat) {
+export const isTagActive = (editor: Editor, tag: string) => {
+  if (tag in EHtmlMarkTag) {
     const marks = Editor.marks(editor)
-    return marks ? marks[format] === true : false
+    return marks ? marks[tag] === true : false
   }
 
-  if (format in EHtmlBlockFormat) {
+  if (tag in EHtmlBlockTag) {
     const [match] = Editor.nodes(editor, {
-      match: n => n.type === format,
+      match: n => n.tag === tag,
     })
 
     return !!match

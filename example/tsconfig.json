@@ -7,7 +7,7 @@
     "importHelpers": true,
     "incremental": false,
     "jsx": "react",
-    "lib": ["esnext", "dom", "es2015.iterable"],
+    "lib": ["esnext", "dom"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noEmitHelpers": true,

@@ -5,7 +5,7 @@ import { deserialize, TTagElement } from "./html"
 export const withHtml = (editor: Editor) => {
   const { insertData } = editor
 
-  editor.insertHtml = (tag: EHtmlBlockTag | EHtmlMarkTag) => {
+  editor.insertHtmlTag = (tag: EHtmlBlockTag | EHtmlMarkTag) => {
     const isActive = isTagActive(editor, tag)
     const isList = tag in EHtmlListTag
 
@@ -22,11 +22,11 @@ export const withHtml = (editor: Editor) => {
       })
 
       Transforms.setNodes(editor, {
-        type: isActive ? DEFAULT_TAG : isList ? EHtmlBlockTag.li : tag,
+        tag: isActive ? DEFAULT_TAG : isList ? EHtmlBlockTag.li : tag,
       })
 
       if (!isActive && isList) {
-        Transforms.wrapNodes(editor, { type: tag, children: [] })
+        Transforms.wrapNodes(editor, { tag, children: [] })
       }
     }
   }

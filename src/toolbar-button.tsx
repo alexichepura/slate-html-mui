@@ -35,7 +35,7 @@ export const TagButton: FC<TTagButtonProps> = React.forwardRef(({ tag, ...rest }
       variant={isActive ? "contained" : "text"}
       onMouseDown={event => {
         event.preventDefault()
-        slate.insertHtml(tag)
+        slate.insertHtmlTag(tag)
       }}
       {...rest}
     />

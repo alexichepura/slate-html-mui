@@ -15,7 +15,7 @@ import { useSlate, RenderElementProps } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 import { TTagElement } from "./html"
 
-export const LINK_INLINE_TYPE = "a"
+export const LINK_TAG = "a"
 export const SET_LINK_COMMAND = "set_link"
 
 type TSetLinkCommand = {
@@ -50,7 +50,7 @@ const defaults: TLinkButtonState = {
   attributes: {},
 }
 
-const match = (node: Node): boolean => (node as TTagElement).tag === LINK_INLINE_TYPE
+const match = (node: Node): boolean => (node as TTagElement).tag === LINK_TAG
 
 const isLinkActive = (editor: Editor) => {
   return !!findLink(editor)
@@ -90,7 +90,7 @@ const getInitialLinkData = (editor: Editor): TLinkButtonStateInitial => {
 export const isHtmlAnchorElement = (
   element: SlateElement | TTagElement | Text
 ): element is THtmlLinkSlateElement => {
-  return element.tag === LINK_INLINE_TYPE
+  return element.tag === LINK_TAG
 }
 const cleanAttributesMutate = (attributes: AnchorHTMLAttributes<any>) =>
   Object.entries(attributes).forEach(([key, value]) => {
@@ -104,7 +104,7 @@ export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children
     title: element.attributes.title || null,
   }
   cleanAttributesMutate(resultAttributes)
-  return React.createElement(LINK_INLINE_TYPE, resultAttributes, children)
+  return React.createElement(LINK_TAG, resultAttributes, children)
 }
 
 type TLinkButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">
@@ -139,7 +139,7 @@ export const withLink = (editor: Editor) => {
   const { insertData, insertText, isInline } = editor
 
   editor.isInline = element => {
-    return (element as TTagElement).tag === LINK_INLINE_TYPE ? true : isInline(element)
+    return (element as TTagElement).tag === LINK_TAG ? true : isInline(element)
   }
 
   editor.insertText = text => {
@@ -171,25 +171,22 @@ const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
   const { range, attributes, text } = command
   const foundLinkEntry = findLinkEntry(editor)
   Transforms.setSelection(editor, range)
-  // if (foundLink) {
-  //   unwrapLink(editor)
-  // }
   const isCollapsed = range && Range.isCollapsed(range)
 
-  const link: SlateElement = {
-    type: LINK_INLINE_TYPE,
+  const link: TTagElement = {
+    tag: LINK_TAG,
     attributes,
     children: [{ text }],
   }
 
   if (!foundLinkEntry && isCollapsed) {
-    Transforms.insertNodes(editor, [link], { at: range })
+    Transforms.insertNodes(editor, [link as SlateElement], { at: range })
   } else {
     if (isCollapsed) {
       const path = foundLinkEntry[1]
       Transforms.setNodes(editor, link, { at: path, split: true })
     } else {
-      Transforms.wrapNodes(editor, link, { at: range, split: true })
+      Transforms.wrapNodes(editor, link as SlateElement, { at: range, split: true })
     }
     Transforms.collapse(editor, { edge: "end" })
   }

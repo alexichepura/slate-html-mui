@@ -13,8 +13,7 @@ import {
   withHtml,
   withLink,
 } from "../src"
-import { initial } from "./initial"
-import { test_html_string } from "./html-test"
+import { initial, initial_string } from "./initial"
 import { TTagElement } from "../src/html"
 
 const MyEditor: FC = () => {
@@ -31,7 +30,7 @@ const MyEditor: FC = () => {
     setValue(savedValue as any)
   }
   const loadFromSample = () => {
-    const document = new DOMParser().parseFromString(test_html_string, "text/html")
+    const document = new DOMParser().parseFromString(initial_string, "text/html")
     const savedValue = deserializeHtml(document.body)
 
     setValue(savedValue as any)

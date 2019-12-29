@@ -2,7 +2,7 @@ import escapeHtml from "escape-html"
 import { Descendant, Element as SlateElement, Text } from "slate"
 import { jsx as slateJsx } from "slate-hyperscript"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlNontextTag } from "./format"
-import { isHtmlAnchorElement, LINK_INLINE_TYPE } from "./link"
+import { isHtmlAnchorElement, LINK_TAG } from "./link"
 
 type TSlateHtmlProps = {
   tag: string
@@ -15,6 +15,7 @@ type TAttributes = Record<string, any> | null
 export type TTagElement = {
   tag: string
   children?: (TTagElement | Text)[]
+  [key: string]: any
 }
 
 const attributes2String = (attributes: TAttributes): string => {
@@ -94,7 +95,7 @@ export const deserialize = (
     {}
   )
 
-  if (tag in EHtmlBlockTag) {
+  if (tag in EHtmlBlockTag || tag === LINK_TAG) {
     if (children.length === 0) {
       children.push({ text: "" })
     }
@@ -102,13 +103,10 @@ export const deserialize = (
   }
 
   if (tag in EHtmlMarkTag) {
-    const textChildren = children.map(child =>
-      slateJsx("text", { [tag]: true, attributes, tag }, child)
-    )
-    return textChildren
+    return children.map(child => slateJsx("text", { [tag]: true, attributes }, child))
   }
 
-  if (tag === LINK_INLINE_TYPE || tag in EHtmlNontextTag) {
+  if (tag in EHtmlNontextTag) {
     return slateHtml({ tag, attributes }, children)
   }
 

@@ -20,5 +20,6 @@ export const RenderElement = (props: RenderElementProps) => {
   if (isHtmlNontextElement(element)) {
     return <HtmlNontextElement {...props} />
   }
+  console.warn("INVALID ELEMENT", element)
   return <p>INVALID ELEMENT</p>
 }

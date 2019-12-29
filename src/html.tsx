@@ -35,7 +35,7 @@ const formatToString = (tag: string, attributes: TAttributes, children: string) 
   return `<${tag}${attributes2String(attributes)}>${children}</${tag}>`
 }
 
-export const serialize = (node: TTagElement | TTagElement[] | Text | Text[]): string => {
+export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | Node[]): string => {
   if (Text.isText(node)) {
     const textTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
     if (textTag && textTag[0]) {

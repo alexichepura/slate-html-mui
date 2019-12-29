@@ -88,7 +88,7 @@ const getInitialLinkData = (editor: Editor): TLinkButtonStateInitial => {
 }
 
 export const isHtmlAnchorElement = (
-  element: SlateElement | TTagElement
+  element: SlateElement | TTagElement | Text
 ): element is THtmlLinkSlateElement => {
   return element.tag === LINK_INLINE_TYPE
 }

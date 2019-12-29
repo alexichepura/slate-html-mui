@@ -14,7 +14,6 @@ export const RenderElement = (props: RenderElementProps) => {
   if (isHtmlBlockElement(element)) {
     return <HtmlBlockElement {...props} />
   }
-  console.log(element)
   if (isHtmlAnchorElement(element)) {
     return <HtmlAnchorElement {...props} />
   }

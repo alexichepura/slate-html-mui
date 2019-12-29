@@ -30,32 +30,41 @@ const attributes2String = (attributes: TAttributes): string => {
   return attributesString.length > 0 ? " " + attributesString : ""
 }
 
-const formatToString = (node: TTagElement, attributes: TAttributes, children: string) => {
-  return `<${node.tag}${attributes2String(attributes)}>${children}</${node.tag}>`
+const formatToString = (tag: string, attributes: TAttributes, children: string) => {
+  return `<${tag}${attributes2String(attributes)}>${children}</${tag}>`
 }
 
 export const serialize = (node: TTagElement | TTagElement[] | Text | Text[]): string => {
   if (Text.isText(node)) {
-    return escapeHtml(node.text)
+    const textTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
+    if (textTag && textTag[0]) {
+      return formatToString(textTag[0], null, escapeHtml(node.text))
+    } else {
+      return escapeHtml(node.text)
+    }
   }
 
   if (Array.isArray(node)) {
     return (node as (TTagElement | Text)[]).map(serialize).join("")
   }
 
-  const children = node.children && node.children.map(n => serialize(n)).join("")
-  if ((node.tag in EHtmlBlockTag || node.tag in EHtmlMarkTag) && children) {
-    return formatToString(node, null, children)
+  const children = node.children && node.children.map(serialize).join("")
+  if (!children) {
+    return ""
   }
-  if (isHtmlAnchorElement(node) && children) {
+  if (node.tag in EHtmlBlockTag) {
+    return formatToString(node.tag, null, children)
+  }
+
+  if (isHtmlAnchorElement(node)) {
     const attributes = {
       ...node.attributes,
       href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
     }
-    return formatToString(node, attributes, children)
+    return formatToString(node.tag, attributes, children)
   }
 
-  return children || ""
+  return children
 }
 
 export const deserialize = (
@@ -93,7 +102,9 @@ export const deserialize = (
   }
 
   if (tag in EHtmlMarkTag) {
-    const textChildren = children.map(child => slateJsx("text", { [tag]: true, attributes }, child))
+    const textChildren = children.map(child =>
+      slateJsx("text", { [tag]: true, attributes, tag }, child)
+    )
     return textChildren
   }
 

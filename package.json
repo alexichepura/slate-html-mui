@@ -50,11 +50,12 @@
   "scripts": {
     "build": "tsc",
     "clean": "rm -r dist",
+    "rebuild": "yarn clean && yarn build",
     "example": "cd example && TS_NODE_PROJECT=\"tsconfig.json\" webpack-dev-server --config webpack.config.ts",
     "pack:dry": "npm pack && tar -xvzf *.tgz && rm -rf package *.tgz"
   },
   "sideEffects": false,
   "types": "dist/index.d.ts",
   "typings": "dist/index.d.ts",
-  "version": "0.3.1"
+  "version": "0.4.0"
 }

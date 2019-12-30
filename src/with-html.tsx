@@ -10,7 +10,7 @@ export const withHtml = (editor: Editor) => {
     const isList = tag in EHtmlListTag
 
     if (tag in EHtmlMarkTag) {
-      Editor.addMark(editor, tag, true)
+      isActive ? Editor.removeMark(editor, tag) : Editor.addMark(editor, tag, true)
     }
 
     if (tag in EHtmlBlockTag) {

@@ -1,11 +1,6 @@
 import React from "react"
 import { RenderElementProps } from "slate-react"
-import {
-  HtmlBlockElement,
-  HtmlNontextElement,
-  isHtmlBlockElement,
-  isHtmlNontextElement,
-} from "./format"
+import { HtmlBlockElement, HtmlVoidElement, isHtmlBlockElement, isHtmlVoidElement } from "./format"
 import { HtmlAnchorElement, isHtmlAnchorElement } from "./link"
 import { TTagElement } from "./html"
 
@@ -17,8 +12,8 @@ export const RenderElement = (props: RenderElementProps) => {
   if (isHtmlAnchorElement(element)) {
     return <HtmlAnchorElement {...props} />
   }
-  if (isHtmlNontextElement(element)) {
-    return <HtmlNontextElement {...props} />
+  if (isHtmlVoidElement(element)) {
+    return <HtmlVoidElement {...props} />
   }
   console.warn("INVALID ELEMENT", element)
   return <p>INVALID ELEMENT</p>

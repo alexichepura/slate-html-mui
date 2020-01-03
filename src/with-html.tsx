@@ -1,9 +1,20 @@
 import { Editor, Node, Transforms } from "slate"
-import { DEFAULT_TAG, EHtmlBlockTag, EHtmlListTag, EHtmlMarkTag, isTagActive } from "./format"
+import {
+  DEFAULT_TAG,
+  EHtmlBlockTag,
+  EHtmlListTag,
+  EHtmlMarkTag,
+  isTagActive,
+  EHtmlVoidTag,
+} from "./format"
 import { deserialize, TTagElement } from "./html"
 
 export const withHtml = (editor: Editor) => {
-  const { insertData } = editor
+  const { insertData, isVoid } = editor
+
+  editor.isVoid = element => {
+    return (element as TTagElement).tag in EHtmlVoidTag ? true : isVoid(element)
+  }
 
   editor.insertHtmlTag = (tag: EHtmlBlockTag | EHtmlMarkTag) => {
     const isActive = isTagActive(editor, tag)

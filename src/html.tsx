@@ -1,15 +1,7 @@
 import escapeHtml from "escape-html"
 import { Descendant, Element as SlateElement, Text } from "slate"
-import { jsx as slateJsx } from "slate-hyperscript"
-import { EHtmlBlockTag, EHtmlMarkTag, EHtmlNontextTag } from "./format"
+import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
-
-type TSlateHtmlProps = {
-  tag: string
-  attributes: Record<string, string>
-}
-
-const slateHtml = (props: TSlateHtmlProps, children: any[]) => slateJsx("element", props, children)
 
 type TAttributes = Record<string, any> | null
 export type TTagElement = {
@@ -33,6 +25,9 @@ const attributes2String = (attributes: TAttributes): string => {
 
 const formatToString = (tag: string, attributes: TAttributes, children: string) => {
   return `<${tag}${attributes2String(attributes)}>${children}</${tag}>`
+}
+const formatVoidToString = (tag: string, attributes: TAttributes) => {
+  return `<${tag}${attributes2String(attributes)}/>`
 }
 
 export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | Node[]): string => {
@@ -65,12 +60,16 @@ export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | No
     return formatToString(node.tag, attributes, children)
   }
 
+  if (node.tag in EHtmlVoidTag) {
+    return formatVoidToString(node.tag, null)
+  }
+
   return children
 }
 
 export const deserialize = (
   el: Element | ChildNode
-): SlateElement | string | null | Descendant[] => {
+): SlateElement | string | null | Descendant[] | TTagElement => {
   if (el.nodeType === 3) {
     return el.textContent
   } else if (el.nodeType !== 1) {
@@ -82,8 +81,7 @@ export const deserialize = (
     .flat()
 
   if (el.nodeName === "BODY") {
-    const body = slateJsx("fragment", {}, children)
-    return body
+    return children
   }
 
   const tag = el.nodeName.toLowerCase()
@@ -97,17 +95,32 @@ export const deserialize = (
 
   if (tag in EHtmlBlockTag || tag === LINK_TAG) {
     if (children.length === 0) {
-      children.push({ text: "" })
+      children.push({ text: "" } as Text)
     }
-    return slateHtml({ tag, attributes }, children)
+    const _children = children.map(child => {
+      if (typeof child === "string") {
+        return { text: child }
+      } else {
+        return child
+      }
+    })
+    return {
+      tag,
+      attributes,
+      children: _children,
+    }
   }
 
   if (tag in EHtmlMarkTag) {
-    return children.map(child => slateJsx("text", { [tag]: true, attributes }, child))
+    return children.map(child => ({ [tag]: true, attributes, text: child }))
   }
 
-  if (tag in EHtmlNontextTag) {
-    return slateHtml({ tag, attributes }, children)
+  if (tag in EHtmlVoidTag) {
+    return {
+      tag,
+      attributes,
+      children: [{ text: "" }],
+    }
   }
 
   return children

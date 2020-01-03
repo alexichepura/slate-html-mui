@@ -28,7 +28,7 @@ export enum EHtmlListTag {
   "ul" = "ul",
 }
 
-export enum EHtmlNontextTag {
+export enum EHtmlVoidTag {
   "br" = "br",
   "hr" = "hr",
 }
@@ -42,11 +42,11 @@ export const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children,
   return React.createElement((element as TTagElement).tag, attributes, children)
 }
 
-export const isHtmlNontextElement = (element: SlateElement | TTagElement) => {
-  return element.tag in EHtmlNontextTag
+export const isHtmlVoidElement = (element: SlateElement | TTagElement) => {
+  return element.tag in EHtmlVoidTag
 }
-export const HtmlNontextElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
-  return React.createElement((element as TTagElement).tag, attributes, children)
+export const HtmlVoidElement: FC<RenderElementProps> = ({ attributes, element }) => {
+  return React.createElement((element as TTagElement).tag, attributes)
 }
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {

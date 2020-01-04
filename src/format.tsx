@@ -64,7 +64,7 @@ export const isTagActive = (editor: Editor, tag: string) => {
     return marks ? marks[tag] === true : false
   }
 
-  if (tag in EHtmlBlockTag) {
+  if (tag in EHtmlBlockTag || tag in EHtmlVoidTag) {
     const [match] = Editor.nodes(editor, {
       match: n => n.tag === tag,
     })

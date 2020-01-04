@@ -16,12 +16,13 @@ export const withHtml = (editor: Editor) => {
     return (element as TTagElement).tag in EHtmlVoidTag ? true : isVoid(element)
   }
 
-  editor.insertHtmlTag = (tag: EHtmlBlockTag | EHtmlMarkTag) => {
+  editor.insertHtmlTag = (tag: EHtmlBlockTag | EHtmlMarkTag | EHtmlVoidTag) => {
     const isActive = isTagActive(editor, tag)
     const isList = tag in EHtmlListTag
 
     if (tag in EHtmlMarkTag) {
       isActive ? Editor.removeMark(editor, tag) : Editor.addMark(editor, tag, true)
+      return
     }
 
     if (tag in EHtmlBlockTag) {
@@ -39,6 +40,17 @@ export const withHtml = (editor: Editor) => {
       if (!isActive && isList) {
         Transforms.wrapNodes(editor, { tag, children: [] })
       }
+      return
+    }
+
+    if (tag === EHtmlVoidTag.br) {
+      editor.insertText("\n")
+      return
+    }
+
+    if (tag in EHtmlVoidTag) {
+      Transforms.insertNodes(editor, { tag, children: [] }, { at: editor.selection as any })
+      return
     }
   }
 

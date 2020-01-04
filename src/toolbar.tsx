@@ -9,7 +9,7 @@ import React, { FC } from "react"
 import { UndoButton, RedoButton } from "./history"
 import { LinkButton } from "./link"
 import { TagButton } from "./toolbar-button"
-import { EHtmlBlockTag, EHtmlMarkTag } from "./format"
+import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 
 export const Toolbar: FC = () => {
   return (
@@ -71,6 +71,16 @@ export const Toolbar: FC = () => {
         tag={EHtmlBlockTag.ul}
         children={<FormatListBulleted />}
       />
+      <TagButton
+        tooltipTitle="Line break"
+        tag={EHtmlVoidTag.br}
+        children={EHtmlVoidTag.br.toUpperCase()}
+      />
+      {/* <TagButton
+        tooltipTitle="Horizontal rule"
+        tag={EHtmlVoidTag.hr}
+        children={EHtmlVoidTag.hr.toUpperCase()}
+      /> */}
     </div>
   )
 }

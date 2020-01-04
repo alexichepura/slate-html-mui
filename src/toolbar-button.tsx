@@ -2,7 +2,7 @@ import { Button, Tooltip } from "@material-ui/core"
 import { ButtonProps } from "@material-ui/core/Button"
 import React, { FC } from "react"
 import { useSlate } from "slate-react"
-import { isTagActive, EHtmlBlockTag, EHtmlMarkTag } from "./format"
+import { isTagActive, EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 
 export type TToolbarButtonProps = { tooltipTitle: string } & ButtonProps
 export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
@@ -23,7 +23,7 @@ export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
 )
 
 type TTagButtonProps = {
-  tag: EHtmlBlockTag | EHtmlMarkTag
+  tag: EHtmlBlockTag | EHtmlMarkTag | EHtmlVoidTag
 } & TToolbarButtonProps
 export const TagButton: FC<TTagButtonProps> = React.forwardRef(({ tag, ...rest }, ref) => {
   const slate = useSlate()

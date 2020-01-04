@@ -32,12 +32,14 @@ const formatVoidToString = (tag: string, attributes: TAttributes) => {
 
 export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | Node[]): string => {
   if (Text.isText(node)) {
-    const textTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
-    if (textTag && textTag[0]) {
-      return formatToString(textTag[0], null, escapeHtml(node.text))
+    const markTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
+    let text
+    if (markTag && markTag[0]) {
+      text = formatToString(markTag[0], null, escapeHtml(node.text))
     } else {
-      return escapeHtml(node.text)
+      text = escapeHtml(node.text)
     }
+    return text.split("\n").join("<br/>")
   }
 
   if (Array.isArray(node)) {
@@ -45,7 +47,7 @@ export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | No
   }
 
   const children = node.children && node.children.map(serialize).join("")
-  if (!children) {
+  if (children === undefined) {
     return ""
   }
   if (node.tag in EHtmlBlockTag) {
@@ -113,6 +115,10 @@ export const deserialize = (
 
   if (tag in EHtmlMarkTag) {
     return children.map(child => ({ [tag]: true, attributes, text: child }))
+  }
+
+  if (tag === EHtmlVoidTag.br) {
+    return "\n"
   }
 
   if (tag in EHtmlVoidTag) {

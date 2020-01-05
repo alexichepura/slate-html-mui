@@ -11,9 +11,9 @@ import { LinkButton } from "./link"
 import { TagButton } from "./toolbar-button"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 
-export const Toolbar: FC = () => {
+export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
   return (
-    <div>
+    <div {...props}>
       <UndoButton />
       <RedoButton />
 

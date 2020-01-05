@@ -1,20 +1,76 @@
-import { Button } from "@material-ui/core"
+import { Button, Card, makeStyles } from "@material-ui/core"
 import React, { FC, useCallback, useMemo, useState } from "react"
 import { render } from "react-dom"
-import { createEditor, Node } from "slate"
-import { withHistory } from "slate-history"
-import { Editable, ReactEditor, Slate, withReact } from "slate-react"
+import { Node } from "slate"
+import { Editable, ReactEditor, Slate } from "slate-react"
 import {
+  createHtmlEditor,
   deserializeHtml,
   Leaf,
   RenderElement,
   serializeHtml,
   Toolbar,
-  withHtml,
-  withLink,
+  useSticky,
 } from "../src"
-import { initial, initial_string } from "./initial"
 import { TTagElement } from "../src/html"
+import { initial, initial_string } from "./initial"
+
+const SlateHtmlEditor: FC<{ value: TTagElement[]; setValue: (value: TTagElement[]) => void }> = ({
+  value,
+  setValue,
+}) => {
+  const editor = useMemo(() => createHtmlEditor(), [])
+  const renderElement = useCallback(RenderElement, [])
+  const renderLeaf = useCallback(Leaf, [])
+  const [isSticky, stickyPlaceholderRef] = useSticky()
+
+  const classes = useStyles()
+  return (
+    <Slate
+      editor={editor as ReactEditor}
+      defaultValue={value}
+      onChange={value => {
+        setValue(value as TTagElement[])
+      }}
+      value={value as Node[]}
+    >
+      <Card>
+        <div className={classes.toolbarPlaceholder} ref={stickyPlaceholderRef}>
+          <Toolbar className={classes.toolbar + (isSticky ? " " + classes.toolbarSticky : "")} />
+        </div>
+        <Editable
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+          placeholder="Enter some rich text…"
+          spellCheck
+          className={classes.editable}
+        />
+      </Card>
+    </Slate>
+  )
+}
+SlateHtmlEditor.displayName = "SlateHtmlEditor"
+
+const useStyles = makeStyles(
+  theme => ({
+    toolbarPlaceholder: {
+      height: "47px",
+    },
+    toolbar: {
+      padding: "8px",
+      backgroundColor: "rgba(255,255,255,0.8)",
+      backdropFilter: "blur(2px)",
+      borderBottom: "1px solid " + theme.palette.divider,
+      top: 0,
+    },
+    toolbarSticky: {
+      position: "fixed",
+      borderRight: "1px solid " + theme.palette.divider,
+    },
+    editable: { minHeight: "100px", padding: "8px" },
+  }),
+  { name: SlateHtmlEditor.displayName }
+)
 
 const MyEditor: FC = () => {
   const [value, setValue] = useState<TTagElement[]>(initial)
@@ -32,12 +88,8 @@ const MyEditor: FC = () => {
   const loadFromSample = () => {
     const document = new DOMParser().parseFromString(initial_string, "text/html")
     const savedValue = deserializeHtml(document.body)
-
     setValue(savedValue as any)
   }
-  const editor = useMemo(() => withHtml(withLink(withHistory(withReact(createEditor())))), [])
-  const renderElement = useCallback(RenderElement, [])
-  const renderLeaf = useCallback(Leaf, [])
   return (
     <div>
       <Button color="primary" onClick={loadFromLocalstorage}>
@@ -49,26 +101,10 @@ const MyEditor: FC = () => {
       <Button color="primary" onClick={saveToLocalstorage}>
         to localstorage
       </Button>
-      <Slate
-        editor={editor as ReactEditor}
-        defaultValue={value}
-        onChange={value => {
-          setValue(value as TTagElement[])
-        }}
-        value={value as Node[]}
-      >
-        <>
-          <Toolbar />
-          <Editable
-            renderElement={renderElement}
-            renderLeaf={renderLeaf}
-            placeholder="Enter some rich text…"
-            spellCheck
-          />
-        </>
-      </Slate>
+      <SlateHtmlEditor value={value} setValue={setValue} />
     </div>
   )
 }
+MyEditor.displayName = "MyEditor"
 
 render(<MyEditor />, document.getElementById("app"))

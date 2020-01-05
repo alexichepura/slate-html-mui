@@ -69,22 +69,26 @@ export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | No
   return children
 }
 
-export const deserialize = (
-  el: Element | ChildNode
-): SlateElement | string | null | Descendant[] | TTagElement => {
-  if (el.nodeType === 3) {
-    return el.textContent
-  } else if (el.nodeType !== 1) {
-    return null
-  }
-
-  const children = Array.from(el.childNodes)
+const deserializeChildNodes = (nodes: NodeListOf<ChildNode>) =>
+  Array.from(nodes)
     .map(deserialize)
     .flat()
 
-  if (el.nodeName === "BODY") {
-    return children
+export const deserialize = (
+  el: Element | ChildNode
+): SlateElement | Text | string | null | Descendant[] | TTagElement => {
+  if (el.nodeType === 3) {
+    return { text: el.textContent || "" }
   }
+  if (el.nodeType !== 1) {
+    return null
+  }
+
+  if (el.nodeName === "BODY") {
+    return deserializeChildNodes(el.childNodes)
+  }
+
+  const children = deserializeChildNodes(el.childNodes)
 
   const tag = el.nodeName.toLowerCase()
   const attributes = Array.from((el as Element).attributes).reduce<Record<string, string>>(
@@ -99,26 +103,18 @@ export const deserialize = (
     if (children.length === 0) {
       children.push({ text: "" } as Text)
     }
-    const _children = children.map(child => {
-      if (typeof child === "string") {
-        return { text: child }
-      } else {
-        return child
-      }
-    })
-    return {
-      tag,
-      attributes,
-      children: _children,
-    }
+    return { tag, attributes, children }
   }
 
   if (tag in EHtmlMarkTag) {
-    return children.map(child => ({ [tag]: true, attributes, text: child }))
+    return children.map(child => {
+      const text = typeof child === "string" ? child : child.text
+      return { [tag]: true, attributes, text }
+    })
   }
 
   if (tag === EHtmlVoidTag.br) {
-    return "\n"
+    return { text: "\n" }
   }
 
   if (tag in EHtmlVoidTag) {

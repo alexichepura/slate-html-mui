@@ -32,7 +32,7 @@
   ],
   "license": "MIT",
   "main": "dist/index.js",
-  "name": "slate-mui",
+  "name": "slate-html-mui",
   "dependencies": {
     "escape-html": "^1.0.3",
     "is-hotkey": "^0.1.6",

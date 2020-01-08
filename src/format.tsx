@@ -41,6 +41,7 @@ export const isHtmlBlockElement = (element: SlateElement | TTagElement) => {
 export const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
   return React.createElement((element as TTagElement).tag, attributes, children)
 }
+HtmlBlockElement.displayName = "HtmlBlockElement"
 
 export const isHtmlVoidElement = (element: SlateElement | TTagElement) => {
   return element.tag in EHtmlVoidTag
@@ -48,6 +49,7 @@ export const isHtmlVoidElement = (element: SlateElement | TTagElement) => {
 export const HtmlVoidElement: FC<RenderElementProps> = ({ attributes, element }) => {
   return React.createElement((element as TTagElement).tag, attributes)
 }
+HtmlVoidElement.displayName = "HtmlVoidElement"
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   Object.keys(EHtmlMarkTag).forEach(tag => {

@@ -21,6 +21,7 @@ export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
     )
   }
 )
+ToolbarButton.displayName = "ToolbarButton"
 
 type TTagButtonProps = {
   tag: EHtmlBlockTag | EHtmlMarkTag | EHtmlVoidTag
@@ -41,3 +42,4 @@ export const TagButton: FC<TTagButtonProps> = React.forwardRef(({ tag, ...rest }
     />
   )
 })
+TagButton.displayName = "TagButton"

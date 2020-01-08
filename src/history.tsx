@@ -19,6 +19,8 @@ export const UndoButton: FC = () => {
     />
   )
 }
+UndoButton.displayName = "UndoButton"
+
 export const RedoButton: FC = () => {
   const editor = (useSlate() as unknown) as HistoryEditor
   const { history } = editor
@@ -32,3 +34,4 @@ export const RedoButton: FC = () => {
     />
   )
 }
+RedoButton.displayName = "RedoButton"

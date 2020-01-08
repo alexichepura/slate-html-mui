@@ -93,7 +93,8 @@ export const deserialize = (
   const tag = el.nodeName.toLowerCase()
   const attributes = Array.from((el as Element).attributes).reduce<Record<string, string>>(
     (prev, attr) => {
-      prev[attr.name] = attr.value
+      const name = attr.name === "class" ? "className" : attr.name
+      prev[name] = attr.value
       return prev
     },
     {}

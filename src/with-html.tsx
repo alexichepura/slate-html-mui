@@ -1,4 +1,4 @@
-import { Editor, Node, Transforms } from "slate"
+import { Editor, Node, Transforms, Element } from "slate"
 import {
   DEFAULT_TAG,
   EHtmlBlockTag,
@@ -10,7 +10,7 @@ import {
 import { deserialize, TTagElement } from "./html"
 
 export const withHtml = (editor: Editor) => {
-  const { insertData, isVoid } = editor
+  const { insertData, isVoid, normalizeNode } = editor
 
   editor.isVoid = element => {
     return (element as TTagElement).tag in EHtmlVoidTag ? true : isVoid(element)
@@ -64,6 +64,24 @@ export const withHtml = (editor: Editor) => {
       return
     }
     insertData(data)
+  }
+
+  editor.normalizeNode = entry => {
+    const [_node, path] = entry
+    const node = _node as Editor | Element | TTagElement
+
+    // If the element is a paragraph, ensure it's children are valid.
+    if (Element.isElement(node) && node.tag === EHtmlBlockTag.p) {
+      for (const [child, childPath] of Node.children(editor, path)) {
+        if (Element.isElement(child) && !editor.isInline(child)) {
+          Transforms.unwrapNodes(editor, { at: childPath })
+          return
+        }
+      }
+    }
+
+    // Fall back to the original `normalizeNode` to enforce other constraints.
+    normalizeNode(entry)
   }
 
   return editor

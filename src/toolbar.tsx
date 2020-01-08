@@ -84,3 +84,4 @@ export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
     </div>
   )
 }
+Toolbar.displayName = "Toolbar"

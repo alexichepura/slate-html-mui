@@ -106,6 +106,7 @@ export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children
   cleanAttributesMutate(resultAttributes)
   return React.createElement(LINK_TAG, resultAttributes, children)
 }
+HtmlAnchorElement.displayName = "HtmlAnchorElement"
 
 type TLinkButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">
 export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
@@ -134,6 +135,7 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
     </>
   )
 }
+LinkButton.displayName = "LinkButton"
 
 export const withLink = (editor: Editor) => {
   const { insertData, insertText, isInline } = editor
@@ -274,3 +276,4 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
     </Dialog>
   )
 }
+LinkFormDialog.displayName = "LinkFormDialog"

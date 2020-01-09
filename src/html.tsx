@@ -2,6 +2,7 @@ import escapeHtml from "escape-html"
 import { Descendant, Element as SlateElement, Text } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
+// import { CSSProperties } from "react"
 
 type TAttributes = Record<string, any> | null
 export type TTagElement = {
@@ -10,6 +11,7 @@ export type TTagElement = {
   [key: string]: any
 }
 
+// SERIALIZE
 const attributes2String = (attributes: TAttributes): string => {
   if (!attributes) {
     return ""
@@ -69,6 +71,7 @@ export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | No
   return children
 }
 
+// DESEREALIZE
 const deserializeChildNodes = (nodes: NodeListOf<ChildNode>) =>
   Array.from(nodes)
     .map(deserialize)
@@ -93,8 +96,17 @@ export const deserialize = (
   const tag = el.nodeName.toLowerCase()
   const attributes = Array.from((el as Element).attributes).reduce<Record<string, string>>(
     (prev, attr) => {
-      const name = attr.name === "class" ? "className" : attr.name
-      prev[name] = attr.value
+      if (attr.name === "style" || attr.name === "class") {
+        return prev
+      }
+      // if (attr.name === "style") {
+      //   const { style } = parseCSSText(attr.value)
+      //   prev[attr.name] = style as any // TODO proper types
+      //   return prev
+      // }
+
+      // const name = attr.name === "class" ? "className" : attr.name
+      prev[attr.name] = attr.value
       return prev
     },
     {}
@@ -128,3 +140,23 @@ export const deserialize = (
 
   return children
 }
+
+// modified from https://stackoverflow.com/questions/8987550/convert-css-text-to-javascript-object/43012849
+// type TParseCssResult = {
+//   cssText: string
+//   ruleName: string
+//   style: CSSProperties
+// }
+// function parseCSSText(cssText: string): TParseCssResult {
+//   const cssTxt = cssText.replace(/\/\*(.|\s)*?\*\//g, " ").replace(/\s+/g, " ")
+//   const style: any = {} // TODO proper types
+//   const [, ruleName = "", rule = ""] = cssTxt.match(/ ?(.*?) ?{([^}]*)}/) || [, , cssTxt]
+//   const properties = rule.split(";").map(o => o.split(":").map(x => x && x.trim()))
+//   for (var [property, value] of properties) {
+//     const cssPropertyName = cssToJs(property)
+//     style[cssPropertyName] = value
+//   }
+//   return { cssText, ruleName, style }
+// }
+
+// const cssToJs = (s: string) => s.replace(/\W+\w/g, match => match.slice(-1).toUpperCase())

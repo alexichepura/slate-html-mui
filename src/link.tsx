@@ -120,6 +120,22 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
     mergeState({ open: true, ...linkData })
   }
 
+  const onRemove = () => {
+    unwrapLink(editor)
+    mergeState({ open: false })
+  }
+
+  const onOk = () => {
+    const { text, attributes } = state
+    cleanAttributesMutate(attributes)
+    if (!state.range) {
+      throw new Error("Invalid range. Must be typeof Range.")
+    }
+    const command: TSetLinkCommand = { attributes, text, range: state.range }
+    wrapLink(editor, command)
+    mergeState({ open: false })
+  }
+
   return (
     <>
       <ToolbarButton
@@ -131,7 +147,18 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
       >
         <Link />
       </ToolbarButton>
-      <LinkFormDialog state={state} mergeState={mergeState} />
+      <LinkFormDialog
+        open={state.open}
+        attributes={state.attributes}
+        text={state.text}
+        onOk={onOk}
+        updateText={text => mergeState({ text })}
+        updateAttribute={(name, value) =>
+          mergeState({ attributes: { ...state.attributes, [name]: value } })
+        }
+        onRemove={onRemove}
+        onClose={() => mergeState({ open: false })}
+      />
     </>
   )
 }
@@ -195,63 +222,51 @@ const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
 }
 
 type TLinkFormDialogProps = {
-  state: TLinkButtonState
-  mergeState(state: Partial<TLinkButtonState>): void
+  text: string
+  attributes: AnchorHTMLAttributes<any>
+  open: boolean
+  updateText: (text: string) => void
+  updateAttribute: (name: keyof AnchorHTMLAttributes<any>, value: string) => void
+  onRemove: () => void
+  onClose: () => void
+  onOk: () => void
 }
-export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) => {
-  const editor = useSlate()
-
-  const handleClose = () => {
-    mergeState(defaults)
-  }
-
-  const handleOk = () => {
-    cleanAttributesMutate(state.attributes)
-
-    if (!state.range) {
-      throw new Error("Invalid range. Must be typeof Range.")
-    }
-    const command: TSetLinkCommand = {
-      attributes: state.attributes,
-      range: state.range,
-      text: state.text,
-    }
-    wrapLink(editor, command)
-    handleClose()
-  }
-
-  const handleRemove = () => {
-    unwrapLink(editor)
-    handleClose()
-  }
+export const LinkFormDialog: FC<TLinkFormDialogProps> = ({
+  open,
+  text,
+  attributes,
+  updateText,
+  updateAttribute,
+  onRemove,
+  onClose,
+  onOk,
+}) => {
   return (
-    <Dialog open={state.open} onClose={handleClose} aria-labelledby="link-form-dialog-title">
+    <Dialog open={open} onClose={onClose} aria-labelledby="link-form-dialog-title">
       <DialogTitle id="link-form-dialog-title">Insert/Edit Link</DialogTitle>
       <DialogContent>
         <TextField
           label="Text to display"
-          value={state.text}
-          onChange={e => mergeState({ text: e.target.value })}
+          value={text}
+          onChange={e => updateText(e.target.value)}
           fullWidth
         />
         <TextField
           label="Attribute: title"
-          value={state.attributes.title}
-          onChange={e => mergeState({ attributes: { ...state.attributes, title: e.target.value } })}
+          value={attributes.title}
+          onChange={e => updateAttribute("title", e.target.value)}
           fullWidth
         />
         <TextField
           label="Attribute: href"
-          value={state.attributes.href}
-          onChange={e => mergeState({ attributes: { ...state.attributes, href: e.target.value } })}
+          value={attributes.href}
+          onChange={e => updateAttribute("href", e.target.value)}
           fullWidth
         />
         <TextField
           label="Attribute: target"
-          value={state.attributes.target}
-          onChange={e =>
-            mergeState({ attributes: { ...state.attributes, target: e.target.value } })
-          }
+          value={attributes.target}
+          onChange={e => updateAttribute("target", e.target.value)}
           select
           fullWidth
         >
@@ -263,13 +278,13 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({ state, mergeState }) 
         </TextField>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleRemove} color="secondary">
+        <Button onClick={onRemove} color="secondary">
           Remove link
         </Button>
-        <Button onClick={handleClose} color="primary">
+        <Button onClick={onClose} color="primary">
           Cancel
         </Button>
-        <Button onClick={handleOk} color="primary">
+        <Button onClick={onOk} color="primary">
           OK
         </Button>
       </DialogActions>

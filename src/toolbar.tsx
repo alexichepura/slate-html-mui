@@ -10,6 +10,7 @@ import { UndoButton, RedoButton } from "./history"
 import { LinkButton } from "./link"
 import { TagButton } from "./toolbar-button"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
+import { ImageButton } from "./image/image"
 
 export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
   return (
@@ -35,6 +36,7 @@ export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
         children={<FormatUnderlinedTwoTone />}
       />
       <LinkButton />
+      <ImageButton />
 
       <TagButton
         tooltipTitle="Heading 1"

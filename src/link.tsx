@@ -16,7 +16,6 @@ import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 import { TTagElement } from "./html"
 
 export const LINK_TAG = "a"
-export const SET_LINK_COMMAND = "set_link"
 
 type TSetLinkCommand = {
   attributes: AnchorHTMLAttributes<any>

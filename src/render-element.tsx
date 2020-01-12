@@ -3,7 +3,7 @@ import { RenderElementProps } from "slate-react"
 import { HtmlBlockElement, HtmlVoidElement, isHtmlBlockElement, isHtmlVoidElement } from "./format"
 import { HtmlAnchorElement, isHtmlAnchorElement } from "./link"
 import { TTagElement } from "./html"
-import { isHtmlImgElement, HtmlImgElement } from "./image/image"
+import { isHtmlImgElement, HtmlImgElement } from "./image/img"
 
 export const RenderElement = (props: RenderElementProps) => {
   const element = props.element as TTagElement

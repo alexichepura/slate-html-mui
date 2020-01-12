@@ -2,7 +2,7 @@ import escapeHtml from "escape-html"
 import { Descendant, Element as SlateElement, Text } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
-import { isHtmlImgElement, IMG_TAG } from "./image/image"
+import { isHtmlImgElement, IMG_TAG } from "./image/img"
 // import { CSSProperties } from "react"
 
 type TAttributes = Record<string, any> | null

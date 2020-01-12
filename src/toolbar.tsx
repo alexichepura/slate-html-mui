@@ -10,7 +10,7 @@ import { UndoButton, RedoButton } from "./history"
 import { LinkButton } from "./link"
 import { TagButton } from "./toolbar-button"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
-import { ImgButton } from "./image/image"
+import { ImgButton } from "./image/img"
 
 export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
   return (

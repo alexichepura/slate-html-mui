@@ -73,16 +73,18 @@ const cleanAttributesMutate = (attributes: ImgHTMLAttributes<any>) =>
 export const HtmlImageElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
   const selected = useSelected()
   const focused = useFocused()
+  const style = {
+    display: "inline-block",
+    fontSize: 0,
+    boxShadow: `${selected && focused ? "0 0 0 3px #B4D5FF" : "none"}`,
+  }
   return (
-    <div {...attributes}>
-      <div
-        contentEditable={false}
-        style={{ boxShadow: `${selected && focused ? "0 0 0 3px #B4D5FF" : "none"}` }}
-      >
+    <span {...attributes}>
+      <span contentEditable={false} style={style}>
         <img {...element.attributes} />
-      </div>
+      </span>
       {children}
-    </div>
+    </span>
   )
 }
 HtmlImageElement.displayName = "HtmlImageElement"

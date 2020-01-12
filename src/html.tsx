@@ -2,6 +2,7 @@ import escapeHtml from "escape-html"
 import { Descendant, Element as SlateElement, Text } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
+import { isHtmlImageElement, IMG_TAG } from "./image/image"
 // import { CSSProperties } from "react"
 
 type TAttributes = Record<string, any> | null
@@ -64,6 +65,10 @@ export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | No
     return formatToString(node.tag, attributes, children)
   }
 
+  if (isHtmlImageElement(node)) {
+    return formatToString(node.tag, node.attributes, children)
+  }
+
   if (node.tag in EHtmlVoidTag) {
     return formatVoidToString(node.tag, null)
   }
@@ -112,7 +117,7 @@ export const deserialize = (
     {}
   )
 
-  if (tag in EHtmlBlockTag || tag === LINK_TAG) {
+  if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG) {
     if (children.length === 0) {
       children.push({ text: "" } as Text)
     }

@@ -9,7 +9,7 @@ import {
 import Image from "@material-ui/icons/Image"
 import React, { FC, useState, ImgHTMLAttributes } from "react"
 import { Editor, Element as SlateElement, Text, Node, Range, Path, Transforms } from "slate"
-import { useSlate, RenderElementProps } from "slate-react"
+import { useSlate, RenderElementProps, useSelected, useFocused } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 import { TTagElement } from "../html"
 
@@ -71,12 +71,18 @@ const cleanAttributesMutate = (attributes: ImgHTMLAttributes<any>) =>
     return (value === null || value === undefined) && delete (attributes as any)[key]
   })
 export const HtmlImageElement: FC<RenderElementProps> = ({ attributes, element }) => {
-  const resultAttributes: ImgHTMLAttributes<any> = {
-    ...attributes,
-    ...element.attributes,
-  }
-  cleanAttributesMutate(resultAttributes)
-  return React.createElement(IMG_TAG, resultAttributes)
+  const selected = useSelected()
+  const focused = useFocused()
+  return (
+    <div {...attributes}>
+      <div
+        contentEditable={false}
+        style={{ boxShadow: `${selected && focused ? "0 0 0 3px #B4D5FF" : "none"}` }}
+      >
+        <img {...element.attributes} />
+      </div>
+    </div>
+  )
 }
 HtmlImageElement.displayName = "HtmlImageElement"
 

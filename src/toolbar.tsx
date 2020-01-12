@@ -11,6 +11,7 @@ import { LinkButton } from "./link"
 import { TagButton } from "./toolbar-button"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { ImgButton } from "./image/img"
+import { PictureButton } from "./image/picture"
 
 export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
   return (
@@ -37,6 +38,7 @@ export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
       />
       <LinkButton />
       <ImgButton />
+      <PictureButton />
 
       <TagButton
         tooltipTitle="Heading 1"

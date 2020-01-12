@@ -3,7 +3,7 @@ import { Descendant, Element as SlateElement, Text } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
 import { isHtmlImgElement, IMG_TAG } from "./image/img"
-// import { CSSProperties } from "react"
+import { PICTURE_TAG, isHtmlPictureElement } from "./image/picture"
 
 type TAttributes = Record<string, any> | null
 export type TTagElement = {
@@ -68,6 +68,9 @@ export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | No
   if (isHtmlImgElement(node)) {
     return formatToString(node.tag, node.attributes, children)
   }
+  if (isHtmlPictureElement(node)) {
+    return formatToString(node.tag, node.attributes, children)
+  }
 
   if (node.tag in EHtmlVoidTag) {
     return formatVoidToString(node.tag, null)
@@ -117,7 +120,7 @@ export const deserialize = (
     {}
   )
 
-  if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG) {
+  if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG || tag === PICTURE_TAG) {
     if (children.length === 0) {
       children.push({ text: "" } as Text)
     }

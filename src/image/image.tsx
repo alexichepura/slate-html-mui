@@ -70,7 +70,7 @@ const cleanAttributesMutate = (attributes: ImgHTMLAttributes<any>) =>
   Object.entries(attributes).forEach(([key, value]) => {
     return (value === null || value === undefined) && delete (attributes as any)[key]
   })
-export const HtmlImageElement: FC<RenderElementProps> = ({ attributes, element }) => {
+export const HtmlImageElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
   const selected = useSelected()
   const focused = useFocused()
   return (
@@ -81,6 +81,7 @@ export const HtmlImageElement: FC<RenderElementProps> = ({ attributes, element }
       >
         <img {...element.attributes} />
       </div>
+      {children}
     </div>
   )
 }
@@ -141,7 +142,7 @@ export const withImage = (editor: Editor) => {
   const { isVoid } = editor
 
   editor.isVoid = element => {
-    return isImageTag(element as TTagElement) || isVoid(element)
+    return isImageTag(element as TTagElement) ? true : isVoid(element)
   }
 
   return editor

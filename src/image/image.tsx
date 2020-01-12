@@ -15,23 +15,23 @@ import { TTagElement } from "../html"
 
 export const IMG_TAG = "img"
 
-type TSetImageCommand = {
+type TSetImgCommand = {
   attributes: ImgHTMLAttributes<any>
   range: Range
 }
-export type THtmlImageSlateElement = TTagElement & {
+export type THtmlImgSlateElement = TTagElement & {
   attributes: ImgHTMLAttributes<any>
 }
 
-type TImageButtonState = {
+type TImgButtonState = {
   open: boolean
   range: Range | null
   attributes: ImgHTMLAttributes<any>
 }
 
-type TImageButtonStateInitial = Omit<TImageButtonState, "open">
+type TImgButtonStateInitial = Omit<TImgButtonState, "open">
 
-const defaults: TImageButtonState = {
+const defaults: TImgButtonState = {
   open: false,
   range: null,
   attributes: {},
@@ -41,36 +41,36 @@ const match = (node: Node): boolean => {
   return (node as TTagElement).tag === IMG_TAG
 }
 
-const isImageActive = (editor: Editor) => {
-  return !!findImage(editor)
+const isImgActive = (editor: Editor) => {
+  return !!findImg(editor)
 }
-const findImageEntry = (editor: Editor): [THtmlImageSlateElement, Path] => {
-  const [imageEntry] = Editor.nodes(editor, { match })
-  return imageEntry as [THtmlImageSlateElement, Path]
+const findImgEntry = (editor: Editor): [THtmlImgSlateElement, Path] => {
+  const [imgEntry] = Editor.nodes(editor, { match })
+  return imgEntry as [THtmlImgSlateElement, Path]
 }
-const findImage = (editor: Editor): THtmlImageSlateElement | null => {
-  const imageEntry = findImageEntry(editor)
-  return imageEntry ? imageEntry[0] : null
+const findImg = (editor: Editor): THtmlImgSlateElement | null => {
+  const imgEntry = findImgEntry(editor)
+  return imgEntry ? imgEntry[0] : null
 }
 
-const getInitialImageData = (editor: Editor): TImageButtonStateInitial => {
-  const image = findImage(editor)
+const getInitialImgData = (editor: Editor): TImgButtonStateInitial => {
+  const img = findImg(editor)
   return {
     range: editor.selection ? { ...editor.selection } : null,
-    attributes: image ? image.attributes : {},
+    attributes: img ? img.attributes : {},
   }
 }
 
-export const isHtmlImageElement = (
+export const isHtmlImgElement = (
   element: SlateElement | TTagElement | Text
-): element is THtmlImageSlateElement => {
+): element is THtmlImgSlateElement => {
   return element.tag === IMG_TAG
 }
 const cleanAttributesMutate = (attributes: ImgHTMLAttributes<any>) =>
   Object.entries(attributes).forEach(([key, value]) => {
     return (value === null || value === undefined) && delete (attributes as any)[key]
   })
-export const HtmlImageElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
+export const HtmlImgElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
   const selected = useSelected()
   const focused = useFocused()
   const style = {
@@ -87,17 +87,17 @@ export const HtmlImageElement: FC<RenderElementProps> = ({ attributes, children,
     </span>
   )
 }
-HtmlImageElement.displayName = "HtmlImageElement"
+HtmlImgElement.displayName = "HtmlImgElement"
 
-type TImageButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">
-export const ImageButton: FC<TImageButtonProps> = ({ ...rest }) => {
+type TImgButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">
+export const ImgButton: FC<TImgButtonProps> = ({ ...rest }) => {
   const editor = useSlate()
-  const isActive = isImageActive(editor)
-  const [state, setState] = useState<TImageButtonState>(defaults)
-  const mergeState = (partState: Partial<TImageButtonState>) => setState({ ...state, ...partState })
+  const isActive = isImgActive(editor)
+  const [state, setState] = useState<TImgButtonState>(defaults)
+  const mergeState = (partState: Partial<TImgButtonState>) => setState({ ...state, ...partState })
 
   const handleOpen = () => {
-    mergeState({ open: true, ...getInitialImageData(editor) })
+    mergeState({ open: true, ...getInitialImgData(editor) })
   }
 
   const onOk = () => {
@@ -106,15 +106,15 @@ export const ImageButton: FC<TImageButtonProps> = ({ ...rest }) => {
     if (!state.range) {
       throw new Error("Invalid range. Must be typeof Range.")
     }
-    const command: TSetImageCommand = { attributes, range: state.range }
-    insertImage(editor, command)
+    const command: TSetImgCommand = { attributes, range: state.range }
+    insertImg(editor, command)
     mergeState({ open: false })
   }
 
   return (
     <>
       <ToolbarButton
-        tooltipTitle="Image"
+        tooltipTitle="Img"
         color={isActive ? "primary" : "default"}
         variant={isActive ? "contained" : "text"}
         onClick={handleOpen}
@@ -122,7 +122,7 @@ export const ImageButton: FC<TImageButtonProps> = ({ ...rest }) => {
       >
         <Image />
       </ToolbarButton>
-      <ImageFormDialog
+      <ImgFormDialog
         open={state.open}
         attributes={state.attributes}
         onOk={onOk}
@@ -134,40 +134,40 @@ export const ImageButton: FC<TImageButtonProps> = ({ ...rest }) => {
     </>
   )
 }
-ImageButton.displayName = "ImageButton"
+ImgButton.displayName = "ImgButton"
 
-const isImageTag = (element: TTagElement) => {
+const isImgTag = (element: TTagElement) => {
   return element.tag === IMG_TAG
 }
 
-export const withImage = (editor: Editor) => {
+export const withImg = (editor: Editor) => {
   const { isVoid } = editor
 
   editor.isVoid = element => {
-    return isImageTag(element as TTagElement) ? true : isVoid(element)
+    return isImgTag(element as TTagElement) ? true : isVoid(element)
   }
 
   return editor
 }
 
-const insertImage = (editor: Editor, command: TSetImageCommand) => {
+const insertImg = (editor: Editor, command: TSetImgCommand) => {
   const { attributes, range } = command
-  const image: TTagElement = {
+  const img: TTagElement = {
     tag: IMG_TAG,
     attributes,
     children: [{ text: "" }],
   }
-  Transforms.insertNodes(editor, image as SlateElement, { at: range })
+  Transforms.insertNodes(editor, img as SlateElement, { at: range })
 }
 
-type TImageFormDialogProps = {
+type TImgFormDialogProps = {
   attributes: ImgHTMLAttributes<any>
   open: boolean
   updateAttribute: (name: keyof ImgHTMLAttributes<any>, value: string) => void
   onClose: () => void
   onOk: () => void
 }
-export const ImageFormDialog: FC<TImageFormDialogProps> = ({
+export const ImgFormDialog: FC<TImgFormDialogProps> = ({
   open,
   attributes,
   updateAttribute,
@@ -175,8 +175,8 @@ export const ImageFormDialog: FC<TImageFormDialogProps> = ({
   onOk,
 }) => {
   return (
-    <Dialog open={open} onClose={onClose} aria-labelledby="image-form-dialog-title">
-      <DialogTitle id="image-form-dialog-title">Insert/Edit Image</DialogTitle>
+    <Dialog open={open} onClose={onClose} aria-labelledby="img-form-dialog-title">
+      <DialogTitle id="img-form-dialog-title">Insert/Edit Img</DialogTitle>
       <DialogContent>
         <TextField
           label="Attribute: src"
@@ -202,4 +202,4 @@ export const ImageFormDialog: FC<TImageFormDialogProps> = ({
     </Dialog>
   )
 }
-ImageFormDialog.displayName = "ImageFormDialog"
+ImgFormDialog.displayName = "ImgFormDialog"

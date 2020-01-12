@@ -3,7 +3,7 @@ import { withHistory } from "slate-history"
 import { withReact } from "slate-react"
 import { withLink } from "./link"
 import { withHtml } from "./with-html"
-import { withImage } from "./image/image"
+import { withImg } from "./image/image"
 
 export const createHtmlEditor = (): Editor =>
-  withHtml(withImage(withLink(withHistory(withReact(createEditor())))))
+  withHtml(withImg(withLink(withHistory(withReact(createEditor())))))

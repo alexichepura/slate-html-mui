@@ -3,7 +3,7 @@ import { RenderElementProps } from "slate-react"
 import { HtmlBlockElement, HtmlVoidElement, isHtmlBlockElement, isHtmlVoidElement } from "./format"
 import { HtmlAnchorElement, isHtmlAnchorElement } from "./link"
 import { TTagElement } from "./html"
-import { isHtmlImageElement, HtmlImageElement } from "./image/image"
+import { isHtmlImgElement, HtmlImgElement } from "./image/image"
 
 export const RenderElement = (props: RenderElementProps) => {
   const element = props.element as TTagElement
@@ -13,8 +13,8 @@ export const RenderElement = (props: RenderElementProps) => {
   if (isHtmlAnchorElement(element)) {
     return <HtmlAnchorElement {...props} />
   }
-  if (isHtmlImageElement(element)) {
-    return <HtmlImageElement {...props} />
+  if (isHtmlImgElement(element)) {
+    return <HtmlImgElement {...props} />
   }
   if (isHtmlVoidElement(element)) {
     return <HtmlVoidElement {...props} />

@@ -19,6 +19,7 @@ import {
 } from "../src"
 import { CustomImgFormDialog } from "./custom-img"
 import { CustomLinkFormDialog } from "./custom-link"
+import { CustomPictureFormDialog } from "./custom-picture"
 
 export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
   return (
@@ -50,7 +51,7 @@ export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
         children={"CL"}
       />
       <ImgButton ImgFormDialog={CustomImgFormDialog} />
-      <PictureButton />
+      <PictureButton PictureFormDialog={CustomPictureFormDialog} />
 
       <TagButton
         tooltipTitle="Heading 1"

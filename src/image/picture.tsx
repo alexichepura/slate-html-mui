@@ -7,11 +7,11 @@ import {
   TextField,
 } from "@material-ui/core"
 import PhotoLibrary from "@material-ui/icons/PhotoLibrary"
-import React, { FC, useState, HTMLAttributes, CSSProperties } from "react"
-import { Editor, Element as SlateElement, Text, Node, Range, Path, Transforms } from "slate"
-import { useSlate, RenderElementProps, useSelected, useFocused } from "slate-react"
-import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
+import React, { CSSProperties, FC, HTMLAttributes, useState } from "react"
+import { Editor, Element as SlateElement, Node, Path, Range, Text, Transforms } from "slate"
+import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import { TTagElement } from "../html"
+import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 
 export const PICTURE_TAG = "picture"
 
@@ -91,8 +91,13 @@ export const HtmlPictureElement: FC<RenderElementProps> = ({ attributes, childre
 }
 HtmlPictureElement.displayName = "HtmlPictureElement"
 
-type TPictureButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">
-export const PictureButton: FC<TPictureButtonProps> = ({ ...rest }) => {
+type TPictureButtonProps = {
+  PictureFormDialog?: FC<TPictureFormDialogProps>
+} & Omit<TToolbarButtonProps, "tooltipTitle">
+export const PictureButton: FC<TPictureButtonProps> = ({
+  PictureFormDialog: _PictureFormDialog,
+  ...rest
+}) => {
   const editor = useSlate()
   const isActive = isPictureActive(editor)
   const [state, setState] = useState<TPictureButtonState>(defaults)
@@ -114,6 +119,7 @@ export const PictureButton: FC<TPictureButtonProps> = ({ ...rest }) => {
     mergeState({ open: false })
   }
 
+  const PictureFormDialogComponent = _PictureFormDialog || PictureFormDialog
   return (
     <>
       <ToolbarButton
@@ -125,7 +131,7 @@ export const PictureButton: FC<TPictureButtonProps> = ({ ...rest }) => {
       >
         <PhotoLibrary />
       </ToolbarButton>
-      <PictureFormDialog
+      <PictureFormDialogComponent
         open={state.open}
         attributes={state.attributes}
         onOk={onOk}
@@ -163,7 +169,7 @@ const insertPicture = (editor: Editor, command: TSetPictureCommand) => {
   Transforms.insertNodes(editor, picture as SlateElement, { at: range })
 }
 
-type TPictureFormDialogProps = {
+export type TPictureFormDialogProps = {
   attributes: HTMLAttributes<any>
   open: boolean
   updateAttribute: (name: keyof HTMLAttributes<any>, value: string) => void

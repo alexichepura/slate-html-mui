@@ -7,11 +7,11 @@ import {
   TextField,
 } from "@material-ui/core"
 import Image from "@material-ui/icons/Image"
-import React, { FC, useState, ImgHTMLAttributes } from "react"
-import { Editor, Element as SlateElement, Text, Node, Range, Path, Transforms } from "slate"
-import { useSlate, RenderElementProps, useSelected, useFocused } from "slate-react"
-import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
+import React, { FC, ImgHTMLAttributes, useState } from "react"
+import { Editor, Element as SlateElement, Node, Path, Range, Text, Transforms } from "slate"
+import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import { TTagElement } from "../html"
+import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 
 export const IMG_TAG = "img"
 
@@ -89,8 +89,10 @@ export const HtmlImgElement: FC<RenderElementProps> = ({ attributes, children, e
 }
 HtmlImgElement.displayName = "HtmlImgElement"
 
-type TImgButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">
-export const ImgButton: FC<TImgButtonProps> = ({ ...rest }) => {
+type TImgButtonProps = {
+  ImgFormDialog?: FC<TImgFormDialogProps>
+} & Omit<TToolbarButtonProps, "tooltipTitle">
+export const ImgButton: FC<TImgButtonProps> = ({ ImgFormDialog: _ImgFormDialog, ...rest }) => {
   const editor = useSlate()
   const isActive = isImgActive(editor)
   const [state, setState] = useState<TImgButtonState>(defaults)
@@ -111,6 +113,7 @@ export const ImgButton: FC<TImgButtonProps> = ({ ...rest }) => {
     mergeState({ open: false })
   }
 
+  const ImgFormDialogComponent = _ImgFormDialog || ImgFormDialog
   return (
     <>
       <ToolbarButton
@@ -122,7 +125,7 @@ export const ImgButton: FC<TImgButtonProps> = ({ ...rest }) => {
       >
         <Image />
       </ToolbarButton>
-      <ImgFormDialog
+      <ImgFormDialogComponent
         open={state.open}
         attributes={state.attributes}
         onOk={onOk}
@@ -160,7 +163,7 @@ const insertImg = (editor: Editor, command: TSetImgCommand) => {
   Transforms.insertNodes(editor, img as SlateElement, { at: range })
 }
 
-type TImgFormDialogProps = {
+export type TImgFormDialogProps = {
   attributes: ImgHTMLAttributes<any>
   open: boolean
   updateAttribute: (name: keyof ImgHTMLAttributes<any>, value: string) => void

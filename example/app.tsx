@@ -1,25 +1,18 @@
 import { Button, Card, makeStyles } from "@material-ui/core"
 import React, { FC, useCallback, useMemo, useState } from "react"
 import { render } from "react-dom"
-import { Node } from "slate"
+import { Node, createEditor } from "slate"
 import { Editable, ReactEditor, Slate } from "slate-react"
-import {
-  createHtmlEditor,
-  deserializeHtml,
-  Leaf,
-  RenderElement,
-  serializeHtml,
-  TTagElement,
-  useSticky,
-} from "../src"
+import { deserializeHtml, Leaf, RenderElement, serializeHtml, TTagElement, useSticky } from "../src"
 import { initial, initial_string } from "./initial"
 import { CustomToolbar } from "./toolbar"
+import { withHtmlEditor } from "../src/create"
 
 const SlateHtmlEditor: FC<{ value: TTagElement[]; setValue: (value: TTagElement[]) => void }> = ({
   value,
   setValue,
 }) => {
-  const editor = useMemo(() => createHtmlEditor(), [])
+  const editor = useMemo(() => withHtmlEditor(createEditor()), [])
   const renderElement = useCallback(RenderElement, [])
   const renderLeaf = useCallback(Leaf, [])
   const [isSticky, stickyPlaceholderRef] = useSticky()

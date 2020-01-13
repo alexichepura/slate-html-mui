@@ -8,3 +8,6 @@ import { withHtml } from "./with-html"
 
 export const createHtmlEditor = (): Editor =>
   withHtml(withPicture(withImg(withLink(withHistory(withReact(createEditor()))))))
+
+export const withHtmlEditor = (editor: Editor): Editor =>
+  withHtml(withPicture(withImg(withLink(withHistory(withReact(editor))))))

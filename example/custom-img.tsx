@@ -18,7 +18,7 @@ export const CustomImgFormDialog: FC<TImgFormDialogProps> = ({
 }) => {
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="img-form-dialog-title">
-      <DialogTitle id="img-form-dialog-title">Insert/Edit Img</DialogTitle>
+      <DialogTitle id="img-form-dialog-title">Insert/Edit Custom Img</DialogTitle>
       <DialogContent>
         <TextField
           label="Attribute: src"

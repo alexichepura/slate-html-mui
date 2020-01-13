@@ -33,9 +33,10 @@ type TLinkSelection = {
   link: THtmlLinkSlateElement | null
   text: string
 }
+type TAnchorAnyAttributes = AnchorHTMLAttributes<any> & Record<string, string>
 type TLinkButtonState = {
   open: boolean
-  attributes: AnchorHTMLAttributes<any>
+  attributes: TAnchorAnyAttributes
 } & TLinkSelection
 
 type TLinkButtonStateInitial = Omit<TLinkButtonState, "open">
@@ -107,8 +108,10 @@ export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children
 }
 HtmlAnchorElement.displayName = "HtmlAnchorElement"
 
-type TLinkButtonProps = {} & Omit<TToolbarButtonProps, "tooltipTitle">
-export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
+type TLinkButtonProps = {
+  LinkFormDialog?: FC<TLinkFormDialogProps>
+} & Omit<TToolbarButtonProps, "tooltipTitle">
+export const LinkButton: FC<TLinkButtonProps> = ({ LinkFormDialog: _LinkFormDialog, ...rest }) => {
   const editor = useSlate()
   const isActive = isLinkActive(editor)
   const [state, setState] = useState<TLinkButtonState>(defaults)
@@ -135,6 +138,10 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
     mergeState({ open: false })
   }
 
+  const updateAttribute = (name: string, value: string) =>
+    mergeState({ attributes: { ...state.attributes, [name]: value } })
+
+  const LinkFormDialogComponent = _LinkFormDialog || LinkFormDialog
   return (
     <>
       <ToolbarButton
@@ -146,15 +153,13 @@ export const LinkButton: FC<TLinkButtonProps> = ({ ...rest }) => {
       >
         <Link />
       </ToolbarButton>
-      <LinkFormDialog
+      <LinkFormDialogComponent
         open={state.open}
         attributes={state.attributes}
         text={state.text}
         onOk={onOk}
         updateText={text => mergeState({ text })}
-        updateAttribute={(name, value) =>
-          mergeState({ attributes: { ...state.attributes, [name]: value } })
-        }
+        updateAttribute={updateAttribute}
         onRemove={onRemove}
         onClose={() => mergeState({ open: false })}
       />
@@ -220,12 +225,12 @@ const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
   }
 }
 
-type TLinkFormDialogProps = {
+export type TLinkFormDialogProps = {
   text: string
-  attributes: AnchorHTMLAttributes<any>
+  attributes: TAnchorAnyAttributes
   open: boolean
   updateText: (text: string) => void
-  updateAttribute: (name: keyof AnchorHTMLAttributes<any>, value: string) => void
+  updateAttribute: (name: keyof AnchorHTMLAttributes<any> | string, value: string) => void
   onRemove: () => void
   onClose: () => void
   onOk: () => void

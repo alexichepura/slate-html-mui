@@ -9,11 +9,11 @@ import {
   Leaf,
   RenderElement,
   serializeHtml,
-  Toolbar,
+  TTagElement,
   useSticky,
 } from "../src"
-import { TTagElement } from "../src/html"
 import { initial, initial_string } from "./initial"
+import { CustomToolbar } from "./toolbar"
 
 const SlateHtmlEditor: FC<{ value: TTagElement[]; setValue: (value: TTagElement[]) => void }> = ({
   value,
@@ -36,7 +36,9 @@ const SlateHtmlEditor: FC<{ value: TTagElement[]; setValue: (value: TTagElement[
     >
       <Card>
         <div className={classes.toolbarPlaceholder} ref={stickyPlaceholderRef}>
-          <Toolbar className={classes.toolbar + (isSticky ? " " + classes.toolbarSticky : "")} />
+          <CustomToolbar
+            className={classes.toolbar + (isSticky ? " " + classes.toolbarSticky : "")}
+          />
         </div>
         <Editable
           renderElement={renderElement}

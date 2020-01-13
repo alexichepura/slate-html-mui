@@ -77,13 +77,15 @@ export const ButtonLinkButton: FC = () => {
 ButtonLinkButton.displayName = "ButtonLinkButton"
 
 const insertButtonLink = (editor: Editor) => {
-  Transforms.setNodes(editor, {
-    tag: "a",
+  const link: TTagElement = {
+    tag: LINK_TAG,
     attributes: {
       [DATA_ATTRIBUTE]: "true",
     },
     children: [{ text: "text" }],
-  })
+  }
+
+  Transforms.setNodes(editor, link)
   return
 }
 

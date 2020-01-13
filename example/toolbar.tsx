@@ -18,6 +18,7 @@ import {
   UndoButton,
 } from "../src"
 import { CustomLinkFormDialog } from "./custom-link"
+import { ButtonLinkButton } from "./button-link"
 
 export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
   return (
@@ -48,6 +49,7 @@ export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
         tooltipTitle="Custom Link"
         children={"CL"}
       />
+      <ButtonLinkButton />
       <ImgButton />
       <PictureButton />
 

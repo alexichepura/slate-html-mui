@@ -4,13 +4,15 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  MenuItem,
   TextField,
 } from "@material-ui/core"
 import React, { FC } from "react"
 import { TLinkFormDialogProps } from "../src"
+import { useSlate } from "slate-react"
+import { ToolbarButton } from "../src/toolbar-button"
+import { Editor, Transforms } from "slate"
 
-export const CustomLinkFormDialog: FC<TLinkFormDialogProps> = ({
+export const ButtonLinkFormDialog: FC<TLinkFormDialogProps> = ({
   open,
   text,
   attributes,
@@ -36,16 +38,6 @@ export const CustomLinkFormDialog: FC<TLinkFormDialogProps> = ({
           onChange={e => updateAttribute("href", e.target.value)}
           fullWidth
         />
-        <TextField
-          label="Is custom"
-          value={attributes["data-custom"] || ""}
-          onChange={e => updateAttribute("data-custom", e.target.value)}
-          select
-          fullWidth
-        >
-          <MenuItem value="">False</MenuItem>
-          <MenuItem value="true">True</MenuItem>
-        </TextField>
       </DialogContent>
       <DialogActions>
         <Button onClick={onRemove} color="secondary">
@@ -61,4 +53,44 @@ export const CustomLinkFormDialog: FC<TLinkFormDialogProps> = ({
     </Dialog>
   )
 }
-CustomLinkFormDialog.displayName = "CustomLinkFormDialog"
+ButtonLinkFormDialog.displayName = "ButtonLinkFormDialog"
+
+export const ButtonLinkButton: FC = () => {
+  const slate = useSlate()
+  const isActive = isButtonLinkActive(slate)
+  return (
+    <ToolbarButton
+      tooltipTitle="Button Link"
+      color={isActive ? "primary" : "default"}
+      variant={isActive ? "contained" : "text"}
+      onMouseDown={event => {
+        event.preventDefault()
+        insertButtonLink(slate)
+      }}
+      children={"BL"}
+    />
+  )
+}
+ButtonLinkButton.displayName = "ButtonLinkButton"
+
+export const isButtonLinkActive = (editor: Editor) => {
+  const [match] = Editor.nodes(editor, {
+    match: n => {
+      return n.tag === "a" && n.attributes && n.attributes["data-button"]
+    },
+  })
+
+  return !!match
+}
+
+const insertButtonLink = (editor: Editor) => {
+  // const isActive = isButtonLinkActive(editor)
+
+  Transforms.setNodes(editor, {
+    tag: "a",
+    attributes: {
+      "data-button": "true",
+    },
+  })
+  return
+}

@@ -21,5 +21,5 @@ export {
 export { RenderElement } from "./render-element"
 export { useSticky } from "./sticky"
 export { Toolbar } from "./toolbar"
-export { TagButton } from "./toolbar-button"
+export { TagButton, ToolbarButton } from "./toolbar-button"
 export { withHtml } from "./with-html"

@@ -31,29 +31,20 @@ export const CustomLinkFormDialog: FC<TLinkFormDialogProps> = ({
           fullWidth
         />
         <TextField
-          label="Attribute: title"
-          value={attributes.title}
-          onChange={e => updateAttribute("title", e.target.value)}
-          fullWidth
-        />
-        <TextField
           label="Attribute: href"
           value={attributes.href}
           onChange={e => updateAttribute("href", e.target.value)}
           fullWidth
         />
         <TextField
-          label="Attribute: target"
-          value={attributes.target}
-          onChange={e => updateAttribute("target", e.target.value)}
+          label="Is button"
+          value={attributes["data-button"] || ""}
+          onChange={e => updateAttribute("data-button", e.target.value)}
           select
           fullWidth
         >
-          <MenuItem value="">_self (implicit)</MenuItem>
-          <MenuItem value="_self">_self (explicit)</MenuItem>
-          <MenuItem value="_blank">_blank</MenuItem>
-          <MenuItem value="_parent">_parent</MenuItem>
-          <MenuItem value="_top">_top</MenuItem>
+          <MenuItem value="">False</MenuItem>
+          <MenuItem value="true">True</MenuItem>
         </TextField>
       </DialogContent>
       <DialogActions>

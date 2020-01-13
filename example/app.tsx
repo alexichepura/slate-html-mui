@@ -70,6 +70,13 @@ const useStyles = makeStyles(
       borderRight: "1px solid " + theme.palette.divider,
     },
     editable: { minHeight: "100px", padding: "8px" },
+    '@global [data-button="true"]': {
+      padding: "5px 15px 5px 15px",
+      backgroundColor: "#B00000",
+      border: "1px solid #7F0000",
+      color: "#FFF",
+      textShadow: "1px 1px 4px #000",
+    },
   }),
   { name: SlateHtmlEditor.displayName }
 )

@@ -110,8 +110,12 @@ HtmlAnchorElement.displayName = "HtmlAnchorElement"
 
 type TLinkButtonProps = {
   LinkFormDialog?: FC<TLinkFormDialogProps>
-} & Omit<TToolbarButtonProps, "tooltipTitle">
-export const LinkButton: FC<TLinkButtonProps> = ({ LinkFormDialog: _LinkFormDialog, ...rest }) => {
+} & Omit<TToolbarButtonProps, "tooltipTitle"> & { tooltipTitle?: string }
+export const LinkButton: FC<TLinkButtonProps> = ({
+  LinkFormDialog: _LinkFormDialog,
+  children,
+  ...rest
+}) => {
   const editor = useSlate()
   const isActive = isLinkActive(editor)
   const [state, setState] = useState<TLinkButtonState>(defaults)
@@ -151,7 +155,7 @@ export const LinkButton: FC<TLinkButtonProps> = ({ LinkFormDialog: _LinkFormDial
         onClick={handleOpen}
         {...rest}
       >
-        <Link />
+        {children || <Link />}
       </ToolbarButton>
       <LinkFormDialogComponent
         open={state.open}

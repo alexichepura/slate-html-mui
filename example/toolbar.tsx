@@ -42,7 +42,12 @@ export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
         tag={EHtmlMarkTag.u}
         children={<FormatUnderlinedTwoTone />}
       />
-      <LinkButton LinkFormDialog={CustomLinkFormDialog} />
+      <LinkButton />
+      <LinkButton
+        LinkFormDialog={CustomLinkFormDialog}
+        tooltipTitle="Custom Link"
+        children={"CL"}
+      />
       <ImgButton />
       <PictureButton />
 

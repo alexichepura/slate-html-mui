@@ -25,7 +25,7 @@
     "webpack-dev-server": "^3.10.1"
   },
   "files": [
-    "dist/*(*.ts|*.js)",
+    "dist/**(*.ts|*.js)",
     "package.json",
     "LICENSE",
     "README.md"
@@ -56,5 +56,5 @@
   "sideEffects": false,
   "types": "dist/index.d.ts",
   "typings": "dist/index.d.ts",
-  "version": "0.5.2"
+  "version": "0.5.3"
 }

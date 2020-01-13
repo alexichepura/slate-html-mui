@@ -7,12 +7,13 @@ import { deserializeHtml, Leaf, RenderElement, serializeHtml, TTagElement, useSt
 import { initial, initial_string } from "./initial"
 import { CustomToolbar } from "./toolbar"
 import { withHtmlEditor } from "../src/create"
+import { withButtonLink } from "./button-link"
 
 const SlateHtmlEditor: FC<{ value: TTagElement[]; setValue: (value: TTagElement[]) => void }> = ({
   value,
   setValue,
 }) => {
-  const editor = useMemo(() => withHtmlEditor(createEditor()), [])
+  const editor = useMemo(() => withHtmlEditor(withButtonLink(createEditor())), [])
   const renderElement = useCallback(RenderElement, [])
   const renderLeaf = useCallback(Leaf, [])
   const [isSticky, stickyPlaceholderRef] = useSticky()

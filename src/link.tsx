@@ -17,14 +17,15 @@ import { TTagElement } from "./html"
 
 export const LINK_TAG = "a"
 
+type TAnchorAnyAttributes = AnchorHTMLAttributes<any> & Record<string, string>
 type TSetLinkCommand = {
-  attributes: AnchorHTMLAttributes<any>
+  attributes: TAnchorAnyAttributes
   text: string
   range: Range
 }
 export type THtmlLinkSlateElement = TTagElement & {
   text: Text["text"]
-  attributes: AnchorHTMLAttributes<any>
+  attributes: TAnchorAnyAttributes
 }
 
 type TLinkSelection = {
@@ -33,7 +34,6 @@ type TLinkSelection = {
   link: THtmlLinkSlateElement | null
   text: string
 }
-type TAnchorAnyAttributes = AnchorHTMLAttributes<any> & Record<string, string>
 type TLinkButtonState = {
   open: boolean
   attributes: TAnchorAnyAttributes
@@ -79,11 +79,7 @@ const getInitialLinkData = (editor: Editor): TLinkButtonStateInitial => {
     link,
     text,
     range: editor.selection ? { ...editor.selection } : null,
-    attributes: {
-      href: (link && link.attributes.href) || "",
-      title: (link && link.attributes.title) || "",
-      target: (link && link.attributes.target) || "",
-    },
+    attributes: link ? link.attributes : {},
   }
 }
 
@@ -92,16 +88,14 @@ export const isHtmlAnchorElement = (
 ): element is THtmlLinkSlateElement => {
   return element.tag === LINK_TAG
 }
-const cleanAttributesMutate = (attributes: AnchorHTMLAttributes<any>) =>
+const cleanAttributesMutate = (attributes: TAnchorAnyAttributes) =>
   Object.entries(attributes).forEach(([key, value]) => {
     return (value === null || value === undefined) && delete (attributes as any)[key]
   })
 export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
-  const resultAttributes: AnchorHTMLAttributes<any> = {
+  const resultAttributes: TAnchorAnyAttributes = {
     ...attributes,
     ...element.attributes,
-    target: element.attributes.target || null,
-    title: element.attributes.title || null,
   }
   cleanAttributesMutate(resultAttributes)
   return React.createElement(LINK_TAG, resultAttributes, children)

@@ -7,10 +7,11 @@ import {
   TextField,
 } from "@material-ui/core"
 import React, { FC } from "react"
-import { TLinkFormDialogProps } from "../src"
+import { TLinkFormDialogProps, TTagElement } from "../src"
 import { useSlate } from "slate-react"
 import { ToolbarButton } from "../src/toolbar-button"
 import { Editor, Transforms } from "slate"
+import { LINK_TAG } from "../src/link"
 
 export const ButtonLinkFormDialog: FC<TLinkFormDialogProps> = ({
   open,
@@ -24,7 +25,7 @@ export const ButtonLinkFormDialog: FC<TLinkFormDialogProps> = ({
 }) => {
   return (
     <Dialog open={open} onClose={onClose} aria-labelledby="link-form-dialog-title">
-      <DialogTitle id="link-form-dialog-title">Insert/Edit Link</DialogTitle>
+      <DialogTitle id="link-form-dialog-title">Insert/Edit Button Link</DialogTitle>
       <DialogContent>
         <TextField
           label="Text to display"
@@ -55,6 +56,8 @@ export const ButtonLinkFormDialog: FC<TLinkFormDialogProps> = ({
 }
 ButtonLinkFormDialog.displayName = "ButtonLinkFormDialog"
 
+const DATA_ATTRIBUTE = "data-button"
+
 export const ButtonLinkButton: FC = () => {
   const slate = useSlate()
   const isActive = isButtonLinkActive(slate)
@@ -67,30 +70,45 @@ export const ButtonLinkButton: FC = () => {
         event.preventDefault()
         insertButtonLink(slate)
       }}
-      children={"BL"}
+      children={"BtL"}
     />
   )
 }
 ButtonLinkButton.displayName = "ButtonLinkButton"
 
+const insertButtonLink = (editor: Editor) => {
+  Transforms.setNodes(editor, {
+    tag: "a",
+    attributes: {
+      [DATA_ATTRIBUTE]: "true",
+    },
+    children: [{ text: "text" }],
+  })
+  return
+}
+
+const isElementButtonLink = (tagElement: TTagElement) => {
+  return (
+    tagElement.tag === LINK_TAG &&
+    tagElement.attributes &&
+    tagElement.attributes[DATA_ATTRIBUTE] === "true"
+  )
+}
+
 export const isButtonLinkActive = (editor: Editor) => {
   const [match] = Editor.nodes(editor, {
-    match: n => {
-      return n.tag === "a" && n.attributes && n.attributes["data-button"]
-    },
+    match: n => isElementButtonLink(n as TTagElement),
   })
 
   return !!match
 }
 
-const insertButtonLink = (editor: Editor) => {
-  // const isActive = isButtonLinkActive(editor)
+export const withButtonLink = (editor: Editor) => {
+  const { isInline } = editor
 
-  Transforms.setNodes(editor, {
-    tag: "a",
-    attributes: {
-      "data-button": "true",
-    },
-  })
-  return
+  editor.isInline = element => {
+    return isElementButtonLink(element as TTagElement) ? false : isInline(element)
+  }
+
+  return editor
 }

@@ -26,19 +26,26 @@ const attributes2String = (attributes: TAttributes): string => {
   return attributesString.length > 0 ? " " + attributesString : ""
 }
 
-const formatToString = (tag: string, attributes: TAttributes, children: string) => {
+export const formatTagToString = (tag: string, attributes: TAttributes, children: string) => {
   return `<${tag}${attributes2String(attributes)}>${children}</${tag}>`
 }
 const formatVoidToString = (tag: string, attributes: TAttributes) => {
   return `<${tag}${attributes2String(attributes)}/>`
 }
 
-export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | Node[]): string => {
+type TSerializeInput = TTagElement | TTagElement[] | Text | Text[] | Node[]
+export type TSerialize<T = unknown> = (node: TSerializeInput | T, cb?: TSerialize<T>) => string
+
+export function serialize<T>(node: TSerializeInput, cb?: TSerialize<T>): string {
+  const cbResult = cb && cb(node)
+  if (cbResult) {
+    return cbResult
+  }
   if (Text.isText(node)) {
     const markTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
     let text
     if (markTag && markTag[0]) {
-      text = formatToString(markTag[0], null, escapeHtml(node.text))
+      text = formatTagToString(markTag[0], null, escapeHtml(node.text))
     } else {
       text = escapeHtml(node.text)
     }
@@ -46,15 +53,15 @@ export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | No
   }
 
   if (Array.isArray(node)) {
-    return (node as (TTagElement | Text)[]).map(serialize).join("")
+    return (node as (TTagElement | Text)[]).map(n => serialize(n, cb)).join("")
   }
 
-  const children = node.children && node.children.map(serialize).join("")
+  const children = node.children && node.children.map(n => serialize(n, cb)).join("")
   if (children === undefined) {
     return ""
   }
   if (node.tag in EHtmlBlockTag) {
-    return formatToString(node.tag, null, children)
+    return formatTagToString(node.tag, null, children)
   }
 
   if (isHtmlAnchorElement(node)) {
@@ -62,14 +69,14 @@ export const serialize = (node: TTagElement | TTagElement[] | Text | Text[] | No
       ...node.attributes,
       href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
     }
-    return formatToString(node.tag, attributes, children)
+    return formatTagToString(node.tag, attributes, children)
   }
 
   if (isHtmlImgElement(node)) {
-    return formatToString(node.tag, node.attributes, children)
+    return formatTagToString(node.tag, node.attributes, children)
   }
   if (isHtmlPictureElement(node)) {
-    return formatToString(node.tag, node.attributes, children)
+    return formatTagToString(node.tag, node.attributes, children)
   }
 
   if (node.tag in EHtmlVoidTag) {

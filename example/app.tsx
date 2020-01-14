@@ -3,13 +3,21 @@ import React, { FC, useCallback, useMemo, useState, CSSProperties } from "react"
 import { render } from "react-dom"
 import { createEditor, Node } from "slate"
 import { Editable, ReactEditor, RenderElementProps, Slate, withReact } from "slate-react"
-import { deserializeHtml, Leaf, RenderElement, serializeHtml, TTagElement, useSticky } from "../src"
-import { withHtmlEditor } from "../src/create"
+import {
+  deserializeHtml,
+  Leaf,
+  RenderElement,
+  serializeHtml,
+  TTagElement,
+  useSticky,
+  withHtmlEditor,
+} from "../src"
 import {
   ButtonLinkElement,
   isElementButtonLink,
   BUTTON_LINK_DATA_ATTRIBUTE,
   withButtonLink,
+  serializeWithButtonLink,
 } from "./button-link"
 import { initial, initial_string } from "./initial"
 import { CustomToolbar } from "./toolbar"
@@ -98,7 +106,7 @@ const useStyles = makeStyles(
 const MyEditor: FC = () => {
   const [value, setValue] = useState<TTagElement[]>(initial)
   const saveToLocalstorage = () => {
-    const str = serializeHtml(value)
+    const str = serializeHtml(value, serializeWithButtonLink)
     localStorage.setItem("slate-mui-value", str)
   }
   const loadFromLocalstorage = () => {

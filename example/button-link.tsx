@@ -1,7 +1,7 @@
 import React, { CSSProperties, FC, useState } from "react"
 import { Editor, Element as SlateElement, Path, Range, Text, Transforms } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TAnchorAnyAttributes, ToolbarButton } from "../src"
+import { TAnchorAnyAttributes, ToolbarButton, TSerialize, formatTagToString } from "../src"
 import { CustomLinkFormDialog } from "./custom-link"
 
 export const withButtonLink = (editor: Editor) => {
@@ -134,8 +134,9 @@ const insertButtonLink = (editor: Editor, command: TSetLinkCommand) => {
   Transforms.setNodes(editor, buttonLink, { at: range })
 }
 
-export const isElementButtonLink = (el: SlateElement | TButtonLinkElement): boolean =>
-  el.type === BUTTON_LINK_TYPE
+export const isElementButtonLink = (
+  el: SlateElement | TButtonLinkElement | any
+): el is TButtonLinkElement => el.type === BUTTON_LINK_TYPE
 
 const match = (n: any) => isElementButtonLink(n as TButtonLinkElement)
 const isButtonLinkActive = (editor: Editor): boolean => {
@@ -156,8 +157,16 @@ const getInitialLinkData = (editor: Editor): TButtonLinkButtonStateInitial => {
   const link = findLink(editor)
 
   return {
-    txt: "",
+    txt: link ? link.txt : "",
     range: editor.selection ? { ...editor.selection } : null,
     attributes: link ? link.attributes : {},
   }
+}
+
+export const serializeWithButtonLink: TSerialize<TButtonLinkElement> = node => {
+  if (isElementButtonLink(node)) {
+    const text = formatTagToString("a", node.attributes, node.txt)
+    return `<div ${BUTTON_LINK_DATA_ATTRIBUTE}="true">${text}</div>`
+  }
+  return ""
 }

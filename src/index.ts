@@ -1,4 +1,4 @@
-export { createHtmlEditor } from "./create"
+export { createHtmlEditor, withHtmlEditor } from "./create"
 export {
   EHtmlBlockTag,
   EHtmlMarkTag,
@@ -8,7 +8,13 @@ export {
   Leaf,
 } from "./format"
 export { RedoButton, UndoButton } from "./history"
-export { deserialize as deserializeHtml, serialize as serializeHtml, TTagElement } from "./html"
+export {
+  deserialize as deserializeHtml,
+  serialize as serializeHtml,
+  TTagElement,
+  TSerialize,
+  formatTagToString,
+} from "./html"
 export { ImgButton } from "./image/img"
 export { PictureButton } from "./image/picture"
 export {

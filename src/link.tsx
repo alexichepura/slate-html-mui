@@ -17,7 +17,7 @@ import { TTagElement } from "./html"
 
 export const LINK_TAG = "a"
 
-type TAnchorAnyAttributes = AnchorHTMLAttributes<any> & Record<string, string>
+export type TAnchorAnyAttributes = AnchorHTMLAttributes<any> & Record<string, string>
 type TSetLinkCommand = {
   attributes: TAnchorAnyAttributes
   text: string
@@ -229,9 +229,9 @@ export type TLinkFormDialogProps = {
   open: boolean
   updateText: (text: string) => void
   updateAttribute: (name: keyof AnchorHTMLAttributes<any> | string, value: string) => void
-  onRemove: () => void
   onClose: () => void
   onOk: () => void
+  onRemove?: () => void
 }
 export const LinkFormDialog: FC<TLinkFormDialogProps> = ({
   open,
@@ -280,9 +280,11 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({
         </TextField>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onRemove} color="secondary">
-          Remove link
-        </Button>
+        {onRemove && (
+          <Button onClick={onRemove} color="secondary">
+            Remove link
+          </Button>
+        )}
         <Button onClick={onClose} color="primary">
           Cancel
         </Button>

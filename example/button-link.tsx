@@ -1,116 +1,163 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  TextField,
-} from "@material-ui/core"
-import React, { FC } from "react"
-import { TLinkFormDialogProps, TTagElement } from "../src"
-import { useSlate } from "slate-react"
-import { ToolbarButton } from "../src/toolbar-button"
-import { Editor, Transforms } from "slate"
-import { LINK_TAG } from "../src/link"
+import React, { CSSProperties, FC, useState } from "react"
+import { Editor, Element as SlateElement, Path, Range, Text, Transforms } from "slate"
+import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
+import { TAnchorAnyAttributes, ToolbarButton } from "../src"
+import { CustomLinkFormDialog } from "./custom-link"
 
-export const ButtonLinkFormDialog: FC<TLinkFormDialogProps> = ({
-  open,
-  text,
-  attributes,
-  updateText,
-  updateAttribute,
-  onRemove,
-  onClose,
-  onOk,
-}) => {
-  return (
-    <Dialog open={open} onClose={onClose} aria-labelledby="link-form-dialog-title">
-      <DialogTitle id="link-form-dialog-title">Insert/Edit Button Link</DialogTitle>
-      <DialogContent>
-        <TextField
-          label="Text to display"
-          value={text}
-          onChange={e => updateText(e.target.value)}
-          fullWidth
-        />
-        <TextField
-          label="Attribute: href"
-          value={attributes.href}
-          onChange={e => updateAttribute("href", e.target.value)}
-          fullWidth
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onRemove} color="secondary">
-          Remove link
-        </Button>
-        <Button onClick={onClose} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={onOk} color="primary">
-          OK
-        </Button>
-      </DialogActions>
-    </Dialog>
-  )
+export const withButtonLink = (editor: Editor) => {
+  const { isVoid } = editor
+
+  editor.isVoid = element => {
+    return isElementButtonLink((element as any) as TButtonLinkElement) ? true : isVoid(element)
+  }
+
+  return editor
 }
-ButtonLinkFormDialog.displayName = "ButtonLinkFormDialog"
 
-const DATA_ATTRIBUTE = "data-button"
+export const BUTTON_LINK_DATA_ATTRIBUTE = "data-article-link-button"
+const dataAttributeObject = { [BUTTON_LINK_DATA_ATTRIBUTE]: "true" }
+
+type TSetLinkCommand = {
+  attributes: TAnchorAnyAttributes
+  txt: string
+  range: Range
+}
+export type THtmlLinkSlateElement = {
+  txt: Text["text"]
+  attributes: TAnchorAnyAttributes
+  children: Text[]
+}
+
+type TButtonLinkButtonState = {
+  open: boolean
+  txt: string
+  attributes: TAnchorAnyAttributes
+  range: Range | null
+}
+
+type TButtonLinkButtonStateInitial = Omit<TButtonLinkButtonState, "open">
+
+const defaults: TButtonLinkButtonState = {
+  open: false,
+  range: null,
+  txt: "",
+  attributes: {},
+}
+
+const cleanAttributesMutate = (attributes: TAnchorAnyAttributes) =>
+  Object.entries(attributes).forEach(([key, value]) => {
+    return (value === null || value === undefined) && delete (attributes as any)[key]
+  })
 
 export const ButtonLinkButton: FC = () => {
-  const slate = useSlate()
-  const isActive = isButtonLinkActive(slate)
+  const editor = useSlate()
+  const isActive = isButtonLinkActive(editor)
+  const [state, setState] = useState<TButtonLinkButtonState>(defaults)
+  const mergeState = (partState: Partial<TButtonLinkButtonState>) =>
+    setState({ ...state, ...partState })
+
+  const handleOpen = () => {
+    const linkData = getInitialLinkData(editor)
+    mergeState({ open: true, ...linkData })
+  }
+
+  const onOk = () => {
+    if (!state.range) {
+      throw new Error("Invalid range. Must be typeof Range.")
+    }
+    const { txt, attributes, range } = state
+    cleanAttributesMutate(attributes)
+    const command: TSetLinkCommand = { attributes, txt, range }
+    insertButtonLink(editor, command)
+    mergeState({ open: false })
+  }
+
+  const updateAttribute = (name: string, value: string) =>
+    mergeState({ attributes: { ...state.attributes, [name]: value } })
   return (
-    <ToolbarButton
-      tooltipTitle="Button Link"
-      color={isActive ? "primary" : "default"}
-      variant={isActive ? "contained" : "text"}
-      onMouseDown={event => {
-        event.preventDefault()
-        insertButtonLink(slate)
-      }}
-      children={"BtL"}
-    />
+    <>
+      <ToolbarButton
+        tooltipTitle="Button Link"
+        color={isActive ? "primary" : "default"}
+        variant={isActive ? "contained" : "text"}
+        onClick={handleOpen}
+        children={"BtL"}
+      />
+      <CustomLinkFormDialog
+        open={state.open}
+        attributes={state.attributes}
+        text={state.txt}
+        onOk={onOk}
+        updateText={txt => mergeState({ txt })}
+        updateAttribute={updateAttribute}
+        onClose={() => mergeState({ open: false })}
+      />
+    </>
   )
 }
 ButtonLinkButton.displayName = "ButtonLinkButton"
 
-const insertButtonLink = (editor: Editor) => {
-  const link: TTagElement = {
-    tag: LINK_TAG,
-    attributes: {
-      [DATA_ATTRIBUTE]: "true",
-    },
-    children: [{ text: "text" }],
+export const ButtonLinkElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
+  const buttonLinkElement = (element as unknown) as TButtonLinkElement
+  const selected = useSelected()
+  const focused = useFocused()
+  const style: CSSProperties = {
+    boxShadow: `${selected && focused ? "0 0 0 3px #B4D5FF" : "none"}`,
+    pointerEvents: "none",
   }
-
-  Transforms.setNodes(editor, link)
-  return
-}
-
-const isElementButtonLink = (tagElement: TTagElement) => {
   return (
-    tagElement.tag === LINK_TAG &&
-    tagElement.attributes &&
-    tagElement.attributes[DATA_ATTRIBUTE] === "true"
+    <div {...attributes} {...dataAttributeObject}>
+      <div contentEditable={false} style={style}>
+        <a {...buttonLinkElement.attributes}>{buttonLinkElement.txt}</a>
+      </div>
+      {children}
+    </div>
   )
 }
+ButtonLinkElement.displayName = "ButtonLinkElement"
 
-export const isButtonLinkActive = (editor: Editor) => {
-  const [match] = Editor.nodes(editor, {
-    match: n => isElementButtonLink(n as TTagElement),
-  })
-
-  return !!match
+const BUTTON_LINK_TYPE = "ButtonLink"
+type TButtonLinkElement = {
+  type: "ButtonLink"
+  txt: string
+  attributes: TAnchorAnyAttributes
+  children: Text[]
+}
+const insertButtonLink = (editor: Editor, command: TSetLinkCommand) => {
+  const { txt, attributes, range } = command
+  const buttonLink: TButtonLinkElement = {
+    type: BUTTON_LINK_TYPE,
+    txt,
+    attributes,
+    children: [{ text: "" }],
+  }
+  Transforms.setNodes(editor, buttonLink, { at: range })
 }
 
-export const withButtonLink = (editor: Editor) => {
-  const { isInline } = editor
+export const isElementButtonLink = (el: SlateElement | TButtonLinkElement): boolean =>
+  el.type === BUTTON_LINK_TYPE
 
-  editor.isInline = element => {
-    return isElementButtonLink(element as TTagElement) ? false : isInline(element)
+const match = (n: any) => isElementButtonLink(n as TButtonLinkElement)
+const isButtonLinkActive = (editor: Editor): boolean => {
+  const [matched] = Editor.nodes(editor, { match })
+  return Boolean(matched)
+}
+
+const findLinkEntry = (editor: Editor): [THtmlLinkSlateElement, Path] => {
+  const [linkEntry] = Editor.nodes<THtmlLinkSlateElement>(editor, { match })
+  return linkEntry
+}
+const findLink = (editor: Editor): THtmlLinkSlateElement | null => {
+  const linkEntry = findLinkEntry(editor)
+  return linkEntry ? linkEntry[0] : null
+}
+
+const getInitialLinkData = (editor: Editor): TButtonLinkButtonStateInitial => {
+  const link = findLink(editor)
+
+  return {
+    txt: "",
+    range: editor.selection ? { ...editor.selection } : null,
+    attributes: link ? link.attributes : {},
   }
-
-  return editor
 }

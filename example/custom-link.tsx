@@ -4,7 +4,6 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  MenuItem,
   TextField,
 } from "@material-ui/core"
 import React, { FC } from "react"
@@ -26,26 +25,16 @@ export const CustomLinkFormDialog: FC<TLinkFormDialogProps> = ({
       <DialogContent>
         <TextField
           label="Text to display"
-          value={text}
+          value={text || ""}
           onChange={e => updateText(e.target.value)}
           fullWidth
         />
         <TextField
           label="Attribute: href"
-          value={attributes.href}
+          value={attributes.href || ""}
           onChange={e => updateAttribute("href", e.target.value)}
           fullWidth
         />
-        <TextField
-          label="Is custom"
-          value={attributes["data-custom"] || ""}
-          onChange={e => updateAttribute("data-custom", e.target.value)}
-          select
-          fullWidth
-        >
-          <MenuItem value="">False</MenuItem>
-          <MenuItem value="true">True</MenuItem>
-        </TextField>
       </DialogContent>
       <DialogActions>
         <Button onClick={onRemove} color="secondary">

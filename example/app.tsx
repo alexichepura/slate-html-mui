@@ -1,20 +1,31 @@
 import { Button, Card, makeStyles } from "@material-ui/core"
-import React, { FC, useCallback, useMemo, useState } from "react"
+import React, { FC, useCallback, useMemo, useState, CSSProperties } from "react"
 import { render } from "react-dom"
-import { Node, createEditor } from "slate"
-import { Editable, ReactEditor, Slate } from "slate-react"
+import { createEditor, Node } from "slate"
+import { Editable, ReactEditor, RenderElementProps, Slate, withReact } from "slate-react"
 import { deserializeHtml, Leaf, RenderElement, serializeHtml, TTagElement, useSticky } from "../src"
+import { withHtmlEditor } from "../src/create"
+import {
+  ButtonLinkElement,
+  isElementButtonLink,
+  BUTTON_LINK_DATA_ATTRIBUTE,
+  withButtonLink,
+} from "./button-link"
 import { initial, initial_string } from "./initial"
 import { CustomToolbar } from "./toolbar"
-import { withHtmlEditor } from "../src/create"
-import { withButtonLink } from "./button-link"
 
 const SlateHtmlEditor: FC<{ value: TTagElement[]; setValue: (value: TTagElement[]) => void }> = ({
   value,
   setValue,
 }) => {
-  const editor = useMemo(() => withHtmlEditor(withButtonLink(createEditor())), [])
-  const renderElement = useCallback(RenderElement, [])
+  const editor = useMemo(() => withHtmlEditor(withButtonLink(withReact(createEditor()))), [])
+  const renderElement = useCallback((props: RenderElementProps) => {
+    console.log("renderElement", props.element)
+    if (isElementButtonLink(props.element)) {
+      return <ButtonLinkElement {...props} />
+    }
+    return <RenderElement {...props} />
+  }, [])
   const renderLeaf = useCallback(Leaf, [])
   const [isSticky, stickyPlaceholderRef] = useSticky()
 
@@ -64,12 +75,22 @@ const useStyles = makeStyles(
       borderRight: "1px solid " + theme.palette.divider,
     },
     editable: { minHeight: "100px", padding: "8px" },
-    '@global [data-button="true"]': {
+    [`@global [data-custom="true"] a`]: {
       padding: "5px 15px 5px 15px",
       backgroundColor: "#B00000",
       border: "1px solid #7F0000",
       color: "#FFF",
       textShadow: "1px 1px 4px #000",
+    },
+    [`@global [${BUTTON_LINK_DATA_ATTRIBUTE}="true"] a`]: {
+      backgroundColor: "#32CD32",
+      color: "#fff",
+      textShadow: "1px 0px 1px rgba(0,0,0,0.2)",
+      padding: "15px 50px",
+      width: "300px",
+      textAlign: "center" as CSSProperties["textAlign"],
+      margin: "0 auto",
+      display: "block",
     },
   }),
   { name: SlateHtmlEditor.displayName }

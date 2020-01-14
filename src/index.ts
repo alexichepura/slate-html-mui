@@ -10,11 +10,12 @@ export {
 export { RedoButton, UndoButton } from "./history"
 export {
   deserialize as deserializeHtml,
-  serialize as serializeHtml,
-  TTagElement,
-  TSerialize,
   formatTagToString,
   getAttributes,
+  serialize as serializeHtml,
+  TDeserialize,
+  TSerialize,
+  TTagElement,
 } from "./html"
 export { ImgButton } from "./image/img"
 export { PictureButton } from "./image/picture"

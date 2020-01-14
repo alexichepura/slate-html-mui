@@ -1,9 +1,15 @@
 import React, { CSSProperties, FC, useState } from "react"
 import { Editor, Element as SlateElement, Path, Range, Text, Transforms } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TAnchorAnyAttributes, ToolbarButton, TSerialize, formatTagToString } from "../src"
+import {
+  TAnchorAnyAttributes,
+  ToolbarButton,
+  TSerialize,
+  formatTagToString,
+  TDeserialize,
+  getAttributes,
+} from "../src"
 import { CustomLinkFormDialog } from "./custom-link"
-import { TDeserialize, getAttributes } from "../src/html"
 
 export const withButtonLink = (editor: Editor) => {
   const { isVoid } = editor

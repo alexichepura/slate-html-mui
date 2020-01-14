@@ -20,7 +20,6 @@ const SlateHtmlEditor: FC<{ value: TTagElement[]; setValue: (value: TTagElement[
 }) => {
   const editor = useMemo(() => withHtmlEditor(withButtonLink(withReact(createEditor()))), [])
   const renderElement = useCallback((props: RenderElementProps) => {
-    console.log("renderElement", props.element)
     if (isElementButtonLink(props.element)) {
       return <ButtonLinkElement {...props} />
     }

@@ -3,6 +3,7 @@ import { Editor, Element as SlateElement, Path, Range, Text, Transforms } from "
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import { TAnchorAnyAttributes, ToolbarButton, TSerialize, formatTagToString } from "../src"
 import { CustomLinkFormDialog } from "./custom-link"
+import { TDeserialize, getAttributes } from "../src/html"
 
 export const withButtonLink = (editor: Editor) => {
   const { isVoid } = editor
@@ -169,4 +170,22 @@ export const serializeWithButtonLink: TSerialize<TButtonLinkElement> = node => {
     return `<div ${BUTTON_LINK_DATA_ATTRIBUTE}="true">${text}</div>`
   }
   return ""
+}
+export const deserializeWithButtonLink: TDeserialize<TButtonLinkElement> = el => {
+  if (el.nodeName.toLowerCase() !== "div") {
+    return null
+  }
+  const attr = (el as Element).attributes.getNamedItem(BUTTON_LINK_DATA_ATTRIBUTE)
+
+  if (attr && attr.value === "true") {
+    const a = (el as Element).firstChild! as Element
+    const link: TButtonLinkElement = {
+      type: BUTTON_LINK_TYPE,
+      txt: a.textContent || "",
+      attributes: getAttributes(a),
+      children: [{ text: "" }],
+    }
+    return link
+  }
+  return null
 }

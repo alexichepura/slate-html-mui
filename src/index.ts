@@ -14,6 +14,7 @@ export {
   TTagElement,
   TSerialize,
   formatTagToString,
+  getAttributes,
 } from "./html"
 export { ImgButton } from "./image/img"
 export { PictureButton } from "./image/picture"

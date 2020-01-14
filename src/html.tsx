@@ -1,9 +1,9 @@
 import escapeHtml from "escape-html"
 import { Descendant, Element as SlateElement, Text } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
+import { IMG_TAG, isHtmlImgElement } from "./image/img"
+import { isHtmlPictureElement, PICTURE_TAG } from "./image/picture"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
-import { isHtmlImgElement, IMG_TAG } from "./image/img"
-import { PICTURE_TAG, isHtmlPictureElement } from "./image/picture"
 
 type TAttributes = Record<string, any> | null
 export type TTagElement = {
@@ -87,14 +87,42 @@ export function serialize<T>(node: TSerializeInput, cb?: TSerialize<T>): string 
 }
 
 // DESEREALIZE
-const deserializeChildNodes = (nodes: NodeListOf<ChildNode>) =>
-  Array.from(nodes)
-    .map(deserialize)
+function deserializeChildNodes<T>(nodes: NodeListOf<ChildNode>, cb?: TDeserialize<T>) {
+  return Array.from(nodes)
+    .map(n => deserialize(n, cb))
     .flat()
+}
 
-export const deserialize = (
-  el: Element | ChildNode
-): SlateElement | Text | string | null | Descendant[] | TTagElement => {
+export const getAttributes = (el: Element) =>
+  Array.from(el.attributes).reduce<Record<string, string>>((prev, attr) => {
+    if (attr.name === "style" || attr.name === "class") {
+      return prev
+    }
+    // if (attr.name === "style") {
+    //   const { style } = parseCSSText(attr.value)
+    //   prev[attr.name] = style as any // TODO proper types
+    //   return prev
+    // }
+
+    // const name = attr.name === "class" ? "className" : attr.name
+    prev[attr.name] = attr.value
+    return prev
+  }, {})
+
+type TDeserializeInput = Element | ChildNode
+type TDeserializeOutput = SlateElement | Text | string | null | Descendant[] | TTagElement
+export type TDeserialize<T = unknown> = (
+  el: TDeserializeInput,
+  cb?: TDeserialize<T>
+) => TDeserializeOutput | T
+export function deserialize<T>(
+  el: TDeserializeInput,
+  cb?: TDeserialize<T>
+): TDeserializeOutput | T {
+  const cbResult = cb && cb(el)
+  if (cbResult) {
+    return cbResult
+  }
   if (el.nodeType === 3) {
     return { text: el.textContent || "" }
   }
@@ -103,29 +131,13 @@ export const deserialize = (
   }
 
   if (el.nodeName === "BODY") {
-    return deserializeChildNodes(el.childNodes)
+    return deserializeChildNodes(el.childNodes, cb)
   }
 
-  const children = deserializeChildNodes(el.childNodes)
+  const children = deserializeChildNodes(el.childNodes, cb)
 
   const tag = el.nodeName.toLowerCase()
-  const attributes = Array.from((el as Element).attributes).reduce<Record<string, string>>(
-    (prev, attr) => {
-      if (attr.name === "style" || attr.name === "class") {
-        return prev
-      }
-      // if (attr.name === "style") {
-      //   const { style } = parseCSSText(attr.value)
-      //   prev[attr.name] = style as any // TODO proper types
-      //   return prev
-      // }
-
-      // const name = attr.name === "class" ? "className" : attr.name
-      prev[attr.name] = attr.value
-      return prev
-    },
-    {}
-  )
+  const attributes = getAttributes(el as Element)
 
   if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG || tag === PICTURE_TAG) {
     if (children.length === 0) {

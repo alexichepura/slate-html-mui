@@ -18,6 +18,7 @@ import {
   BUTTON_LINK_DATA_ATTRIBUTE,
   withButtonLink,
   serializeWithButtonLink,
+  deserializeWithButtonLink,
 } from "./button-link"
 import { initial, initial_string } from "./initial"
 import { CustomToolbar } from "./toolbar"
@@ -112,13 +113,13 @@ const MyEditor: FC = () => {
   const loadFromLocalstorage = () => {
     const savedStr = localStorage.getItem("slate-mui-value") || ""
     const document = new DOMParser().parseFromString(savedStr, "text/html")
-    const savedValue = deserializeHtml(document.body)
+    const savedValue = deserializeHtml(document.body, deserializeWithButtonLink)
 
     setValue(savedValue as any)
   }
   const loadFromSample = () => {
     const document = new DOMParser().parseFromString(initial_string, "text/html")
-    const savedValue = deserializeHtml(document.body)
+    const savedValue = deserializeHtml(document.body, deserializeWithButtonLink)
     setValue(savedValue as any)
   }
   return (

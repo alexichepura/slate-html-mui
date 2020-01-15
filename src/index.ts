@@ -15,7 +15,6 @@ export {
   TSerialize,
   TTagElement,
 } from "./html"
-export { formatTagToString, getAttributes } from "./util"
 export { ImgButton } from "./image/img"
 export { PictureButton } from "./image/picture"
 export {
@@ -30,5 +29,6 @@ export {
 export { RenderElement } from "./render-element"
 export { useSticky } from "./sticky"
 export { Toolbar } from "./toolbar"
-export { TagButton, ToolbarButton } from "./toolbar-button"
+export { TagButton, ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
+export { formatTagToString, formatVoidToString, getAttributes } from "./util"
 export { withHtml } from "./with-html"

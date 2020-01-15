@@ -6,7 +6,7 @@ export const attributes2String = (attributes: TAttributes): string => {
   const attributesString = Object.entries(attributes)
     .filter(([_k, v]) => v !== undefined && v !== null)
     .map(([k, v]) => {
-      return `${k}="${String(v)}"`
+      return `${normalizeAttributeNameToHtml(k)}="${String(v)}"`
     })
     .join(" ")
   return attributesString.length > 0 ? " " + attributesString : ""
@@ -30,7 +30,40 @@ export const getAttributes = (el: Element) =>
     //   return prev
     // }
 
-    const name = attr.name === "class" ? "className" : attr.name === "srcset" ? "srcSet" : attr.name
-    prev[name] = attr.value
+    prev[normalizeAttributeNameToReact(attr.name)] = attr.value
     return prev
   }, {})
+
+export const normalizeAttributeNameToReact = (name: string) => {
+  switch (name) {
+    case "class":
+      return "className"
+    case "srcset":
+      return "srcSet"
+    case "itemprop":
+      return "itemProp"
+    case "itemscope":
+      return "itemScope"
+    case "itemtype":
+      return "itemType"
+    default:
+      return name
+  }
+}
+
+export const normalizeAttributeNameToHtml = (name: string) => {
+  switch (name) {
+    case "className":
+      return "class"
+    case "srcSet":
+      return "srcset"
+    case "itemProp":
+      return "itemprop"
+    case "itemScope":
+      return "itemscope"
+    case "itemType":
+      return "itemtype"
+    default:
+      return name
+  }
+}

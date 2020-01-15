@@ -97,6 +97,8 @@ export const HtmlPictureElement: FC<RenderElementProps> = ({ attributes, childre
 
 HtmlPictureElement.displayName = "HtmlPictureElement"
 
+type TMergeState = (partState: Partial<TPictureElement>) => void
+
 type TPictureButtonProps = {
   PictureFormDialog?: FC<TPictureFormDialogProps>
 } & Omit<TToolbarButtonProps, "tooltipTitle">
@@ -110,7 +112,7 @@ export const PictureButton: FC<TPictureButtonProps> = ({
   const [open, setOpen] = useState<boolean>(false)
   const [state, setState] = useState<TPictureElement>(defaults)
 
-  const mergeState = (partState: Partial<TPictureElement>) => setState({ ...state, ...partState })
+  const mergeState: TMergeState = partState => setState({ ...state, ...partState })
 
   const handleOpen = () => {
     range.current = editor.selection ? { ...editor.selection } : null
@@ -182,6 +184,7 @@ export const PictureButton: FC<TPictureButtonProps> = ({
         updateAttribute={updateAttribute}
         updateImgAttribute={updateImgAttribute}
         updateSourceAttribute={updateSourceAttribute}
+        mergeState={mergeState}
         onClose={onClose}
         addSource={addSource}
         removeSource={removeSource}
@@ -221,6 +224,7 @@ export type TPictureFormDialogProps = {
   updateAttribute: (name: keyof HTMLAttributes<any>, value: string) => void
   updateImgAttribute: (name: keyof ImgHTMLAttributes<any>, value: string) => void
   updateSourceAttribute: TUpdateSourceAttribute
+  mergeState: TMergeState
   addSource: () => void
   removeSource: (i: number) => void
   onClose: () => void

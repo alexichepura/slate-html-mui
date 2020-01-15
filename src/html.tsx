@@ -2,10 +2,10 @@ import escapeHtml from "escape-html"
 import { Descendant, Element as SlateElement, Text } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { IMG_TAG, isHtmlImgElement } from "./image/img"
-import { isHtmlPictureElement, PICTURE_TAG } from "./image/picture"
+import { isHtmlPictureElement, deserializePicture, serializePicture } from "./image/picture"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
+import { formatTagToString, formatVoidToString, getAttributes } from "./util"
 
-type TAttributes = Record<string, any> | null
 export type TTagElement = {
   tag: string
   children?: (TTagElement | Text)[]
@@ -13,26 +13,6 @@ export type TTagElement = {
 }
 
 // SERIALIZE
-const attributes2String = (attributes: TAttributes): string => {
-  if (!attributes) {
-    return ""
-  }
-  const attributesString = Object.entries(attributes)
-    .filter(([_k, v]) => v !== undefined && v !== null)
-    .map(([k, v]) => {
-      return `${k}="${String(v)}"`
-    })
-    .join(" ")
-  return attributesString.length > 0 ? " " + attributesString : ""
-}
-
-export const formatTagToString = (tag: string, attributes: TAttributes, children: string) => {
-  return `<${tag}${attributes2String(attributes)}>${children}</${tag}>`
-}
-const formatVoidToString = (tag: string, attributes: TAttributes) => {
-  return `<${tag}${attributes2String(attributes)}/>`
-}
-
 type TSerializeInput = TTagElement | TTagElement[] | Text | Text[] | Node[]
 export type TSerialize<T = unknown> = (node: TSerializeInput | T, cb?: TSerialize<T>) => string
 
@@ -41,6 +21,10 @@ export function serialize<T>(node: TSerializeInput, cb?: TSerialize<T>): string 
   if (cbResult) {
     return cbResult
   }
+
+  const picture = serializePicture(node)
+  if (picture) return picture
+
   if (Text.isText(node)) {
     const markTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
     let text
@@ -93,22 +77,6 @@ function deserializeChildNodes<T>(nodes: NodeListOf<ChildNode>, cb?: TDeserializ
     .flat()
 }
 
-export const getAttributes = (el: Element) =>
-  Array.from(el.attributes).reduce<Record<string, string>>((prev, attr) => {
-    if (attr.name === "style" || attr.name === "class") {
-      return prev
-    }
-    // if (attr.name === "style") {
-    //   const { style } = parseCSSText(attr.value)
-    //   prev[attr.name] = style as any // TODO proper types
-    //   return prev
-    // }
-
-    // const name = attr.name === "class" ? "className" : attr.name
-    prev[attr.name] = attr.value
-    return prev
-  }, {})
-
 type TDeserializeInput = Element | ChildNode
 type TDeserializeOutput = SlateElement | Text | string | null | Descendant[] | TTagElement
 export type TDeserialize<T = unknown> = (
@@ -116,30 +84,27 @@ export type TDeserialize<T = unknown> = (
   cb?: TDeserialize<T>
 ) => TDeserializeOutput | T
 export function deserialize<T>(
-  el: TDeserializeInput,
+  element: TDeserializeInput,
   cb?: TDeserialize<T>
 ): TDeserializeOutput | T {
-  const cbResult = cb && cb(el)
-  if (cbResult) {
-    return cbResult
-  }
-  if (el.nodeType === 3) {
-    return { text: el.textContent || "" }
-  }
-  if (el.nodeType !== 1) {
-    return null
-  }
+  const cbResult = cb && cb(element)
+  if (cbResult) return cbResult
 
-  if (el.nodeName === "BODY") {
-    return deserializeChildNodes(el.childNodes, cb)
-  }
+  if (element.nodeType === 3) return { text: element.textContent || "" }
+  const el: Element = element as Element
+
+  if (el.nodeType !== 1) return null
+  if (el.nodeName === "BODY") return deserializeChildNodes(el.childNodes, cb)
+
+  const picture = deserializePicture(el)
+  if (picture) return picture
 
   const children = deserializeChildNodes(el.childNodes, cb)
 
   const tag = el.nodeName.toLowerCase()
-  const attributes = getAttributes(el as Element)
+  const attributes = getAttributes(el)
 
-  if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG || tag === PICTURE_TAG) {
+  if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG) {
     if (children.length === 0) {
       children.push({ text: "" } as Text)
     }

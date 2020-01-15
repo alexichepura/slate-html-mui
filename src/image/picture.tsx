@@ -5,36 +5,44 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Divider,
+  Grid,
 } from "@material-ui/core"
 import PhotoLibrary from "@material-ui/icons/PhotoLibrary"
-import React, { CSSProperties, FC, HTMLAttributes, useState } from "react"
-import { Editor, Element as SlateElement, Node, Path, Range, Text, Transforms } from "slate"
+import React, {
+  CSSProperties,
+  FC,
+  HTMLAttributes,
+  useState,
+  ImgHTMLAttributes,
+  useRef,
+  SourceHTMLAttributes,
+} from "react"
+import { Editor, Element, Node, Range, Text, Transforms, NodeEntry } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import { TTagElement } from "../html"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 
 export const PICTURE_TAG = "picture"
 
-type TSetPictureCommand = {
+type TPictureElement = TTagElement & {
   attributes: HTMLAttributes<any>
+  img: ImgHTMLAttributes<any>
+  sources: SourceHTMLAttributes<any>[]
+}
+export type TPictureNode = Node & TPictureElement
+
+type TSetPictureCommand = {
+  element: TPictureElement
   range: Range
 }
-export type THtmlPictureSlateElement = TTagElement & {
-  attributes: HTMLAttributes<any>
-}
 
-type TPictureButtonState = {
-  open: boolean
-  range: Range | null
-  attributes: HTMLAttributes<any>
-}
-
-type TPictureButtonStateInitial = Omit<TPictureButtonState, "open">
-
-const defaults: TPictureButtonState = {
-  open: false,
-  range: null,
+const defaults: TPictureElement = {
+  tag: PICTURE_TAG,
   attributes: {},
+  img: {},
+  sources: [],
+  children: [{ text: "" }],
 }
 
 const match = (node: Node): boolean => {
@@ -44,26 +52,18 @@ const match = (node: Node): boolean => {
 const isPictureActive = (editor: Editor) => {
   return !!findPicture(editor)
 }
-const findPictureEntry = (editor: Editor): [THtmlPictureSlateElement, Path] => {
-  const [pictureEntry] = Editor.nodes(editor, { match })
-  return pictureEntry as [THtmlPictureSlateElement, Path]
+const findPictureEntry = (editor: Editor): NodeEntry<TPictureNode> => {
+  const [pictureEntry] = Editor.nodes<TPictureNode>(editor, { match })
+  return pictureEntry
 }
-const findPicture = (editor: Editor): THtmlPictureSlateElement | null => {
+const findPicture = (editor: Editor): TPictureElement | null => {
   const pictureEntry = findPictureEntry(editor)
   return pictureEntry ? pictureEntry[0] : null
 }
 
-const getInitialPictureData = (editor: Editor): TPictureButtonStateInitial => {
-  const picture = findPicture(editor)
-  return {
-    range: editor.selection ? { ...editor.selection } : null,
-    attributes: picture ? picture.attributes : {},
-  }
-}
-
 export const isHtmlPictureElement = (
-  element: SlateElement | TTagElement | Text
-): element is THtmlPictureSlateElement => {
+  element: Element | TTagElement | Text
+): element is TPictureElement => {
   return element.tag === PICTURE_TAG
 }
 const cleanAttributesMutate = (attributes: HTMLAttributes<any>) =>
@@ -71,6 +71,7 @@ const cleanAttributesMutate = (attributes: HTMLAttributes<any>) =>
     return (value === null || value === undefined) && delete (attributes as any)[key]
   })
 export const HtmlPictureElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
+  const el: TPictureElement = element as TPictureElement
   const selected = useSelected()
   const focused = useFocused()
   const style: CSSProperties = {
@@ -81,14 +82,18 @@ export const HtmlPictureElement: FC<RenderElementProps> = ({ attributes, childre
   return (
     <span {...attributes}>
       <span contentEditable={false} style={style}>
-        <picture {...element.attributes}>
-          <img />
+        <picture {...el.attributes}>
+          {el.sources.map((s, i) => (
+            <source key={i} {...s} />
+          ))}
+          <img {...el.img} />
         </picture>
       </span>
       {children}
     </span>
   )
 }
+
 HtmlPictureElement.displayName = "HtmlPictureElement"
 
 type TPictureButtonProps = {
@@ -100,23 +105,61 @@ export const PictureButton: FC<TPictureButtonProps> = ({
 }) => {
   const editor = useSlate()
   const isActive = isPictureActive(editor)
-  const [state, setState] = useState<TPictureButtonState>(defaults)
-  const mergeState = (partState: Partial<TPictureButtonState>) =>
-    setState({ ...state, ...partState })
+  const range = useRef<Range | null>(null)
+  const [open, setOpen] = useState<boolean>(false)
+  const [state, setState] = useState<TPictureElement>(defaults)
+
+  const mergeState = (partState: Partial<TPictureElement>) => setState({ ...state, ...partState })
 
   const handleOpen = () => {
-    mergeState({ open: true, ...getInitialPictureData(editor) })
+    range.current = editor.selection ? { ...editor.selection } : null
+    mergeState(findPicture(editor) || defaults)
+    setOpen(true)
   }
 
   const onOk = () => {
-    const { attributes } = state
+    const { attributes, img } = state
     cleanAttributesMutate(attributes)
-    if (!state.range) {
+    cleanAttributesMutate(img)
+    if (!range.current) {
       throw new Error("Invalid range. Must be typeof Range.")
     }
-    const command: TSetPictureCommand = { attributes, range: state.range }
-    insertPicture(editor, command)
-    mergeState({ open: false })
+    const element: TPictureElement = {
+      ...state,
+      attributes,
+      img,
+    }
+    const command: TSetPictureCommand = { element, range: range.current }
+    setPicture(editor, command)
+    setOpen(false)
+  }
+
+  const onClose = () => {
+    setOpen(false)
+  }
+
+  const updateAttribute = (name: string, value: string) =>
+    mergeState({ attributes: { ...state.attributes, [name]: value } })
+
+  const updateImgAttribute = (name: string, value: string) =>
+    mergeState({ img: { ...state.img, [name]: value } })
+
+  const updateSourceAttribute = (sourceIndex: number, name: string, value: string) => {
+    mergeState({
+      sources: state.sources.map((s, i) => (i === sourceIndex ? { ...s, [name]: value } : s)),
+    })
+  }
+
+  const addSource = () => {
+    mergeState({
+      sources: [...state.sources, {}],
+    })
+  }
+
+  const removeSource = (i: number) => {
+    mergeState({
+      sources: [...state.items.slice(0, i), ...state.items.slice(i + 1)],
+    })
   }
 
   const PictureFormDialogComponent = _PictureFormDialog || PictureFormDialog
@@ -132,20 +175,22 @@ export const PictureButton: FC<TPictureButtonProps> = ({
         <PhotoLibrary />
       </ToolbarButton>
       <PictureFormDialogComponent
-        open={state.open}
-        attributes={state.attributes}
+        open={open}
+        picture={state}
         onOk={onOk}
-        updateAttribute={(name, value) =>
-          mergeState({ attributes: { ...state.attributes, [name]: value } })
-        }
-        onClose={() => mergeState({ open: false })}
+        updateAttribute={updateAttribute}
+        updateImgAttribute={updateImgAttribute}
+        updateSourceAttribute={updateSourceAttribute}
+        onClose={onClose}
+        addSource={addSource}
+        removeSource={removeSource}
       />
     </>
   )
 }
 PictureButton.displayName = "PictureButton"
 
-const isPictureTag = (element: TTagElement) => {
+export const isPictureTag = (element: TTagElement) => {
   return element.tag === PICTURE_TAG
 }
 
@@ -159,28 +204,35 @@ export const withPicture = (editor: Editor) => {
   return editor
 }
 
-const insertPicture = (editor: Editor, command: TSetPictureCommand) => {
-  const { attributes, range } = command
-  const picture: TTagElement = {
-    tag: PICTURE_TAG,
-    attributes,
-    children: [{ text: "" }],
-  }
-  Transforms.insertNodes(editor, picture as SlateElement, { at: range })
+const setPicture = (editor: Editor, command: TSetPictureCommand) => {
+  const { element, range } = command
+  Transforms.setNodes(editor, element as Element, { at: range })
 }
 
+type TUpdateSourceAttribute = (
+  i: number,
+  name: keyof SourceHTMLAttributes<any>,
+  value: string
+) => void
 export type TPictureFormDialogProps = {
-  attributes: HTMLAttributes<any>
+  picture: TPictureElement
   open: boolean
   updateAttribute: (name: keyof HTMLAttributes<any>, value: string) => void
+  updateImgAttribute: (name: keyof ImgHTMLAttributes<any>, value: string) => void
+  updateSourceAttribute: TUpdateSourceAttribute
+  addSource: () => void
+  removeSource: (i: number) => void
   onClose: () => void
   onOk: () => void
 }
 export const PictureFormDialog: FC<TPictureFormDialogProps> = ({
   open,
-  attributes,
-  updateAttribute,
+  picture,
+  updateImgAttribute,
+  updateSourceAttribute,
   onClose,
+  removeSource,
+  addSource,
   onOk,
 }) => {
   return (
@@ -188,11 +240,20 @@ export const PictureFormDialog: FC<TPictureFormDialogProps> = ({
       <DialogTitle id="picture-form-dialog-title">Insert/Edit Picture</DialogTitle>
       <DialogContent>
         <TextField
-          label="Attribute: title"
-          value={attributes.title || ""}
-          onChange={e => updateAttribute("title", e.target.value)}
+          label="Img src"
+          value={picture.img.src || ""}
+          onChange={e => updateImgAttribute("src", e.target.value)}
           fullWidth
         />
+        <Divider />
+        <PictureSourceFields
+          sources={picture.sources}
+          updateSourceAttribute={updateSourceAttribute}
+          removeSource={removeSource}
+        />
+        <Button onClick={addSource} color="primary">
+          Add source
+        </Button>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">
@@ -206,3 +267,41 @@ export const PictureFormDialog: FC<TPictureFormDialogProps> = ({
   )
 }
 PictureFormDialog.displayName = "PictureFormDialog"
+
+const PictureSourceFields: FC<{
+  sources: SourceHTMLAttributes<any>[]
+  updateSourceAttribute: TUpdateSourceAttribute
+  removeSource: (i: number) => void
+}> = ({ sources, updateSourceAttribute, removeSource }) => {
+  return (
+    <div>
+      {sources.map((s, i) => {
+        return (
+          <Grid key={i} container>
+            <Grid item>
+              <TextField
+                label="Src set"
+                value={s.srcSet || ""}
+                onChange={e => updateSourceAttribute(i, "srcSet", e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item>
+              <TextField
+                label="Type"
+                value={s.type || ""}
+                onChange={e => updateSourceAttribute(i, "type", e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            <Grid>
+              <Button onClick={() => removeSource(i)} color="primary">
+                Remove
+              </Button>
+            </Grid>
+          </Grid>
+        )
+      })}
+    </div>
+  )
+}

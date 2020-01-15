@@ -109,7 +109,7 @@ export const ImgButton: FC<TImgButtonProps> = ({ ImgFormDialog: _ImgFormDialog, 
       throw new Error("Invalid range. Must be typeof Range.")
     }
     const command: TSetImgCommand = { attributes, range: state.range }
-    insertImg(editor, command)
+    setImg(editor, command)
     mergeState({ open: false })
   }
 
@@ -153,14 +153,14 @@ export const withImg = (editor: Editor) => {
   return editor
 }
 
-const insertImg = (editor: Editor, command: TSetImgCommand) => {
+const setImg = (editor: Editor, command: TSetImgCommand) => {
   const { attributes, range } = command
   const img: TTagElement = {
     tag: IMG_TAG,
     attributes,
     children: [{ text: "" }],
   }
-  Transforms.insertNodes(editor, img as SlateElement, { at: range })
+  Transforms.setNodes(editor, img as SlateElement, { at: range })
 }
 
 export type TImgFormDialogProps = {

@@ -15,8 +15,8 @@ export {
   TSerialize,
   TTagElement,
 } from "./html"
-export { ImgButton } from "./image/img"
-export { PictureButton } from "./image/picture"
+export { ImgButton, TImgFormDialogProps } from "./image/img"
+export { PictureButton, TPictureFormDialogProps } from "./image/picture"
 export {
   HtmlAnchorElement,
   isHtmlAnchorElement,

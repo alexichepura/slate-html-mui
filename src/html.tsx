@@ -94,14 +94,23 @@ export function deserialize<T>(
   const el: Element = element as Element
 
   if (el.nodeType !== 1) return null
-  if (el.nodeName === "BODY") return deserializeChildNodes(el.childNodes, cb)
+  if (el.nodeName === "BODY") {
+    if (el.firstChild && el.firstChild.nodeName === "B") {
+      return deserializeChildNodes(el.firstChild.childNodes, cb)
+    }
+    return deserializeChildNodes(el.childNodes, cb)
+  }
 
   const picture = deserializePicture(el)
   if (picture) return picture
 
-  const children = deserializeChildNodes(el.childNodes, cb)
-
   const tag = el.nodeName.toLowerCase()
+
+  if (tag === EHtmlVoidTag.br) {
+    return { text: "\n" }
+  }
+
+  const children = deserializeChildNodes(el.childNodes, cb)
   const attributes = getAttributes(el)
 
   if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG) {
@@ -116,10 +125,6 @@ export function deserialize<T>(
       const text = typeof child === "string" ? child : child.text
       return { [tag]: true, attributes, text }
     })
-  }
-
-  if (tag === EHtmlVoidTag.br) {
-    return { text: "\n" }
   }
 
   if (tag in EHtmlVoidTag) {

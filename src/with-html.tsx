@@ -1,13 +1,14 @@
-import { Editor, Node, Transforms, Element } from "slate"
+import { Editor, Element, Node, Transforms } from "slate"
 import {
   DEFAULT_TAG,
   EHtmlBlockTag,
   EHtmlListTag,
   EHtmlMarkTag,
-  isTagActive,
   EHtmlVoidTag,
+  isTagActive,
 } from "./format"
 import { deserialize, TTagElement } from "./html"
+import { wrapInlineAndText } from "./html/wrap-inline-and-text"
 
 export const withHtml = (editor: Editor) => {
   const { insertData, isVoid, normalizeNode } = editor
@@ -60,7 +61,15 @@ export const withHtml = (editor: Editor) => {
     if (html) {
       const parsed = new DOMParser().parseFromString(html, "text/html")
       const fragment = deserialize(parsed.body) as Node[]
-      Transforms.insertFragment(editor, fragment)
+      const blocks = wrapInlineAndText(editor, fragment)
+
+      const [node] = Editor.node(editor, editor.selection as any)
+      if (node && node.text === "") {
+        Transforms.removeNodes(editor) // clean from single text node
+        Transforms.insertNodes(editor, blocks as Node[])
+      } else {
+        Transforms.insertFragment(editor, blocks as Node[])
+      }
       return
     }
     insertData(data)

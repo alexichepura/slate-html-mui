@@ -2,18 +2,20 @@ import escapeHtml from "escape-html"
 import { Descendant, Element as SlateElement, Text } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { IMG_TAG, isHtmlImgElement } from "./image/img"
-import { isHtmlPictureElement, deserializePicture, serializePicture } from "./image/picture"
+import { deserializePicture, isHtmlPictureElement, serializePicture } from "./image/picture"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
 import { formatTagToString, formatVoidToString, getAttributes } from "./util"
 
+type TAnyElement = TTagElement | SlateElement | Text
+
 export type TTagElement = {
   tag: string
-  children?: (TTagElement | Text)[]
+  children?: TAnyElement[]
   [key: string]: any
 }
 
 // SERIALIZE
-type TSerializeInput = TTagElement | TTagElement[] | Text | Text[] | Node[]
+type TSerializeInput = TAnyElement | TAnyElement[] | Node[]
 export type TSerialize<T = unknown> = (node: TSerializeInput | T, cb?: TSerialize<T>) => string
 
 export function serialize<T>(node: TSerializeInput, cb?: TSerialize<T>): string {
@@ -40,7 +42,9 @@ export function serialize<T>(node: TSerializeInput, cb?: TSerialize<T>): string 
     return (node as (TTagElement | Text)[]).map(n => serialize(n, cb)).join("")
   }
 
-  const children = node.children && node.children.map(n => serialize(n, cb)).join("")
+  const children =
+    node.children && (node.children as TAnyElement[]).map(n => serialize(n, cb)).join("")
+
   if (children === undefined) {
     return ""
   }
@@ -90,9 +94,12 @@ export function deserialize<T>(
   const cbResult = cb && cb(element)
   if (cbResult) return cbResult
 
-  if (element.nodeType === 3) return { text: element.textContent || "" }
   const el: Element = element as Element
 
+  if (el.nodeType === 3) {
+    const text = el.textContent || ""
+    return { text }
+  }
   if (el.nodeType !== 1) return null
   if (el.nodeName === "BODY") {
     if (el.firstChild && el.firstChild.nodeName === "B") {

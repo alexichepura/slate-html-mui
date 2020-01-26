@@ -107,7 +107,9 @@ const useStyles = makeStyles(
 const MyEditor: FC = () => {
   const [value, setValue] = useState<TTagElement[]>(initial)
   const saveToLocalstorage = () => {
+    console.log("saveToLocalstorage value", value)
     const str = serializeHtml(value, serializeWithButtonLink)
+    console.log("saveToLocalstorage html string", str)
     localStorage.setItem("slate-mui-value", str)
   }
   const loadFromLocalstorage = () => {

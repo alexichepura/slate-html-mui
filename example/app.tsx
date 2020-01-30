@@ -13,12 +13,6 @@ import {
 import { initial, initial_string } from "./initial"
 import { CustomToolbar } from "./toolbar"
 
-const test = `<html>
-<body>
-<!--StartFragment--><meta charset="utf-8"><b style="font-weight:normal;" id="docs-internal-guid-21979ce0-7fff-d173-e6a8-acaf655a443c"><ul style="margin-top:0;margin-bottom:0;"><li dir="ltr" style="list-style-type:disc;font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;"><p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;" role="presentation"><span style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">ый раз после входа в аккаунт стима идет редирект на главную страницу с последующим обучением(можно скипнуть обучение).</span></p></li><li dir="ltr" style="list-style-type:disc;font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;"><p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;" role="presentation"><span style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">После входа в аккаунт меня должно бросить на главную страницу на которой я смогу увидеть свой баланс, кнопку внести депозит (будет кидать на страницу инвентаря на сайте), вывод средств.</span></p></li><li dir="ltr" style="list-style-type:disc;font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;"><p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;" role="presentation"><span style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">Кнопка для связи с поддержкой в хедере (как я понимаю - по клику ведет в личный кабинет во вкладку с формой Поддержка)</span></p></li><li dir="ltr" style="list-style-type:disc;font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;"><p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;" role="presentation"><span style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">Онлайн чат (блок слева или справа нужно еще решить)</span></p></li><li dir="ltr" style="list-style-type:disc;font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;"><p dir="ltr" style="line-height:1.38;margin-top:0pt;margin-bottom:0pt;" role="presentation"><span style="font-size:11pt;font-family:Arial;color:#000000;background-color:transparent;font-weight:400;font-style:normal;font-variant:normal;text-decoration:none;vertical-align:baseline;white-space:pre;white-space:pre-wrap;">Ставки - игроки которые сделали ставку, какую сделали ставку, статус ставки - in progress, crash, win; блок справа или слева</span></p></li></ul></b><!--EndFragment-->
-</body>
-</html>`
-
 const SlateHtmlEditor: FC<{
   value: TTagElement[]
   setValue: (value: TTagElement[]) => void
@@ -116,7 +110,7 @@ const MyEditor: FC = () => {
     setValue(savedValue as any)
   }
   const loadFromSample = () => {
-    const savedValue = editor.deserializeHtml(test || initial_string)
+    const savedValue = editor.deserializeHtml(initial_string)
     setValue(savedValue as any)
   }
   return (

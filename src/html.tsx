@@ -102,8 +102,10 @@ export function deserialize<T>(
   }
   if (el.nodeType !== 1) return null
   if (el.nodeName === "BODY") {
-    if (el.firstChild && el.firstChild.nodeName === "B") {
-      return deserializeChildNodes(el.firstChild.childNodes, cb)
+    const firstElementChild =
+      el.children && Array.from(el.children).filter(child => child.nodeName !== "META")[0]
+    if (firstElementChild && firstElementChild.nodeName === "B") {
+      return deserializeChildNodes(firstElementChild.childNodes, cb)
     }
     return deserializeChildNodes(el.childNodes, cb)
   }

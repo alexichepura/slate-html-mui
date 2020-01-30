@@ -92,15 +92,12 @@ export const withHtml = (editor: Editor) => {
   }
 
   editor.deserializeHtml = (html: string): TTagElement[] => {
-    // console.log("html", html)
     const parsed = new DOMParser().parseFromString(html, "text/html")
     return editor.deserializeHtmlElement(parsed.body)
   }
 
   const deserializeHtmlElement: TDeserialize = element => {
-    // console.log("deserializeHtmlElement", element)
     const fragment = deserialize(element) as Node[]
-    // console.log("fragment", fragment)
     const blocks = wrapInlineAndText(editor, fragment)
     return blocks
   }

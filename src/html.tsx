@@ -15,7 +15,7 @@ export type TTagElement = {
 }
 
 // SERIALIZE
-type TSerializeInput = TAnyElement | TAnyElement[] | Node[]
+export type TSerializeInput = TAnyElement | TAnyElement[] | Node[]
 export type TSerialize<T = unknown> = (node: TSerializeInput | T, cb?: TSerialize<T>) => string
 
 export function serialize<T>(node: TSerializeInput, cb?: TSerialize<T>): string {
@@ -81,7 +81,7 @@ function deserializeChildNodes<T>(nodes: NodeListOf<ChildNode>, cb?: TDeserializ
     .flat()
 }
 
-type TDeserializeInput = Element | ChildNode
+export type TDeserializeInput = Element | ChildNode
 type TDeserializeOutput = SlateElement | Text | string | null | Descendant[] | TTagElement
 export type TDeserialize<T = unknown> = (
   el: TDeserializeInput,

@@ -8,15 +8,28 @@ import {
   formatTagToString,
   TDeserialize,
   getAttributes,
+  TTagElement,
 } from "../src"
 import { CustomLinkFormDialog } from "./custom-link"
 
 export const withButtonLink = (editor: Editor) => {
-  const { isVoid } = editor
+  const { isVoid, deserializeHtmlElement, serializeToHtmlString } = editor
 
   editor.isVoid = element => {
     return isElementButtonLink((element as any) as TButtonLinkElement) ? true : isVoid(element)
   }
+
+  const _deserializeHtmlElement = (element: HTMLElement) => {
+    const buttonLink = deserializeWithButtonLink(element)
+    return buttonLink || deserializeHtmlElement(element)
+  }
+  editor.deserializeHtmlElement = _deserializeHtmlElement
+
+  const _serializeToHtmlString: TSerialize<TTagElement> = element => {
+    const buttonLink = serializeWithButtonLink(element)
+    return buttonLink || serializeToHtmlString(element)
+  }
+  editor.serializeToHtmlString = _serializeToHtmlString
 
   return editor
 }

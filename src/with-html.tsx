@@ -7,7 +7,7 @@ import {
   EHtmlVoidTag,
   isTagActive,
 } from "./format"
-import { deserialize, TTagElement } from "./html"
+import { deserialize, serialize, TDeserialize, TSerialize, TTagElement } from "./html"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
 
 export const withHtml = (editor: Editor) => {
@@ -59,9 +59,7 @@ export const withHtml = (editor: Editor) => {
     const html = data.getData("text/html")
 
     if (html) {
-      const parsed = new DOMParser().parseFromString(html, "text/html")
-      const fragment = deserialize(parsed.body) as Node[]
-      const blocks = wrapInlineAndText(editor, fragment)
+      const blocks = editor.deserializeHtml(html)
 
       const [node] = Editor.node(editor, editor.selection as any)
       if (node && node.text === "") {
@@ -92,6 +90,26 @@ export const withHtml = (editor: Editor) => {
     // Fall back to the original `normalizeNode` to enforce other constraints.
     normalizeNode(entry)
   }
+
+  editor.deserializeHtml = (html: string): TTagElement[] => {
+    // console.log("html", html)
+    const parsed = new DOMParser().parseFromString(html, "text/html")
+    return editor.deserializeHtmlElement(parsed.body)
+  }
+
+  const deserializeHtmlElement: TDeserialize = element => {
+    // console.log("deserializeHtmlElement", element)
+    const fragment = deserialize(element) as Node[]
+    // console.log("fragment", fragment)
+    const blocks = wrapInlineAndText(editor, fragment)
+    return blocks
+  }
+  editor.deserializeHtmlElement = deserializeHtmlElement
+
+  const serializeToHtmlString: TSerialize<TTagElement> = node => {
+    return serialize(node)
+  }
+  editor.serializeToHtmlString = serializeToHtmlString
 
   return editor
 }

@@ -9,7 +9,7 @@ import {
 } from "./format"
 import { createDeserializer, createSerializer, TTagElement } from "./html"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
-import { insertBlock } from "./util/insert-block"
+import { insertBlock, setBlock } from "./util/insert-block"
 
 export const withHtml = (editor: Editor) => {
   const { insertData, isVoid, normalizeNode } = editor
@@ -35,7 +35,7 @@ export const withHtml = (editor: Editor) => {
         })
       })
 
-      insertBlock(
+      setBlock(
         editor,
         {
           tag: isActive ? DEFAULT_TAG : isList ? EHtmlBlockTag.li : tag,

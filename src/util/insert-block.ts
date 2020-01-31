@@ -10,3 +10,9 @@ export const insertBlock = (editor: Editor, slateElement: Partial<Node>, range: 
     Transforms.insertNodes(editor, slateElement as Node, { at: range })
   }
 }
+
+export const setBlock = (editor: Editor, slateElement: Partial<Node>, range: Range) => {
+  const [parent] = Editor.parent(editor, range)
+  Transforms.unsetNodes(editor, Object.keys(parent), { at: range })
+  Transforms.setNodes(editor, slateElement, { at: range })
+}

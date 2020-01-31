@@ -7,7 +7,7 @@ import {
   EHtmlVoidTag,
   isTagActive,
 } from "./format"
-import { createDeserializer, serialize, TSerialize, TTagElement } from "./html"
+import { createDeserializer, createSerializer, TTagElement } from "./html"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
 import { insertBlock } from "./util/insert-block"
 
@@ -105,10 +105,7 @@ export const withHtml = (editor: Editor) => {
   const deserialize = createDeserializer(editor)
   editor.deserializeHtmlElement = deserialize
 
-  const serializeToHtmlString: TSerialize<TTagElement> = node => {
-    return serialize(node)
-  }
-  editor.serializeToHtmlString = serializeToHtmlString
+  editor.serializeToHtmlString = createSerializer(editor)
 
   return editor
 }

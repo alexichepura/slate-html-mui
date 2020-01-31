@@ -1,77 +1,77 @@
 import escapeHtml from "escape-html"
-import { Descendant, Editor, Element as SlateElement, Text } from "slate"
+import { Descendant, Editor, Element as SlateElement, Text, Node } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { IMG_TAG, isHtmlImgElement } from "./image/img"
 import { deserializePicture, isHtmlPictureElement, serializePicture } from "./image/picture"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
 import { formatTagToString, formatVoidToString, getAttributes } from "./util"
 
-type TAnyElement = TTagElement | SlateElement | Text
-
+type TPartialNode = Partial<Node>
 export type TTagElement = {
   tag: string
-  children?: TAnyElement[]
+  children?: TPartialNode[]
   [key: string]: any
 }
 
+const isTagElement = (el: any): el is TTagElement => {
+  return "tag" in el
+}
+
 // SERIALIZE
-export type TSerializeInput = TAnyElement | TAnyElement[] | Node[]
-export type TSerialize<T = unknown> = (node: TSerializeInput | T, cb?: TSerialize<T>) => string
+export type TSerialize<T = Node> = (node: TPartialNode | TPartialNode | T) => string
 
-export function serialize<T>(node: TSerializeInput, cb?: TSerialize<T>): string {
-  const cbResult = cb && cb(node)
-  if (cbResult) {
-    return cbResult
-  }
+export const createSerializer = (editor: Editor): TSerialize => {
+  return function serialize<T = Node>(node: TPartialNode | TPartialNode | T): string {
+    const picture = serializePicture(node)
+    if (picture) return picture
 
-  const picture = serializePicture(node)
-  if (picture) return picture
-
-  if (Text.isText(node)) {
-    const markTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
-    let text
-    if (markTag && markTag[0]) {
-      text = formatTagToString(markTag[0], null, escapeHtml(node.text))
-    } else {
-      text = escapeHtml(node.text)
+    if (Text.isText(node)) {
+      const markTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
+      let text
+      if (markTag && markTag[0]) {
+        text = formatTagToString(markTag[0], null, escapeHtml(node.text))
+      } else {
+        text = escapeHtml(node.text)
+      }
+      return text.split("\n").join("<br/>")
     }
-    return text.split("\n").join("<br/>")
-  }
 
-  if (Array.isArray(node)) {
-    return (node as (TTagElement | Text)[]).map(n => serialize(n, cb)).join("")
-  }
-
-  const children =
-    node.children && (node.children as TAnyElement[]).map(n => serialize(n, cb)).join("")
-
-  if (children === undefined) {
-    return ""
-  }
-  if (node.tag in EHtmlBlockTag) {
-    return formatTagToString(node.tag, null, children)
-  }
-
-  if (isHtmlAnchorElement(node)) {
-    const attributes = {
-      ...node.attributes,
-      href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
+    if (Array.isArray(node)) {
+      return node.map(n => editor.serializeToHtmlString(n)).join("")
     }
-    return formatTagToString(node.tag, attributes, children)
-  }
 
-  if (isHtmlImgElement(node)) {
-    return formatTagToString(node.tag, node.attributes, children)
-  }
-  if (isHtmlPictureElement(node)) {
-    return formatTagToString(node.tag, node.attributes, children)
-  }
+    const children =
+      Editor.isBlock(editor, node) && node.children
+        ? node.children.map(n => editor.serializeToHtmlString(n)).join("")
+        : ""
 
-  if (node.tag in EHtmlVoidTag) {
-    return formatVoidToString(node.tag, null)
-  }
+    if (isTagElement(node)) {
+      if (node.tag in EHtmlBlockTag) {
+        return formatTagToString(node.tag, null, children)
+      }
 
-  return children
+      if (isHtmlAnchorElement(node)) {
+        const attributes = {
+          ...node.attributes,
+          href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
+        }
+        return formatTagToString(node.tag, attributes, children)
+      }
+
+      if (isHtmlImgElement(node)) {
+        return formatTagToString(node.tag, node.attributes, children)
+      }
+      if (isHtmlPictureElement(node)) {
+        return formatTagToString(node.tag, node.attributes, children)
+      }
+
+      if (node.tag in EHtmlVoidTag) {
+        return formatVoidToString(node.tag, null)
+      }
+    }
+
+    return children
+  }
 }
 
 // DESEREALIZE

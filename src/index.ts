@@ -8,13 +8,7 @@ export {
   Leaf,
 } from "./format"
 export { RedoButton, UndoButton } from "./history"
-export {
-  deserialize as deserializeHtml,
-  serialize as serializeHtml,
-  TDeserialize,
-  TSerialize,
-  TTagElement,
-} from "./html"
+export { TDeserialize, TSerialize, TTagElement } from "./html"
 export { ImgButton, TImgFormDialogProps } from "./image/img"
 export { PictureButton, TPictureFormDialogProps } from "./image/picture"
 export {
@@ -31,4 +25,5 @@ export { useSticky } from "./sticky"
 export { Toolbar } from "./toolbar"
 export { TagButton, ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 export { formatTagToString, formatVoidToString, getAttributes } from "./util"
+export { insertBlock } from "./util/insert-block"
 export { withHtml } from "./with-html"

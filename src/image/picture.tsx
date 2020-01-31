@@ -18,11 +18,12 @@ import React, {
   useRef,
   useState,
 } from "react"
-import { Editor, Element as SlateElement, Node, NodeEntry, Range, Transforms } from "slate"
+import { Editor, Node, NodeEntry, Range } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import { TDeserialize, TSerialize, TTagElement } from "../html"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 import { formatTagToString, formatVoidToString, getAttributes } from "../util"
+import { insertBlock } from "../util/insert-block"
 
 export const PICTURE_TAG = "picture"
 
@@ -210,7 +211,7 @@ export const withPicture = (editor: Editor) => {
 
 const setPicture = (editor: Editor, command: TSetPictureCommand) => {
   const { element, range } = command
-  Transforms.setNodes(editor, element as SlateElement, { at: range })
+  insertBlock(editor, element, range)
 }
 
 type TUpdateSourceAttribute = (

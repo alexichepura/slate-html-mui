@@ -1,9 +1,9 @@
 import { Button, Card, makeStyles } from "@material-ui/core"
 import React, { CSSProperties, FC, useCallback, useMemo, useState } from "react"
 import { render } from "react-dom"
-import { createEditor, Editor, Node } from "slate"
-import { Editable, ReactEditor, RenderElementProps, Slate, withReact } from "slate-react"
-import { Leaf, RenderElement, TTagElement, useSticky, withHtmlEditor } from "../src"
+import { Editor, Node } from "slate"
+import { Editable, ReactEditor, RenderElementProps, Slate } from "slate-react"
+import { createHtmlEditor, Leaf, RenderElement, TTagElement, useSticky } from "../src"
 import {
   ButtonLinkElement,
   BUTTON_LINK_DATA_ATTRIBUTE,
@@ -95,7 +95,7 @@ const useStyles = makeStyles(
 )
 
 const MyEditor: FC = () => {
-  const editor = useMemo(() => withHtmlEditor(withButtonLink(withReact(createEditor()))), [])
+  const editor = useMemo(() => withButtonLink(createHtmlEditor()), [])
   const [value, setValue] = useState<TTagElement[]>(initial)
 
   const saveToLocalstorage = () => {
@@ -123,6 +123,9 @@ const MyEditor: FC = () => {
       </Button>
       <Button color="primary" onClick={saveToLocalstorage}>
         to localstorage
+      </Button>
+      <Button color="primary" onClick={() => console.log(value)}>
+        log value
       </Button>
       <SlateHtmlEditor value={value} setValue={setValue} editor={editor} />
     </div>

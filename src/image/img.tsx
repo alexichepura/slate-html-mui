@@ -8,10 +8,11 @@ import {
 } from "@material-ui/core"
 import Image from "@material-ui/icons/Image"
 import React, { FC, ImgHTMLAttributes, useState } from "react"
-import { Editor, Element as SlateElement, Node, Path, Range, Text, Transforms } from "slate"
+import { Editor, Element as SlateElement, Node, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import { TTagElement } from "../html"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
+import { insertBlock } from "../util/insert-block"
 
 export const IMG_TAG = "img"
 
@@ -160,7 +161,7 @@ const setImg = (editor: Editor, command: TSetImgCommand) => {
     attributes,
     children: [{ text: "" }],
   }
-  Transforms.setNodes(editor, img as SlateElement, { at: range })
+  insertBlock(editor, img, range)
 }
 
 export type TImgFormDialogProps = {

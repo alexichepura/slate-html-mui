@@ -7,8 +7,9 @@ import {
   EHtmlVoidTag,
   isTagActive,
 } from "./format"
-import { deserialize, serialize, TDeserialize, TSerialize, TTagElement } from "./html"
+import { createDeserializer, serialize, TSerialize, TTagElement } from "./html"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
+import { insertBlock } from "./util/insert-block"
 
 export const withHtml = (editor: Editor) => {
   const { insertData, isVoid, normalizeNode } = editor
@@ -34,9 +35,13 @@ export const withHtml = (editor: Editor) => {
         })
       })
 
-      Transforms.setNodes(editor, {
-        tag: isActive ? DEFAULT_TAG : isList ? EHtmlBlockTag.li : tag,
-      })
+      insertBlock(
+        editor,
+        {
+          tag: isActive ? DEFAULT_TAG : isList ? EHtmlBlockTag.li : tag,
+        },
+        editor.selection!
+      )
 
       if (!isActive && isList) {
         Transforms.wrapNodes(editor, { tag, children: [] })
@@ -50,7 +55,8 @@ export const withHtml = (editor: Editor) => {
     }
 
     if (tag in EHtmlVoidTag) {
-      Transforms.insertNodes(editor, { tag, children: [] }, { at: editor.selection as any })
+      insertBlock(editor, { tag, children: [] }, editor.selection!)
+      // Transforms.insertNodes(editor, { tag, children: [] }, { at: editor.selection! })
       return
     }
   }
@@ -59,7 +65,8 @@ export const withHtml = (editor: Editor) => {
     const html = data.getData("text/html")
 
     if (html) {
-      const blocks = editor.deserializeHtml(html)
+      const fragment = editor.deserializeHtml(html)
+      const blocks = wrapInlineAndText(editor, fragment)
 
       const [node] = Editor.node(editor, editor.selection as any)
       if (node && node.text === "") {
@@ -96,12 +103,8 @@ export const withHtml = (editor: Editor) => {
     return editor.deserializeHtmlElement(parsed.body)
   }
 
-  const deserializeHtmlElement: TDeserialize = element => {
-    const fragment = deserialize(element) as Node[]
-    const blocks = wrapInlineAndText(editor, fragment)
-    return blocks
-  }
-  editor.deserializeHtmlElement = deserializeHtmlElement
+  const deserialize = createDeserializer(editor)
+  editor.deserializeHtmlElement = deserialize
 
   const serializeToHtmlString: TSerialize<TTagElement> = node => {
     return serialize(node)

@@ -1,13 +1,14 @@
 import React, { CSSProperties, FC, useState } from "react"
-import { Editor, Element as SlateElement, Path, Range, Text, Transforms } from "slate"
+import { Editor, Element as SlateElement, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import {
+  formatTagToString,
+  getAttributes,
+  insertBlock,
   TAnchorAnyAttributes,
+  TDeserialize,
   ToolbarButton,
   TSerialize,
-  formatTagToString,
-  TDeserialize,
-  getAttributes,
   TTagElement,
 } from "../src"
 import { CustomLinkFormDialog } from "./custom-link"
@@ -151,7 +152,8 @@ const insertButtonLink = (editor: Editor, command: TSetLinkCommand) => {
     attributes,
     children: [{ text: "" }],
   }
-  Transforms.setNodes(editor, buttonLink, { at: range })
+
+  insertBlock(editor, buttonLink, range)
 }
 
 export const isElementButtonLink = (

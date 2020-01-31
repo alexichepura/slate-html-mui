@@ -1,5 +1,5 @@
 import escapeHtml from "escape-html"
-import { Descendant, Element as SlateElement, Text } from "slate"
+import { Descendant, Editor, Element as SlateElement, Text } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { IMG_TAG, isHtmlImgElement } from "./image/img"
 import { deserializePicture, isHtmlPictureElement, serializePicture } from "./image/picture"
@@ -75,94 +75,67 @@ export function serialize<T>(node: TSerializeInput, cb?: TSerialize<T>): string 
 }
 
 // DESEREALIZE
-function deserializeChildNodes<T>(nodes: NodeListOf<ChildNode>, cb?: TDeserialize<T>) {
-  return Array.from(nodes)
-    .map(n => deserialize(n, cb))
-    .flat()
-}
-
-export type TDeserializeInput = Element | ChildNode
+type TDeserializeInput = Element | ChildNode
 type TDeserializeOutput = SlateElement | Text | string | null | Descendant[] | TTagElement
-export type TDeserialize<T = unknown> = (
-  el: TDeserializeInput,
-  cb?: TDeserialize<T>
-) => TDeserializeOutput | T
-export function deserialize<T>(
-  element: TDeserializeInput,
-  cb?: TDeserialize<T>
-): TDeserializeOutput | T {
-  const cbResult = cb && cb(element)
-  if (cbResult) return cbResult
+export type TDeserialize<T = unknown> = (el: TDeserializeInput) => TDeserializeOutput | T
 
-  const el: Element = element as Element
-
-  if (el.nodeType === 3) {
-    const text = el.textContent || ""
-    return { text }
+export const createDeserializer = (editor: Editor): TDeserialize => {
+  function deserializeChildNodes(nodes: NodeListOf<ChildNode>) {
+    return Array.from(nodes)
+      .map(editor.deserializeHtmlElement)
+      .flat()
   }
-  if (el.nodeType !== 1) return null
-  if (el.nodeName === "BODY") {
-    const firstElementChild =
-      el.children && Array.from(el.children).filter(child => child.nodeName !== "META")[0]
-    if (firstElementChild && firstElementChild.nodeName === "B") {
-      return deserializeChildNodes(firstElementChild.childNodes, cb)
+  return function deserialize<T>(element: TDeserializeInput): TDeserializeOutput | T {
+    const el: Element = element as Element
+
+    if (el.nodeType === 3) {
+      const text = el.textContent || ""
+      return { text }
     }
-    return deserializeChildNodes(el.childNodes, cb)
-  }
-
-  const picture = deserializePicture(el)
-  if (picture) return picture
-
-  const tag = el.nodeName.toLowerCase()
-
-  if (tag === EHtmlVoidTag.br) {
-    return { text: "\n" }
-  }
-
-  const children = deserializeChildNodes(el.childNodes, cb)
-  const attributes = getAttributes(el)
-
-  if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG) {
-    if (children.length === 0) {
-      children.push({ text: "" } as Text)
+    if (el.nodeType !== 1) return null
+    if (el.nodeName === "BODY") {
+      const firstElementChild =
+        el.children && Array.from(el.children).filter(child => child.nodeName !== "META")[0]
+      if (firstElementChild && firstElementChild.nodeName === "B") {
+        return deserializeChildNodes(firstElementChild.childNodes)
+      }
+      return deserializeChildNodes(el.childNodes)
     }
-    return { tag, attributes, children }
-  }
 
-  if (tag in EHtmlMarkTag) {
-    return children.map(child => {
-      const text = typeof child === "string" ? child : child.text
-      return { [tag]: true, attributes, text }
-    })
-  }
+    const picture = deserializePicture(el)
+    if (picture) return picture
 
-  if (tag in EHtmlVoidTag) {
-    return {
-      tag,
-      attributes,
-      children: [{ text: "" }],
+    const tag = el.nodeName.toLowerCase()
+
+    if (tag === EHtmlVoidTag.br) {
+      return { text: "\n" }
     }
-  }
 
-  return children
+    const children = deserializeChildNodes(el.childNodes)
+    const attributes = getAttributes(el)
+
+    if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG) {
+      if (children.length === 0) {
+        children.push({ text: "" } as Text)
+      }
+      return { tag, attributes, children }
+    }
+
+    if (tag in EHtmlMarkTag) {
+      return children.map(child => {
+        const text = typeof child === "string" ? child : child.text
+        return { [tag]: true, attributes, text }
+      })
+    }
+
+    if (tag in EHtmlVoidTag) {
+      return {
+        tag,
+        attributes,
+        children: [{ text: "" }],
+      }
+    }
+
+    return children
+  }
 }
-
-// modified from https://stackoverflow.com/questions/8987550/convert-css-text-to-javascript-object/43012849
-// type TParseCssResult = {
-//   cssText: string
-//   ruleName: string
-//   style: CSSProperties
-// }
-// function parseCSSText(cssText: string): TParseCssResult {
-//   const cssTxt = cssText.replace(/\/\*(.|\s)*?\*\//g, " ").replace(/\s+/g, " ")
-//   const style: any = {} // TODO proper types
-//   const [, ruleName = "", rule = ""] = cssTxt.match(/ ?(.*?) ?{([^}]*)}/) || [, , cssTxt]
-//   const properties = rule.split(";").map(o => o.split(":").map(x => x && x.trim()))
-//   for (var [property, value] of properties) {
-//     const cssPropertyName = cssToJs(property)
-//     style[cssPropertyName] = value
-//   }
-//   return { cssText, ruleName, style }
-// }
-
-// const cssToJs = (s: string) => s.replace(/\W+\w/g, match => match.slice(-1).toUpperCase())

@@ -56,7 +56,6 @@ export const withHtml = (editor: Editor) => {
 
     if (tag in EHtmlVoidTag) {
       insertBlock(editor, { tag, children: [] }, editor.selection!)
-      // Transforms.insertNodes(editor, { tag, children: [] }, { at: editor.selection! })
       return
     }
   }

@@ -80,7 +80,7 @@ type TDeserializeOutput = SlateElement | Text | string | null | Descendant[] | T
 export type TDeserialize<T = unknown> = (el: TDeserializeInput) => TDeserializeOutput | T
 
 export const createDeserializer = (editor: Editor): TDeserialize => {
-  function deserializeChildNodes(nodes: NodeListOf<ChildNode>) {
+  function deserializeChildNodes(nodes: NodeListOf<ChildNode> | HTMLCollection) {
     return Array.from(nodes)
       .map(editor.deserializeHtmlElement)
       .flat()
@@ -88,19 +88,20 @@ export const createDeserializer = (editor: Editor): TDeserialize => {
   return function deserialize<T>(element: TDeserializeInput): TDeserializeOutput | T {
     const el: Element = element as Element
 
-    if (el.nodeType === 3) {
-      const text = el.textContent || ""
-      return { text }
-    }
-    if (el.nodeType !== 1) return null
     if (el.nodeName === "BODY") {
       const firstElementChild =
         el.children && Array.from(el.children).filter(child => child.nodeName !== "META")[0]
       if (firstElementChild && firstElementChild.nodeName === "B") {
         return deserializeChildNodes(firstElementChild.childNodes)
       }
-      return deserializeChildNodes(el.childNodes)
+      return deserializeChildNodes(el.children)
     }
+
+    if (el.nodeType === 3) {
+      const text = el.textContent || ""
+      return { text }
+    }
+    if (el.nodeType !== 1) return null
 
     const picture = deserializePicture(el)
     if (picture) return picture

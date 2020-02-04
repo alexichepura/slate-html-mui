@@ -99,11 +99,10 @@ export const withHtml = (editor: Editor) => {
 
   editor.deserializeHtml = (html: string): TTagElement[] => {
     const parsed = new DOMParser().parseFromString(html, "text/html")
-    return Array.from(parsed.body.children).map(editor.deserializeHtmlElement)
+    return editor.deserializeHtmlElement(parsed.body)
   }
 
-  const deserialize = createDeserializer(editor)
-  editor.deserializeHtmlElement = deserialize
+  editor.deserializeHtmlElement = createDeserializer(editor)
 
   editor.serializeToHtmlString = createSerializer(editor)
 

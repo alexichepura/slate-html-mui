@@ -1,8 +1,8 @@
 import escapeHtml from "escape-html"
-import { Descendant, Editor, Element as SlateElement, Text, Node } from "slate"
+import { Descendant, Editor, Element as SlateElement, Node, Text } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { IMG_TAG, isHtmlImgElement } from "./image/img"
-import { deserializePicture, isHtmlPictureElement, serializePicture } from "./image/picture"
+import { deserializePicture, serializePicture } from "./image/picture"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
 import { formatTagToString, formatVoidToString, getAttributes } from "./util"
 
@@ -41,7 +41,7 @@ export const createSerializer = (editor: Editor): TSerialize => {
     }
 
     const children =
-      Editor.isBlock(editor, node) && node.children
+      (Editor.isBlock(editor, node) || Editor.isInline(editor, node)) && node.children
         ? node.children.map(n => editor.serializeToHtmlString(n)).join("")
         : ""
 
@@ -59,10 +59,7 @@ export const createSerializer = (editor: Editor): TSerialize => {
       }
 
       if (isHtmlImgElement(node)) {
-        return formatTagToString(node.tag, node.attributes, children)
-      }
-      if (isHtmlPictureElement(node)) {
-        return formatTagToString(node.tag, node.attributes, children)
+        return formatVoidToString(node.tag, node.attributes)
       }
 
       if (node.tag in EHtmlVoidTag) {

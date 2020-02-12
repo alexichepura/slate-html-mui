@@ -1,5 +1,5 @@
 import { Button, Card, makeStyles } from "@material-ui/core"
-import React, { CSSProperties, FC, useCallback, useMemo, useState } from "react"
+import React, { CSSProperties, FC, useCallback, useMemo, useRef, useState } from "react"
 import { render } from "react-dom"
 import { Editor, Node } from "slate"
 import { Editable, ReactEditor, RenderElementProps, Slate } from "slate-react"
@@ -27,6 +27,8 @@ const SlateHtmlEditor: FC<{
   const renderLeaf = useCallback(Leaf, [])
   const [isSticky, stickyPlaceholderRef] = useSticky()
 
+  const isPasteCapture = useRef<boolean>(false)
+
   const classes = useStyles()
   return (
     <Slate
@@ -37,7 +39,11 @@ const SlateHtmlEditor: FC<{
       }}
       value={value as Node[]}
     >
-      <Card>
+      <Card
+        onKeyDown={e => {
+          isPasteCapture.current = e.ctrlKey && e.shiftKey && e.keyCode === 86 ? true : false
+        }}
+      >
         <div className={classes.toolbarPlaceholder} ref={stickyPlaceholderRef}>
           <CustomToolbar
             className={classes.toolbar + (isSticky ? " " + classes.toolbarSticky : "")}
@@ -47,12 +53,12 @@ const SlateHtmlEditor: FC<{
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           onPasteCapture={e => {
-            // workaround for https://github.com/ianstormtaylor/slate/issues/3394
+            if (!isPasteCapture.current) return
             const text = e.clipboardData.getData("text/plain")
             if (text) {
               e.preventDefault()
+              editor.insertText(text)
             }
-            editor.insertText(text)
           }}
           placeholder="Enter some rich text…"
           spellCheck

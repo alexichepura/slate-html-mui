@@ -53,6 +53,7 @@ const SlateHtmlEditor: FC<{
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           onPasteCapture={e => {
+            // workaround for https://github.com/ianstormtaylor/slate/issues/3394
             if (!isPasteCapture.current) return
             const text = e.clipboardData.getData("text/plain")
             if (text) {

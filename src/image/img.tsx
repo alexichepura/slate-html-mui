@@ -10,9 +10,10 @@ import Image from "@material-ui/icons/Image"
 import React, { FC, ImgHTMLAttributes, useState } from "react"
 import { Editor, Element as SlateElement, Node, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TTagElement } from "../html"
+import { TTagElement, TSerialize, TDeserialize } from "../html"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 import { insertBlock } from "../util/insert-block"
+import { formatVoidToString, getAttributes } from "../util"
 
 export const IMG_TAG = "img"
 
@@ -62,9 +63,7 @@ const getInitialImgData = (editor: Editor): TImgButtonStateInitial => {
   }
 }
 
-export const isHtmlImgElement = (
-  element: SlateElement | TTagElement | Text
-): element is THtmlImgSlateElement => {
+export const isHtmlImgElement = (element: any): element is THtmlImgSlateElement => {
   return element.tag === IMG_TAG
 }
 const cleanAttributesMutate = (attributes: ImgHTMLAttributes<any>) =>
@@ -145,13 +144,39 @@ const isImgTag = (element: TTagElement) => {
 }
 
 export const withImg = (editor: Editor) => {
-  const { isVoid } = editor
+  const { isVoid, deserializeHtmlElement, serializeToHtmlString } = editor
 
   editor.isVoid = element => {
     return isImgTag(element as TTagElement) ? true : isVoid(element)
   }
 
+  editor.deserializeHtmlElement = (element: HTMLElement) => {
+    const img = deserializeWithImg(element)
+    return img || deserializeHtmlElement(element)
+  }
+
+  editor.serializeToHtmlString = (element => {
+    const img = serializeWithImg(element)
+    return img || serializeToHtmlString(element)
+  }) as TSerialize<TTagElement>
+
   return editor
+}
+
+export const serializeWithImg: TSerialize = node => {
+  if (isHtmlImgElement(node)) {
+    return formatVoidToString(node.tag, node.attributes)
+  }
+  return ""
+}
+export const deserializeWithImg: TDeserialize = el => {
+  const tag = el.nodeName.toLowerCase()
+  if (tag === IMG_TAG) {
+    const attributes = getAttributes(el as Element)
+    const children: any[] = [{ text: "" } as Text]
+    return { tag, attributes, children }
+  }
+  return null
 }
 
 const setImg = (editor: Editor, command: TSetImgCommand) => {

@@ -1,7 +1,7 @@
 import escapeHtml from "escape-html"
 import { Descendant, Editor, Element as SlateElement, Node, Text } from "slate"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
-import { IMG_TAG, isHtmlImgElement } from "./image/img"
+import { IMG_TAG } from "./image/img"
 import { deserializePicture, serializePicture } from "./image/picture"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
 import { formatTagToString, formatVoidToString, getAttributes } from "./util"
@@ -15,6 +15,11 @@ export type TTagElement = {
 
 const isTagElement = (el: any): el is TTagElement => {
   return "tag" in el
+}
+
+export type THtmlEditor = Editor & {
+  toHtml: (element: Node) => void
+  fromHtml: (element: HTMLElement) => void
 }
 
 // SERIALIZE
@@ -56,10 +61,6 @@ export const createSerializer = (editor: Editor): TSerialize => {
           href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
         }
         return formatTagToString(node.tag, attributes, children)
-      }
-
-      if (isHtmlImgElement(node)) {
-        return formatVoidToString(node.tag, node.attributes)
       }
 
       if (node.tag in EHtmlVoidTag) {

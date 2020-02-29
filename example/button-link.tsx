@@ -20,17 +20,15 @@ export const withButtonLink = (editor: Editor) => {
     return isElementButtonLink((element as any) as TButtonLinkElement) ? true : isVoid(element)
   }
 
-  const _deserializeHtmlElement = (element: HTMLElement) => {
+  editor.deserializeHtmlElement = (element: HTMLElement) => {
     const buttonLink = deserializeWithButtonLink(element)
     return buttonLink || deserializeHtmlElement(element)
   }
-  editor.deserializeHtmlElement = _deserializeHtmlElement
 
-  const _serializeToHtmlString: TSerialize<TTagElement> = element => {
+  editor.serializeToHtmlString = (element => {
     const buttonLink = serializeWithButtonLink(element)
     return buttonLink || serializeToHtmlString(element)
-  }
-  editor.serializeToHtmlString = _serializeToHtmlString
+  }) as TSerialize<TTagElement>
 
   return editor
 }

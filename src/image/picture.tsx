@@ -20,7 +20,7 @@ import React, {
 } from "react"
 import { Editor, Node, NodeEntry, Range } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TDeserialize, TSerialize, TTagElement } from "../html"
+import { TFromHtmlElement, THtmlEditor, TTagElement, TToHtml } from "../html"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 import { formatTagToString, formatVoidToString, getAttributes } from "../util"
 import { insertBlock } from "../util/insert-block"
@@ -199,11 +199,48 @@ export const isPictureTag = (element: TTagElement) => {
   return element.tag === PICTURE_TAG
 }
 
-export const withPicture = (editor: Editor) => {
-  const { isVoid } = editor
+export const withPicture = (editor: THtmlEditor): THtmlEditor => {
+  const { isVoid, toHtml, fromHtmlElement } = editor
 
   editor.isVoid = element => {
     return isPictureTag(element as TTagElement) ? true : isVoid(element)
+  }
+
+  const fromHtmlPicture: TFromHtmlElement = el => {
+    if (!isPicture(el)) {
+      return null
+    }
+
+    const attributes = getAttributes(el as Element)
+    const children = Array.from(el.children)
+    const img = children.filter(c => c.nodeName.toLowerCase() === "img").map(getAttributes)[0] || {}
+    const sources = children.filter(c => c.nodeName.toLowerCase() === "source").map(getAttributes)
+
+    const picture: TPictureElement = {
+      tag: PICTURE_TAG,
+      attributes,
+      img,
+      sources,
+      children: [{ text: "" }],
+    }
+    return picture
+  }
+  editor.fromHtmlElement = element => {
+    const img = fromHtmlPicture(element)
+    return img || fromHtmlElement(element)
+  }
+
+  const toHtmlPicture: TToHtml = (el): string => {
+    if (isHtmlPictureElement(el)) {
+      const sources = el.sources.map(s => formatVoidToString("source", s)).join("")
+      const img = formatVoidToString("img", el.img)
+      return formatTagToString(PICTURE_TAG, el.attributes, sources + img)
+    }
+    return ""
+  }
+  editor.toHtml = element => {
+    const img = toHtmlPicture(element)
+    return img || toHtml(element)
   }
 
   return editor
@@ -312,34 +349,6 @@ const PictureSourceFields: FC<{
   )
 }
 
-export const serializePicture: TSerialize<TPictureElement> = (el): string => {
-  if (isHtmlPictureElement(el)) {
-    const sources = el.sources.map(s => formatVoidToString("source", s)).join("")
-    const img = formatVoidToString("img", el.img)
-    return formatTagToString(PICTURE_TAG, el.attributes, sources + img)
-  }
-  return ""
-}
-
 const isPicture = (el: Element | any): el is Element => {
   return el.nodeName.toLowerCase() === PICTURE_TAG
-}
-export const deserializePicture: TDeserialize<TPictureElement> = el => {
-  if (!isPicture(el)) {
-    return null
-  }
-
-  const attributes = getAttributes(el as Element)
-  const children = Array.from(el.children)
-  const img = children.filter(c => c.nodeName.toLowerCase() === "img").map(getAttributes)[0] || {}
-  const sources = children.filter(c => c.nodeName.toLowerCase() === "source").map(getAttributes)
-
-  const picture: TPictureElement = {
-    tag: PICTURE_TAG,
-    attributes,
-    img,
-    sources,
-    children: [{ text: "" }],
-  }
-  return picture
 }

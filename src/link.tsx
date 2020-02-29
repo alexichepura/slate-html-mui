@@ -13,7 +13,7 @@ import React, { FC, useState, AnchorHTMLAttributes } from "react"
 import { Editor, Element as SlateElement, Text, Node, Range, Path, Transforms } from "slate"
 import { useSlate, RenderElementProps } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
-import { TTagElement } from "./html"
+import { TTagElement, THtmlEditor } from "./html"
 
 export const LINK_TAG = "a"
 
@@ -166,7 +166,7 @@ export const LinkButton: FC<TLinkButtonProps> = ({
 }
 LinkButton.displayName = "LinkButton"
 
-export const withLink = (editor: Editor) => {
+export const withLink = (editor: THtmlEditor) => {
   const { insertData, insertText, isInline } = editor
 
   editor.isInline = element => {

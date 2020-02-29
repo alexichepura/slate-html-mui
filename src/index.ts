@@ -8,7 +8,7 @@ export {
   Leaf,
 } from "./format"
 export { RedoButton, UndoButton } from "./history"
-export { TDeserialize, TSerialize, TTagElement } from "./html"
+export { TFromHtmlElement, TToHtml, TTagElement, THtmlEditor } from "./html"
 export { ImgButton, TImgFormDialogProps } from "./image/img"
 export { PictureButton, TPictureFormDialogProps } from "./image/picture"
 export {

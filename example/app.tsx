@@ -1,9 +1,9 @@
 import { Button, Card, makeStyles } from "@material-ui/core"
 import React, { CSSProperties, FC, useCallback, useMemo, useRef, useState } from "react"
 import { render } from "react-dom"
-import { Editor, Node } from "slate"
+import { Node } from "slate"
 import { Editable, ReactEditor, RenderElementProps, Slate } from "slate-react"
-import { createHtmlEditor, Leaf, RenderElement, TTagElement, useSticky } from "../src"
+import { createHtmlEditor, Leaf, RenderElement, THtmlEditor, TTagElement, useSticky } from "../src"
 import {
   ButtonLinkElement,
   BUTTON_LINK_DATA_ATTRIBUTE,
@@ -16,7 +16,7 @@ import { CustomToolbar } from "./toolbar"
 const SlateHtmlEditor: FC<{
   value: TTagElement[]
   setValue: (value: TTagElement[]) => void
-  editor: Editor
+  editor: THtmlEditor
 }> = ({ value, setValue, editor }) => {
   const renderElement = useCallback((props: RenderElementProps) => {
     if (isElementButtonLink(props.element)) {
@@ -115,17 +115,17 @@ const MyEditor: FC = () => {
 
   const saveToLocalstorage = () => {
     console.log("saveToLocalstorage value", value)
-    const str = editor.serializeToHtmlString(value)
+    const str = editor.toHtml(value)
     console.log("saveToLocalstorage html string", str)
     localStorage.setItem("slate-mui-value", str)
   }
   const loadFromLocalstorage = () => {
     const savedStr = localStorage.getItem("slate-mui-value") || ""
-    const savedValue = editor.deserializeHtml(savedStr)
+    const savedValue = editor.fromHtml(savedStr)
     setValue(savedValue as any)
   }
   const loadFromSample = () => {
-    const savedValue = editor.deserializeHtml(initial_string)
+    const savedValue = editor.fromHtml(initial_string)
     setValue(savedValue as any)
   }
   return (

@@ -8,12 +8,12 @@ import {
 } from "@material-ui/core"
 import Image from "@material-ui/icons/Image"
 import React, { FC, ImgHTMLAttributes, useState } from "react"
-import { Editor, Element as SlateElement, Node, Path, Range, Text } from "slate"
+import { Editor, Node, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TTagElement, TSerialize, TDeserialize } from "../html"
+import { TFromHtmlElement, THtmlEditor, TToHtml, TTagElement } from "../html"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
-import { insertBlock } from "../util/insert-block"
 import { formatVoidToString, getAttributes } from "../util"
+import { insertBlock } from "../util/insert-block"
 
 export const IMG_TAG = "img"
 
@@ -143,40 +143,39 @@ const isImgTag = (element: TTagElement) => {
   return element.tag === IMG_TAG
 }
 
-export const withImg = (editor: Editor) => {
-  const { isVoid, deserializeHtmlElement, serializeToHtmlString } = editor
+export const withImg = (editor: THtmlEditor): THtmlEditor => {
+  const { isVoid, fromHtmlElement, toHtml } = editor
 
   editor.isVoid = element => {
     return isImgTag(element as TTagElement) ? true : isVoid(element)
   }
 
-  editor.deserializeHtmlElement = (element: HTMLElement) => {
-    const img = deserializeWithImg(element)
-    return img || deserializeHtmlElement(element)
+  const fromHtmlImg: TFromHtmlElement = el => {
+    const tag = el.nodeName.toLowerCase()
+    if (tag === IMG_TAG) {
+      const attributes = getAttributes(el as Element)
+      const children: any[] = [{ text: "" } as Text]
+      return { tag, attributes, children }
+    }
+    return null
+  }
+  editor.fromHtmlElement = element => {
+    const img = fromHtmlImg(element)
+    return img || fromHtmlElement(element)
   }
 
-  editor.serializeToHtmlString = (element => {
-    const img = serializeWithImg(element)
-    return img || serializeToHtmlString(element)
-  }) as TSerialize<TTagElement>
+  const toHtmlImg: TToHtml = node => {
+    if (isHtmlImgElement(node)) {
+      return formatVoidToString(node.tag, node.attributes)
+    }
+    return ""
+  }
+  editor.toHtml = element => {
+    const img = toHtmlImg(element)
+    return img || toHtml(element)
+  }
 
   return editor
-}
-
-export const serializeWithImg: TSerialize = node => {
-  if (isHtmlImgElement(node)) {
-    return formatVoidToString(node.tag, node.attributes)
-  }
-  return ""
-}
-export const deserializeWithImg: TDeserialize = el => {
-  const tag = el.nodeName.toLowerCase()
-  if (tag === IMG_TAG) {
-    const attributes = getAttributes(el as Element)
-    const children: any[] = [{ text: "" } as Text]
-    return { tag, attributes, children }
-  }
-  return null
 }
 
 const setImg = (editor: Editor, command: TSetImgCommand) => {

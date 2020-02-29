@@ -1,8 +1,8 @@
 import escapeHtml from "escape-html"
-import { Descendant, Editor, Element as SlateElement, Node, Text } from "slate"
+import { Editor, Node, Text } from "slate"
+import { ReactEditor } from "slate-react"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { IMG_TAG } from "./image/img"
-import { deserializePicture, serializePicture } from "./image/picture"
 import { isHtmlAnchorElement, LINK_TAG } from "./link"
 import { formatTagToString, formatVoidToString, getAttributes } from "./util"
 
@@ -17,19 +17,19 @@ const isTagElement = (el: any): el is TTagElement => {
   return "tag" in el
 }
 
-export type THtmlEditor = Editor & {
-  toHtml: (element: Node) => void
-  fromHtml: (element: HTMLElement) => void
+export type TToHtml = (element: TPartialNode) => string
+export type TFromHtmlElement = (
+  element: HTMLElement | ChildNode
+) => (TTagElement | TPartialNode | any) | (TTagElement | TPartialNode | any)[]
+
+export type THtmlEditor = ReactEditor & {
+  toHtml: TToHtml
+  fromHtmlElement: TFromHtmlElement
+  fromHtml: (html: string) => (TTagElement | TPartialNode)[]
 }
 
-// SERIALIZE
-export type TSerialize<T = Node> = (node: TPartialNode | TPartialNode | T) => string
-
-export const createSerializer = (editor: Editor): TSerialize => {
-  return function serialize<T = Node>(node: TPartialNode | TPartialNode | T): string {
-    const picture = serializePicture(node)
-    if (picture) return picture
-
+export const createToHtml = (editor: THtmlEditor): TToHtml => {
+  return function toHtml(node): string {
     if (Text.isText(node)) {
       const markTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
       let text
@@ -42,12 +42,12 @@ export const createSerializer = (editor: Editor): TSerialize => {
     }
 
     if (Array.isArray(node)) {
-      return node.map(n => editor.serializeToHtmlString(n)).join("")
+      return node.map(n => editor.toHtml(n)).join("")
     }
 
     const children =
       (Editor.isBlock(editor, node) || Editor.isInline(editor, node)) && node.children
-        ? node.children.map(n => editor.serializeToHtmlString(n)).join("")
+        ? node.children.map(n => editor.toHtml(n)).join("")
         : ""
 
     if (isTagElement(node)) {
@@ -72,27 +72,22 @@ export const createSerializer = (editor: Editor): TSerialize => {
   }
 }
 
-// DESEREALIZE
-type TDeserializeInput = Element | ChildNode
-type TDeserializeOutput = SlateElement | Text | string | null | Descendant[] | TTagElement
-export type TDeserialize<T = unknown> = (el: TDeserializeInput) => TDeserializeOutput | T
-
-export const createDeserializer = (editor: Editor): TDeserialize => {
-  function deserializeChildNodes(nodes: NodeListOf<ChildNode> | HTMLCollection) {
+export const createFromHtml = (editor: THtmlEditor): TFromHtmlElement => {
+  function fromHtmlChildNodes(nodes: NodeListOf<ChildNode> | HTMLCollection) {
     return Array.from(nodes)
-      .map(editor.deserializeHtmlElement)
+      .map(editor.fromHtmlElement)
       .flat()
   }
-  return function deserialize<T>(element: TDeserializeInput): TDeserializeOutput | T {
+  return function fromHtml(element) {
     const el: Element = element as Element
 
     if (el.nodeName === "BODY") {
       const firstElementChild =
         el.children && Array.from(el.children).filter(child => child.nodeName !== "META")[0]
       if (firstElementChild && firstElementChild.nodeName === "B") {
-        return deserializeChildNodes(firstElementChild.childNodes)
+        return fromHtmlChildNodes(firstElementChild.childNodes)
       }
-      return deserializeChildNodes(el.children)
+      return fromHtmlChildNodes(el.children)
     }
 
     if (el.nodeType === 3) {
@@ -101,16 +96,13 @@ export const createDeserializer = (editor: Editor): TDeserialize => {
     }
     if (el.nodeType !== 1) return null
 
-    const picture = deserializePicture(el)
-    if (picture) return picture
-
     const tag = el.nodeName.toLowerCase()
 
     if (tag === EHtmlVoidTag.br) {
       return { text: "\n" }
     }
 
-    const children = deserializeChildNodes(el.childNodes)
+    const children = fromHtmlChildNodes(el.childNodes)
     const attributes = getAttributes(el)
 
     if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG) {

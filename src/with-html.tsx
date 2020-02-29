@@ -7,11 +7,11 @@ import {
   EHtmlVoidTag,
   isTagActive,
 } from "./format"
-import { createDeserializer, createSerializer, TTagElement } from "./html"
+import { createFromHtml, createToHtml, TTagElement, THtmlEditor } from "./html"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
 import { insertBlock, setBlock } from "./util/insert-block"
 
-export const withHtml = (editor: Editor) => {
+export const withHtml = (editor: Editor): THtmlEditor => {
   const { insertData, isVoid, normalizeNode } = editor
 
   editor.isVoid = element => {
@@ -64,8 +64,8 @@ export const withHtml = (editor: Editor) => {
     const html = data.getData("text/html")
 
     if (html) {
-      const fragment = editor.deserializeHtml(html)
-      const blocks = wrapInlineAndText(editor, fragment)
+      const fragment = (editor as THtmlEditor).fromHtml(html)
+      const blocks = wrapInlineAndText(editor, fragment as Node[])
 
       const [node] = Editor.node(editor, editor.selection as any)
       if (node && node.text === "") {
@@ -97,14 +97,13 @@ export const withHtml = (editor: Editor) => {
     normalizeNode(entry)
   }
 
-  editor.deserializeHtml = (html: string): TTagElement[] => {
+  const _editor: THtmlEditor = editor as THtmlEditor
+  _editor.fromHtmlElement = createFromHtml(_editor)
+  _editor.fromHtml = html => {
     const parsed = new DOMParser().parseFromString(html, "text/html")
-    return editor.deserializeHtmlElement(parsed.body)
+    return _editor.fromHtmlElement(parsed.body)
   }
+  _editor.toHtml = createToHtml(_editor)
 
-  editor.deserializeHtmlElement = createDeserializer(editor)
-
-  editor.serializeToHtmlString = createSerializer(editor)
-
-  return editor
+  return _editor
 }

@@ -6,29 +6,44 @@ import {
   getAttributes,
   insertBlock,
   TAnchorAnyAttributes,
-  TDeserialize,
+  THtmlEditor,
   ToolbarButton,
-  TSerialize,
-  TTagElement,
 } from "../src"
 import { CustomLinkFormDialog } from "./custom-link"
 
-export const withButtonLink = (editor: Editor) => {
-  const { isVoid, deserializeHtmlElement, serializeToHtmlString } = editor
+export const withButtonLink = (editor: THtmlEditor): THtmlEditor => {
+  const { isVoid, fromHtmlElement, toHtml } = editor
 
   editor.isVoid = element => {
     return isElementButtonLink((element as any) as TButtonLinkElement) ? true : isVoid(element)
   }
 
-  editor.deserializeHtmlElement = (element: HTMLElement) => {
-    const buttonLink = deserializeWithButtonLink(element)
-    return buttonLink || deserializeHtmlElement(element)
+  editor.fromHtmlElement = el => {
+    if (el.nodeName.toLowerCase() !== "div") {
+      return fromHtmlElement(el)
+    }
+    const attr = (el as Element).attributes.getNamedItem(BUTTON_LINK_DATA_ATTRIBUTE)
+
+    if (attr && attr.value === "true") {
+      const a = (el as Element).firstChild! as Element
+      const link: TButtonLinkElement = {
+        type: BUTTON_LINK_TYPE,
+        txt: a.textContent || "",
+        attributes: getAttributes(a),
+        children: [{ text: "" }],
+      }
+      return link
+    }
+    return fromHtmlElement(el)
   }
 
-  editor.serializeToHtmlString = (element => {
-    const buttonLink = serializeWithButtonLink(element)
-    return buttonLink || serializeToHtmlString(element)
-  }) as TSerialize<TTagElement>
+  editor.toHtml = node => {
+    if (isElementButtonLink(node)) {
+      const text = formatTagToString("a", node.attributes, node.txt)
+      return `<div ${BUTTON_LINK_DATA_ATTRIBUTE}="true">${text}</div>`
+    }
+    return toHtml(node)
+  }
 
   return editor
 }
@@ -181,30 +196,4 @@ const getInitialLinkData = (editor: Editor): TButtonLinkButtonStateInitial => {
     range: editor.selection ? { ...editor.selection } : null,
     attributes: link ? link.attributes : {},
   }
-}
-
-export const serializeWithButtonLink: TSerialize<TButtonLinkElement> = node => {
-  if (isElementButtonLink(node)) {
-    const text = formatTagToString("a", node.attributes, node.txt)
-    return `<div ${BUTTON_LINK_DATA_ATTRIBUTE}="true">${text}</div>`
-  }
-  return ""
-}
-export const deserializeWithButtonLink: TDeserialize<TButtonLinkElement> = el => {
-  if (el.nodeName.toLowerCase() !== "div") {
-    return null
-  }
-  const attr = (el as Element).attributes.getNamedItem(BUTTON_LINK_DATA_ATTRIBUTE)
-
-  if (attr && attr.value === "true") {
-    const a = (el as Element).firstChild! as Element
-    const link: TButtonLinkElement = {
-      type: BUTTON_LINK_TYPE,
-      txt: a.textContent || "",
-      attributes: getAttributes(a),
-      children: [{ text: "" }],
-    }
-    return link
-  }
-  return null
 }

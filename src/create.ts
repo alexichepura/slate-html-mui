@@ -5,9 +5,10 @@ import { withImg } from "./image/img"
 import { withPicture } from "./image/picture"
 import { withLink } from "./link"
 import { withHtml } from "./with-html"
+import { THtmlEditor } from "./html"
 
-export const createHtmlEditor = (): Editor =>
-  withHtml(withPicture(withImg(withLink(withHistory(withReact(createEditor()))))))
+export const createHtmlEditor = (): THtmlEditor =>
+  withPicture(withImg(withLink(withHtml(withHistory(withReact(createEditor()))))))
 
-export const withHtmlEditor = (editor: Editor): Editor =>
-  withHtml(withPicture(withImg(withLink(withHistory(editor)))))
+export const withHtmlEditor = (editor: Editor): THtmlEditor =>
+  withPicture(withImg(withLink(withHtml(withHistory(editor)))))

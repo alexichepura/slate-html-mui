@@ -1,3 +1,4 @@
+import escapeHtml from "escape-html"
 import {
   Button,
   Dialog,
@@ -13,7 +14,15 @@ import React, { FC, useState, AnchorHTMLAttributes } from "react"
 import { Editor, Element as SlateElement, Text, Node, Range, Path, Transforms } from "slate"
 import { useSlate, RenderElementProps } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
-import { TTagElement, THtmlEditor } from "./html"
+import {
+  TTagElement,
+  THtmlEditor,
+  TToHtml,
+  TFromHtmlElement,
+  toHtmlgetChildren,
+  fromHtmlChildNodes,
+} from "./html"
+import { formatTagToString, getAttributes } from "./util"
 
 export const LINK_TAG = "a"
 
@@ -83,9 +92,7 @@ const getInitialLinkData = (editor: Editor): TLinkButtonStateInitial => {
   }
 }
 
-export const isHtmlAnchorElement = (
-  element: SlateElement | TTagElement | Text
-): element is THtmlLinkSlateElement => {
+export const isHtmlAnchorElement = (element: any): element is THtmlLinkSlateElement => {
   return element.tag === LINK_TAG
 }
 const cleanAttributesMutate = (attributes: TAnchorAnyAttributes) =>
@@ -167,7 +174,7 @@ export const LinkButton: FC<TLinkButtonProps> = ({
 LinkButton.displayName = "LinkButton"
 
 export const withLink = (editor: THtmlEditor) => {
-  const { insertData, insertText, isInline } = editor
+  const { insertData, insertText, isInline, toHtml, fromHtmlElement } = editor
 
   editor.isInline = element => {
     return (element as TTagElement).tag === LINK_TAG ? true : isInline(element)
@@ -189,6 +196,39 @@ export const withLink = (editor: THtmlEditor) => {
     } else {
       insertData(data)
     }
+  }
+
+  const fromHtmlAnchor: TFromHtmlElement = el => {
+    const tag = el.nodeName.toLowerCase()
+    if (tag === LINK_TAG) {
+      const attributes = getAttributes(el as Element)
+      const children = fromHtmlChildNodes(editor, el.childNodes)
+      if (children.length === 0) {
+        children.push({ text: "" })
+      }
+      return { tag, attributes, children }
+    }
+    return null
+  }
+  editor.fromHtmlElement = element => {
+    const anchor = fromHtmlAnchor(element)
+    return anchor || fromHtmlElement(element)
+  }
+
+  const toHtmlAnchor: TToHtml = node => {
+    if (isHtmlAnchorElement(node)) {
+      const attributes = {
+        ...node.attributes,
+        href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
+      }
+      const children = toHtmlgetChildren(editor, node)
+      return formatTagToString(node.tag, attributes, children)
+    }
+    return ""
+  }
+  editor.toHtml = element => {
+    const img = toHtmlAnchor(element)
+    return img || toHtml(element)
   }
 
   return editor

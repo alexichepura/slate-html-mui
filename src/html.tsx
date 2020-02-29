@@ -2,8 +2,7 @@ import escapeHtml from "escape-html"
 import { Editor, Node, Text } from "slate"
 import { ReactEditor } from "slate-react"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
-import { IMG_TAG } from "./image/img"
-import { isHtmlAnchorElement, LINK_TAG } from "./link"
+import { LINK_TAG } from "./link"
 import { formatTagToString, formatVoidToString, getAttributes } from "./util"
 
 type TPartialNode = Partial<Node>
@@ -11,10 +10,6 @@ export type TTagElement = {
   tag: string
   children?: TPartialNode[]
   [key: string]: any
-}
-
-const isTagElement = (el: any): el is TTagElement => {
-  return "tag" in el
 }
 
 export type TToHtml = (element: TPartialNode) => string
@@ -28,6 +23,13 @@ export type THtmlEditor = ReactEditor & {
   fromHtml: (html: string) => (TTagElement | TPartialNode)[]
 }
 
+export const toHtmlgetChildren = (editor: THtmlEditor, node: TPartialNode) => {
+  const children =
+    (Editor.isBlock(editor, node) || Editor.isInline(editor, node)) && node.children
+      ? node.children.map(n => editor.toHtml(n)).join("")
+      : ""
+  return children
+}
 export const createToHtml = (editor: THtmlEditor): TToHtml => {
   return function toHtml(node): string {
     if (Text.isText(node)) {
@@ -45,39 +47,30 @@ export const createToHtml = (editor: THtmlEditor): TToHtml => {
       return node.map(n => editor.toHtml(n)).join("")
     }
 
-    const children =
-      (Editor.isBlock(editor, node) || Editor.isInline(editor, node)) && node.children
-        ? node.children.map(n => editor.toHtml(n)).join("")
-        : ""
-
-    if (isTagElement(node)) {
-      if (node.tag in EHtmlBlockTag) {
-        return formatTagToString(node.tag, null, children)
-      }
-
-      if (isHtmlAnchorElement(node)) {
-        const attributes = {
-          ...node.attributes,
-          href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
-        }
-        return formatTagToString(node.tag, attributes, children)
-      }
-
-      if (node.tag in EHtmlVoidTag) {
-        return formatVoidToString(node.tag, null)
-      }
+    if (node.tag in EHtmlBlockTag) {
+      const children = toHtmlgetChildren(editor, node)
+      return formatTagToString(node.tag, null, children)
     }
 
+    if (node.tag in EHtmlVoidTag) {
+      return formatVoidToString(node.tag, null)
+    }
+
+    const children = toHtmlgetChildren(editor, node)
     return children
   }
 }
 
+export const fromHtmlChildNodes = (
+  editor: THtmlEditor,
+  nodes: NodeListOf<ChildNode> | HTMLCollection
+) => {
+  return Array.from(nodes)
+    .map(editor.fromHtmlElement)
+    .flat()
+}
+
 export const createFromHtml = (editor: THtmlEditor): TFromHtmlElement => {
-  function fromHtmlChildNodes(nodes: NodeListOf<ChildNode> | HTMLCollection) {
-    return Array.from(nodes)
-      .map(editor.fromHtmlElement)
-      .flat()
-  }
   return function fromHtml(element) {
     const el: Element = element as Element
 
@@ -85,9 +78,9 @@ export const createFromHtml = (editor: THtmlEditor): TFromHtmlElement => {
       const firstElementChild =
         el.children && Array.from(el.children).filter(child => child.nodeName !== "META")[0]
       if (firstElementChild && firstElementChild.nodeName === "B") {
-        return fromHtmlChildNodes(firstElementChild.childNodes)
+        return fromHtmlChildNodes(editor, firstElementChild.childNodes)
       }
-      return fromHtmlChildNodes(el.children)
+      return fromHtmlChildNodes(editor, el.children)
     }
 
     if (el.nodeType === 3) {
@@ -102,10 +95,10 @@ export const createFromHtml = (editor: THtmlEditor): TFromHtmlElement => {
       return { text: "\n" }
     }
 
-    const children = fromHtmlChildNodes(el.childNodes)
+    const children = fromHtmlChildNodes(editor, el.childNodes)
     const attributes = getAttributes(el)
 
-    if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG) {
+    if (tag in EHtmlBlockTag || tag === LINK_TAG) {
       if (children.length === 0) {
         children.push({ text: "" } as Text)
       }

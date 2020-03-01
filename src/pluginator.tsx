@@ -1,17 +1,17 @@
-import { TSlatePlugin, TRenderElement } from "./plugin"
+import React, { createElement } from "react"
+import { Editor } from "slate"
 import { RenderElementProps } from "slate-react"
-import React, { FC, createElement } from "react"
 import {
-  THtmlEditor,
-  TFromHtmlElement,
-  TToHtml,
-  TFromHtml,
   createFromHtml,
   createToHtml,
+  TFromHtml,
+  TFromHtmlElement,
+  THtmlEditor,
   TPartialNode,
   TTagElement,
+  TToHtml,
 } from "./html"
-import { Editor } from "slate"
+import { TRenderElement, TSlatePlugin } from "./plugin"
 
 type TSlatePluginatorInit = {
   editor: Editor
@@ -50,8 +50,11 @@ export class SlatePluginator {
     }
   }
 
-  RenderElement: FC<RenderElementProps> = props => {
-    const Component = this._plugins_RenderElement.find(r => r(props))
+  RenderElement = (props: RenderElementProps) => {
+    const Component = this._plugins_RenderElement.find(r => {
+      console.log(r, props)
+      return r(props)
+    })
     if (Component) {
       return createElement(Component, props)
     }

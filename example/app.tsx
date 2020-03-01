@@ -3,7 +3,16 @@ import React, { CSSProperties, FC, useCallback, useMemo, useRef, useState } from
 import { render } from "react-dom"
 import { Editor, Node } from "slate"
 import { Editable, ReactEditor, RenderElementProps, Slate } from "slate-react"
-import { createHtmlEditor, Leaf, RenderElement, TTagElement, useSticky } from "../src"
+import {
+  createHtmlEditor,
+  HtmlBlockElement,
+  isHtmlBlockElement,
+  Leaf,
+  SlatePluginator,
+  TTagElement,
+  useSticky,
+} from "../src"
+import { HtmlVoidElement, isHtmlVoidElement } from "../src/format"
 import {
   ButtonLinkElement,
   BUTTON_LINK_DATA_ATTRIBUTE,
@@ -18,13 +27,21 @@ const SlateHtmlEditor: FC<{
   value: TTagElement[]
   setValue: (value: TTagElement[]) => void
   editor: Editor
-}> = ({ value, setValue, editor }) => {
+  pluginator: SlatePluginator
+}> = ({ value, setValue, editor, pluginator }) => {
   const renderElement = useCallback((props: RenderElementProps) => {
     if (isElementButtonLink(props.element)) {
       return <ButtonLinkElement {...props} />
     }
-    return <RenderElement {...props} />
+    if (isHtmlBlockElement(props.element)) {
+      return <HtmlBlockElement {...props} />
+    }
+    if (isHtmlVoidElement(props.element)) {
+      return <HtmlVoidElement {...props} />
+    }
+    return pluginator.RenderElement(props)
   }, [])
+
   const renderLeaf = useCallback(Leaf, [])
   const [isSticky, stickyPlaceholderRef] = useSticky()
 
@@ -144,7 +161,7 @@ const MyEditor: FC = () => {
       <Button color="primary" onClick={() => console.log(value)}>
         log value
       </Button>
-      <SlateHtmlEditor value={value} setValue={setValue} editor={editor} />
+      <SlateHtmlEditor value={value} setValue={setValue} editor={editor} pluginator={pluginator} />
     </div>
   )
 }

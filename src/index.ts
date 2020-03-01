@@ -21,7 +21,6 @@ export {
   withLink,
 } from "./link"
 export { SlatePluginator } from "./pluginator"
-export { RenderElement } from "./render-element"
 export { useSticky } from "./sticky"
 export { Toolbar } from "./toolbar"
 export { TagButton, ToolbarButton, TToolbarButtonProps } from "./toolbar-button"

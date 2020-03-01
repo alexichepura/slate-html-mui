@@ -10,7 +10,8 @@ import Image from "@material-ui/icons/Image"
 import React, { FC, ImgHTMLAttributes, useState } from "react"
 import { Editor, Node, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TFromHtmlElement, THtmlEditor, TToHtml, TTagElement } from "../html"
+import { TFromHtmlElement, TTagElement, TToHtml } from "../html"
+import { TSlatePlugin } from "../plugin"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 import { formatVoidToString, getAttributes } from "../util"
 import { insertBlock } from "../util/insert-block"
@@ -143,36 +144,27 @@ const isImgTag = (element: TTagElement) => {
   return element.tag === IMG_TAG
 }
 
-export const withImg = (editor: THtmlEditor): THtmlEditor => {
-  const { isVoid, fromHtmlElement, toHtml } = editor
+const toHtmlImg: TToHtml = node => {
+  if (isHtmlImgElement(node)) {
+    return formatVoidToString(node.tag, node.attributes)
+  }
+  return ""
+}
+const fromHtmlImg: TFromHtmlElement = el => {
+  const tag = el.nodeName.toLowerCase()
+  if (tag === IMG_TAG) {
+    const attributes = getAttributes(el as Element)
+    const children: any[] = [{ text: "" } as Text]
+    return { tag, attributes, children }
+  }
+  return null
+}
+
+export const withImg = (editor: Editor): Editor => {
+  const { isVoid } = editor
 
   editor.isVoid = element => {
     return isImgTag(element as TTagElement) ? true : isVoid(element)
-  }
-
-  const fromHtmlImg: TFromHtmlElement = el => {
-    const tag = el.nodeName.toLowerCase()
-    if (tag === IMG_TAG) {
-      const attributes = getAttributes(el as Element)
-      const children: any[] = [{ text: "" } as Text]
-      return { tag, attributes, children }
-    }
-    return null
-  }
-  editor.fromHtmlElement = element => {
-    const img = fromHtmlImg(element)
-    return img || fromHtmlElement(element)
-  }
-
-  const toHtmlImg: TToHtml = node => {
-    if (isHtmlImgElement(node)) {
-      return formatVoidToString(node.tag, node.attributes)
-    }
-    return ""
-  }
-  editor.toHtml = element => {
-    const img = toHtmlImg(element)
-    return img || toHtml(element)
   }
 
   return editor
@@ -231,3 +223,16 @@ export const ImgFormDialog: FC<TImgFormDialogProps> = ({
   )
 }
 ImgFormDialog.displayName = "ImgFormDialog"
+
+export const createImgPlugin = (): TSlatePlugin => ({
+  toHtml: toHtmlImg,
+  fromHtmlElement: fromHtmlImg,
+  extendEditor: withImg,
+  RenderElement: props => {
+    const element = props.element as TTagElement
+    if (isHtmlImgElement(element)) {
+      return <HtmlImgElement {...props} />
+    }
+    return null
+  },
+})

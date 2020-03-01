@@ -1,28 +1,22 @@
-import escapeHtml from "escape-html"
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   MenuItem,
+  TextField,
 } from "@material-ui/core"
 import Link from "@material-ui/icons/Link"
+import escapeHtml from "escape-html"
 import isUrl from "is-url"
-import React, { FC, useState, AnchorHTMLAttributes } from "react"
-import { Editor, Element as SlateElement, Text, Node, Range, Path, Transforms } from "slate"
-import { useSlate, RenderElementProps } from "slate-react"
+import React, { AnchorHTMLAttributes, FC, useState } from "react"
+import { Editor, Element as SlateElement, Node, Path, Range, Text, Transforms } from "slate"
+import { RenderElementProps, useSlate } from "slate-react"
+import { TFromHtmlElement, TTagElement, TToHtml } from "./html"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
-import {
-  TTagElement,
-  THtmlEditor,
-  TToHtml,
-  TFromHtmlElement,
-  toHtmlgetChildren,
-  fromHtmlChildNodes,
-} from "./html"
 import { formatTagToString, getAttributes } from "./util"
+import { TSlatePlugin } from "./plugin"
 
 export const LINK_TAG = "a"
 
@@ -173,8 +167,8 @@ export const LinkButton: FC<TLinkButtonProps> = ({
 }
 LinkButton.displayName = "LinkButton"
 
-export const withLink = (editor: THtmlEditor) => {
-  const { insertData, insertText, isInline, toHtml, fromHtmlElement } = editor
+export const withLink = (editor: Editor): Editor => {
+  const { insertData, insertText, isInline } = editor
 
   editor.isInline = element => {
     return (element as TTagElement).tag === LINK_TAG ? true : isInline(element)
@@ -196,39 +190,6 @@ export const withLink = (editor: THtmlEditor) => {
     } else {
       insertData(data)
     }
-  }
-
-  const fromHtmlAnchor: TFromHtmlElement = el => {
-    const tag = el.nodeName.toLowerCase()
-    if (tag === LINK_TAG) {
-      const attributes = getAttributes(el as Element)
-      const children = fromHtmlChildNodes(editor, el.childNodes)
-      if (children.length === 0) {
-        children.push({ text: "" })
-      }
-      return { tag, attributes, children }
-    }
-    return null
-  }
-  editor.fromHtmlElement = element => {
-    const anchor = fromHtmlAnchor(element)
-    return anchor || fromHtmlElement(element)
-  }
-
-  const toHtmlAnchor: TToHtml = node => {
-    if (isHtmlAnchorElement(node)) {
-      const attributes = {
-        ...node.attributes,
-        href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
-      }
-      const children = toHtmlgetChildren(editor, node)
-      return formatTagToString(node.tag, attributes, children)
-    }
-    return ""
-  }
-  editor.toHtml = element => {
-    const img = toHtmlAnchor(element)
-    return img || toHtml(element)
   }
 
   return editor
@@ -336,3 +297,41 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({
   )
 }
 LinkFormDialog.displayName = "LinkFormDialog"
+
+const fromHtmlAnchor: TFromHtmlElement = (el, pluginator) => {
+  const tag = el.nodeName.toLowerCase()
+  if (tag === LINK_TAG) {
+    const attributes = getAttributes(el as Element)
+    const children = pluginator.fromHtmlChildNodes(el.childNodes)
+    if (children.length === 0) {
+      children.push({ text: "" })
+    }
+    return { tag, attributes, children }
+  }
+  return null
+}
+
+const toHtmlAnchor: TToHtml = (node, pluginator) => {
+  if (isHtmlAnchorElement(node)) {
+    const attributes = {
+      ...node.attributes,
+      href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
+    }
+    const children = pluginator.toHtmlgetChildren(node)
+    return formatTagToString(node.tag, attributes, children)
+  }
+  return ""
+}
+
+export const createAnchorPlugin = (): TSlatePlugin => ({
+  toHtml: toHtmlAnchor,
+  fromHtmlElement: fromHtmlAnchor,
+  extendEditor: withLink,
+  RenderElement: props => {
+    const element = props.element as TTagElement
+    if (isHtmlAnchorElement(element)) {
+      return <HtmlAnchorElement {...props} />
+    }
+    return null
+  },
+})

@@ -7,11 +7,11 @@ import {
   EHtmlVoidTag,
   isTagActive,
 } from "./format"
-import { createFromHtml, createToHtml, TTagElement, THtmlEditor } from "./html"
+import { THtmlEditor, TTagElement } from "./html"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
 import { insertBlock, setBlock } from "./util/insert-block"
 
-export const withHtml = (editor: Editor): THtmlEditor => {
+export const withHtml = (editor: Editor): Editor => {
   const { insertData, isVoid, normalizeNode } = editor
 
   editor.isVoid = element => {
@@ -97,13 +97,5 @@ export const withHtml = (editor: Editor): THtmlEditor => {
     normalizeNode(entry)
   }
 
-  const _editor: THtmlEditor = editor as THtmlEditor
-  _editor.fromHtmlElement = createFromHtml(_editor)
-  _editor.fromHtml = html => {
-    const parsed = new DOMParser().parseFromString(html, "text/html")
-    return _editor.fromHtmlElement(parsed.body)
-  }
-  _editor.toHtml = createToHtml(_editor)
-
-  return _editor
+  return editor
 }

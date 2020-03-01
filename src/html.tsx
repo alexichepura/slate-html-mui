@@ -1,36 +1,30 @@
 import escapeHtml from "escape-html"
-import { Editor, Node, Text } from "slate"
+import { Node, Text } from "slate"
 import { ReactEditor } from "slate-react"
 import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
 import { LINK_TAG } from "./link"
 import { formatTagToString, formatVoidToString, getAttributes } from "./util"
+import { SlatePluginator } from "./pluginator"
 
-type TPartialNode = Partial<Node>
+export type TPartialNode = Partial<Node>
 export type TTagElement = {
   tag: string
   children?: TPartialNode[]
   [key: string]: any
 }
 
-export type TToHtml = (element: TPartialNode) => string
+export type TToHtml = (element: TPartialNode, pluginator: SlatePluginator) => string
+export type TFromHtml = (html: string) => (TTagElement | TPartialNode)[]
 export type TFromHtmlElement = (
-  element: HTMLElement | ChildNode
+  element: HTMLElement | ChildNode,
+  pluginator: SlatePluginator
 ) => (TTagElement | TPartialNode | any) | (TTagElement | TPartialNode | any)[]
 
 export type THtmlEditor = ReactEditor & {
-  toHtml: TToHtml
-  fromHtmlElement: TFromHtmlElement
-  fromHtml: (html: string) => (TTagElement | TPartialNode)[]
+  html: SlatePluginator
 }
 
-export const toHtmlgetChildren = (editor: THtmlEditor, node: TPartialNode) => {
-  const children =
-    (Editor.isBlock(editor, node) || Editor.isInline(editor, node)) && node.children
-      ? node.children.map(n => editor.toHtml(n)).join("")
-      : ""
-  return children
-}
-export const createToHtml = (editor: THtmlEditor): TToHtml => {
+export const createToHtml = (pluginator: SlatePluginator): TToHtml => {
   return function toHtml(node): string {
     if (Text.isText(node)) {
       const markTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
@@ -44,11 +38,11 @@ export const createToHtml = (editor: THtmlEditor): TToHtml => {
     }
 
     if (Array.isArray(node)) {
-      return node.map(n => editor.toHtml(n)).join("")
+      return node.map(n => pluginator.toHtml(n)).join("")
     }
 
     if (node.tag in EHtmlBlockTag) {
-      const children = toHtmlgetChildren(editor, node)
+      const children = pluginator.toHtmlgetChildren(node)
       return formatTagToString(node.tag, null, children)
     }
 
@@ -56,21 +50,12 @@ export const createToHtml = (editor: THtmlEditor): TToHtml => {
       return formatVoidToString(node.tag, null)
     }
 
-    const children = toHtmlgetChildren(editor, node)
+    const children = pluginator.toHtmlgetChildren(node)
     return children
   }
 }
 
-export const fromHtmlChildNodes = (
-  editor: THtmlEditor,
-  nodes: NodeListOf<ChildNode> | HTMLCollection
-) => {
-  return Array.from(nodes)
-    .map(editor.fromHtmlElement)
-    .flat()
-}
-
-export const createFromHtml = (editor: THtmlEditor): TFromHtmlElement => {
+export const createFromHtml = (pluginator: SlatePluginator): TFromHtmlElement => {
   return function fromHtml(element) {
     const el: Element = element as Element
 
@@ -78,9 +63,9 @@ export const createFromHtml = (editor: THtmlEditor): TFromHtmlElement => {
       const firstElementChild =
         el.children && Array.from(el.children).filter(child => child.nodeName !== "META")[0]
       if (firstElementChild && firstElementChild.nodeName === "B") {
-        return fromHtmlChildNodes(editor, firstElementChild.childNodes)
+        return pluginator.fromHtmlChildNodes(firstElementChild.childNodes)
       }
-      return fromHtmlChildNodes(editor, el.children)
+      return pluginator.fromHtmlChildNodes(el.children)
     }
 
     if (el.nodeType === 3) {
@@ -95,7 +80,7 @@ export const createFromHtml = (editor: THtmlEditor): TFromHtmlElement => {
       return { text: "\n" }
     }
 
-    const children = fromHtmlChildNodes(editor, el.childNodes)
+    const children = pluginator.fromHtmlChildNodes(el.childNodes)
     const attributes = getAttributes(el)
 
     if (tag in EHtmlBlockTag || tag === LINK_TAG) {

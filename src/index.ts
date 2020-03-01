@@ -8,7 +8,7 @@ export {
   Leaf,
 } from "./format"
 export { RedoButton, UndoButton } from "./history"
-export { TFromHtmlElement, TToHtml, TTagElement, THtmlEditor } from "./html"
+export { TFromHtmlElement, THtmlEditor, TTagElement, TToHtml } from "./html"
 export { ImgButton, TImgFormDialogProps } from "./image/img"
 export { PictureButton, TPictureFormDialogProps } from "./image/picture"
 export {
@@ -20,6 +20,7 @@ export {
   TLinkFormDialogProps,
   withLink,
 } from "./link"
+export { SlatePluginator } from "./pluginator"
 export { RenderElement } from "./render-element"
 export { useSticky } from "./sticky"
 export { Toolbar } from "./toolbar"
@@ -27,3 +28,4 @@ export { TagButton, ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 export { formatTagToString, formatVoidToString, getAttributes } from "./util"
 export { insertBlock } from "./util/insert-block"
 export { withHtml } from "./with-html"
+export { TSlatePlugin } from "./plugin"

@@ -2,47 +2,23 @@ import React, { CSSProperties, FC, useState } from "react"
 import { Editor, Element as SlateElement, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import {
-  formatTagToString,
-  getAttributes,
   insertBlock,
   TAnchorAnyAttributes,
-  THtmlEditor,
   ToolbarButton,
+  TSlatePlugin,
+  TFromHtmlElement,
+  TToHtml,
+  formatTagToString,
+  TTagElement,
+  getAttributes,
 } from "../src"
 import { CustomLinkFormDialog } from "./custom-link"
 
-export const withButtonLink = (editor: THtmlEditor): THtmlEditor => {
-  const { isVoid, fromHtmlElement, toHtml } = editor
+export const withButtonLink = (editor: Editor): Editor => {
+  const { isVoid } = editor
 
   editor.isVoid = element => {
     return isElementButtonLink((element as any) as TButtonLinkElement) ? true : isVoid(element)
-  }
-
-  editor.fromHtmlElement = el => {
-    if (el.nodeName.toLowerCase() !== "div") {
-      return fromHtmlElement(el)
-    }
-    const attr = (el as Element).attributes.getNamedItem(BUTTON_LINK_DATA_ATTRIBUTE)
-
-    if (attr && attr.value === "true") {
-      const a = (el as Element).firstChild! as Element
-      const link: TButtonLinkElement = {
-        type: BUTTON_LINK_TYPE,
-        txt: a.textContent || "",
-        attributes: getAttributes(a),
-        children: [{ text: "" }],
-      }
-      return link
-    }
-    return fromHtmlElement(el)
-  }
-
-  editor.toHtml = node => {
-    if (isElementButtonLink(node)) {
-      const text = formatTagToString("a", node.attributes, node.txt)
-      return `<div ${BUTTON_LINK_DATA_ATTRIBUTE}="true">${text}</div>`
-    }
-    return toHtml(node)
   }
 
   return editor
@@ -197,3 +173,43 @@ const getInitialLinkData = (editor: Editor): TButtonLinkButtonStateInitial => {
     attributes: link ? link.attributes : {},
   }
 }
+
+const fromHtmlElement: TFromHtmlElement = (el, pluginator) => {
+  if (el.nodeName.toLowerCase() !== "div") {
+    return pluginator.fromHtmlElement(el)
+  }
+  const attr = (el as Element).attributes.getNamedItem(BUTTON_LINK_DATA_ATTRIBUTE)
+
+  if (attr && attr.value === "true") {
+    const a = (el as Element).firstChild! as Element
+    const link: TButtonLinkElement = {
+      type: BUTTON_LINK_TYPE,
+      txt: a.textContent || "",
+      attributes: getAttributes(a),
+      children: [{ text: "" }],
+    }
+    return link
+  }
+  return pluginator.fromHtmlElement(el)
+}
+
+const toHtml: TToHtml = (node, pluginator) => {
+  if (isElementButtonLink(node)) {
+    const text = formatTagToString("a", node.attributes, node.txt)
+    return `<div ${BUTTON_LINK_DATA_ATTRIBUTE}="true">${text}</div>`
+  }
+  return pluginator.toHtml(node)
+}
+
+export const createButtonLinkPlugin = (): TSlatePlugin => ({
+  toHtml: toHtml,
+  fromHtmlElement: fromHtmlElement,
+  extendEditor: withButtonLink,
+  RenderElement: props => {
+    const element = props.element as TTagElement
+    if (isElementButtonLink(element)) {
+      return <ButtonLinkElement {...props} />
+    }
+    return null
+  },
+})

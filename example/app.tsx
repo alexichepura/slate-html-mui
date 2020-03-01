@@ -1,9 +1,9 @@
 import { Button, Card, makeStyles } from "@material-ui/core"
 import React, { CSSProperties, FC, useCallback, useMemo, useRef, useState } from "react"
 import { render } from "react-dom"
-import { Node } from "slate"
+import { Editor, Node } from "slate"
 import { Editable, ReactEditor, RenderElementProps, Slate } from "slate-react"
-import { createHtmlEditor, Leaf, RenderElement, THtmlEditor, TTagElement, useSticky } from "../src"
+import { createHtmlEditor, Leaf, RenderElement, TTagElement, useSticky } from "../src"
 import {
   ButtonLinkElement,
   BUTTON_LINK_DATA_ATTRIBUTE,
@@ -11,12 +11,13 @@ import {
   withButtonLink,
 } from "./button-link"
 import { initial, initial_string } from "./initial"
+import { createPluginator } from "./setup"
 import { CustomToolbar } from "./toolbar"
 
 const SlateHtmlEditor: FC<{
   value: TTagElement[]
   setValue: (value: TTagElement[]) => void
-  editor: THtmlEditor
+  editor: Editor
 }> = ({ value, setValue, editor }) => {
   const renderElement = useCallback((props: RenderElementProps) => {
     if (isElementButtonLink(props.element)) {
@@ -111,21 +112,22 @@ const useStyles = makeStyles(
 
 const MyEditor: FC = () => {
   const editor = useMemo(() => withButtonLink(createHtmlEditor()), [])
+  const pluginator = useMemo(() => createPluginator(editor), [])
   const [value, setValue] = useState<TTagElement[]>(initial)
 
   const saveToLocalstorage = () => {
     console.log("saveToLocalstorage value", value)
-    const str = editor.toHtml(value)
+    const str = pluginator.toHtml(value)
     console.log("saveToLocalstorage html string", str)
     localStorage.setItem("slate-mui-value", str)
   }
   const loadFromLocalstorage = () => {
     const savedStr = localStorage.getItem("slate-mui-value") || ""
-    const savedValue = editor.fromHtml(savedStr)
+    const savedValue = pluginator.fromHtml(savedStr)
     setValue(savedValue as any)
   }
   const loadFromSample = () => {
-    const savedValue = editor.fromHtml(initial_string)
+    const savedValue = pluginator.fromHtml(initial_string)
     setValue(savedValue as any)
   }
   return (

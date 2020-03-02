@@ -11,7 +11,7 @@ export const createBrPlugin = (): TSlatePlugin => ({
     if ((node as TTagElement).tag === "br") {
       return formatVoidToString(node.tag, node.attributes)
     }
-    return ""
+    return null
   },
   fromHtmlElement: el => {
     const tag = el.nodeName.toLowerCase()

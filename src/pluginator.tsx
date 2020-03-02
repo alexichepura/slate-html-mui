@@ -86,16 +86,17 @@ export class SlatePluginator {
   }
 
   toHtml = (node: TPartialNode) => {
-    let el = ""
+    let html = ""
     this._plugins_toHtml.some(to => {
-      const _el = to(node, this)
-      if (_el) {
-        el = _el
+      const _html = to(node, this)
+      if (_html === null) {
+        return false
+      } else {
+        html = _html
         return true
       }
-      return false
     })
-    return el
+    return html
   }
 
   fromHtml: TFromHtml = html => {
@@ -109,10 +110,10 @@ export class SlatePluginator {
       .flat()
   }
 
-  toHtmlgetChildren = (node: TPartialNode) => {
+  nodeChildrenToHtml = (node: TPartialNode) => {
     const children =
       (Editor.isBlock(this.editor, node) || Editor.isInline(this.editor, node)) && node.children
-        ? node.children.map(n => this.toHtml(n)).join("")
+        ? node.children.map(this.toHtml).join("")
         : ""
     return children
   }

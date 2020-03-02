@@ -277,10 +277,10 @@ export const createAnchorPlugin = (): TSlatePlugin => ({
         ...node.attributes,
         href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
       }
-      const children = pluginator.toHtmlgetChildren(node)
+      const children = pluginator.nodeChildrenToHtml(node)
       return formatTagToString(node.tag, attributes, children)
     }
-    return ""
+    return null
   },
   fromHtmlElement: (el, pluginator) => {
     const tag = el.nodeName.toLowerCase()

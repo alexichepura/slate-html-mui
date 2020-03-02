@@ -163,12 +163,12 @@ const getInitialLinkData = (editor: Editor): TButtonLinkButtonStateInitial => {
 }
 
 export const createButtonLinkPlugin = (): TSlatePlugin => ({
-  toHtml: (node, pluginator) => {
+  toHtml: node => {
     if (isElementButtonLink(node)) {
       const text = formatTagToString("a", node.attributes, node.txt)
       return `<div ${BUTTON_LINK_DATA_ATTRIBUTE}="true">${text}</div>`
     }
-    return pluginator.toHtml(node)
+    return null
   },
   fromHtmlElement: el => {
     if (el.nodeName.toLowerCase() !== "div") {

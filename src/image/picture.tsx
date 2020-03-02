@@ -314,7 +314,7 @@ export const createPicturePlugin = (): TSlatePlugin => ({
       const img = formatVoidToString("img", el.img)
       return formatTagToString(PICTURE_TAG, el.attributes, sources + img)
     }
-    return ""
+    return null
   },
   fromHtmlElement: el => {
     if (!isPicture(el)) {

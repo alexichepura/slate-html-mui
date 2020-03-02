@@ -57,7 +57,7 @@ export type TTagElement = {
   [key: string]: any
 }
 
-export type TToHtml = (element: TPartialNode, pluginator: SlatePluginator) => string
+export type TToHtml = (element: TPartialNode, pluginator: SlatePluginator) => string | null
 export type TFromHtml = (html: string) => (TTagElement | TPartialNode)[]
 export type TFromHtmlElement = (
   element: HTMLElement | ChildNode,
@@ -94,12 +94,11 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
     }
 
     if (node.tag in EHtmlBlockTag) {
-      const children = pluginator.toHtmlgetChildren(node)
+      const children = pluginator.nodeChildrenToHtml(node)
       return formatTagToString(node.tag, null, children)
     }
 
-    const children = pluginator.toHtmlgetChildren(node)
-    return children
+    return ""
   },
   fromHtmlElement: (element, pluginator) => {
     const el: Element = element as Element

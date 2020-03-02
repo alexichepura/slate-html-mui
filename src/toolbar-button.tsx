@@ -4,7 +4,7 @@ import React, { FC } from "react"
 import { Editor } from "slate"
 import { useSlate } from "slate-react"
 import { isTagActive } from "./format"
-import { insertHtmlTag } from "./with-html"
+import { insertHtmlTag } from "./html"
 
 export type TToolbarButtonProps = { tooltipTitle: string } & ButtonProps
 export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(

@@ -1,17 +1,9 @@
 import { Button, Card, makeStyles } from "@material-ui/core"
-import React, { CSSProperties, FC, useCallback, useMemo, useRef, useState } from "react"
+import React, { CSSProperties, FC, useMemo, useRef, useState } from "react"
 import { render } from "react-dom"
 import { Editor, Node } from "slate"
-import { Editable, ReactEditor, RenderElementProps, Slate } from "slate-react"
-import {
-  createHtmlEditor,
-  HtmlBlockElement,
-  isHtmlBlockElement,
-  Leaf,
-  SlatePluginator,
-  TTagElement,
-  useSticky,
-} from "../src"
+import { Editable, ReactEditor, Slate } from "slate-react"
+import { createHtmlEditor, SlatePluginator, TTagElement, useSticky } from "../src"
 import { BUTTON_LINK_DATA_ATTRIBUTE } from "./button-link"
 import { initial, initial_string } from "./initial"
 import { createPluginator } from "./setup"
@@ -23,18 +15,8 @@ const SlateHtmlEditor: FC<{
   editor: Editor
   pluginator: SlatePluginator
 }> = ({ value, setValue, editor, pluginator }) => {
-  const renderElement = useCallback((props: RenderElementProps) => {
-    if (isHtmlBlockElement(props.element)) {
-      return <HtmlBlockElement {...props} />
-    }
-    return pluginator.RenderElement(props)
-  }, [])
-
-  const renderLeaf = useCallback(Leaf, [])
   const [isSticky, stickyPlaceholderRef] = useSticky()
-
   const isPasteCapture = useRef<boolean>(false)
-
   const classes = useStyles()
   return (
     <Slate
@@ -56,8 +38,8 @@ const SlateHtmlEditor: FC<{
           />
         </div>
         <Editable
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
+          renderElement={pluginator.RenderElement}
+          renderLeaf={pluginator.RenderLeaf}
           onPasteCapture={e => {
             // workaround for https://github.com/ianstormtaylor/slate/issues/3394
             if (!isPasteCapture.current) return

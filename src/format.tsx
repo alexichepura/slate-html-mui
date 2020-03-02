@@ -1,7 +1,6 @@
-import React, { FC } from "react"
-import { Editor, Element as SlateElement } from "slate"
-import { RenderElementProps, RenderLeafProps } from "slate-react"
-import { TTagElement } from "./html"
+import React from "react"
+import { Editor } from "slate"
+import { RenderLeafProps } from "slate-react"
 
 export enum EHtmlMarkTag {
   "b" = "b",
@@ -31,14 +30,6 @@ export enum EHtmlListTag {
 }
 
 export const DEFAULT_TAG = EHtmlBlockTag.p
-
-export const isHtmlBlockElement = (element: SlateElement | TTagElement) => {
-  return element.tag in EHtmlBlockTag
-}
-export const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
-  return React.createElement((element as TTagElement).tag, attributes, children)
-}
-HtmlBlockElement.displayName = "HtmlBlockElement"
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   Object.keys(EHtmlMarkTag).forEach(tag => {

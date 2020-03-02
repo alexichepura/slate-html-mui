@@ -1,17 +1,9 @@
 import React, { createElement } from "react"
 import { Editor } from "slate"
-import { RenderElementProps } from "slate-react"
-import {
-  createFromHtml,
-  createToHtml,
-  TFromHtml,
-  TFromHtmlElement,
-  THtmlEditor,
-  TPartialNode,
-  TToHtml,
-} from "./html"
+import { RenderElementProps, RenderLeafProps } from "slate-react"
+import { TFromHtml, TFromHtmlElement, THtmlEditor, TPartialNode, TToHtml } from "./html"
 import { TRenderElement, TSlatePlugin } from "./plugin"
-import { withHtml } from "./with-html"
+import { EHtmlMarkTag } from "./format"
 
 type TSlatePluginatorInit = {
   editor: Editor
@@ -22,14 +14,13 @@ export class SlatePluginator {
   editor: THtmlEditor
   private _plugins: TSlatePlugin[] = []
   private _plugins_RenderElement: TRenderElement[] = []
-  private _plugins_fromHtmlElement: TFromHtmlElement[] = [createFromHtml(this)]
+  private _plugins_fromHtmlElement: TFromHtmlElement[] = []
   private _plugins_toHtml: TToHtml[] = []
 
   constructor(init: TSlatePluginatorInit) {
     this.editor = init.editor as THtmlEditor
     this.editor.html = this
-    withHtml(this.editor, this)
-    this._plugins_toHtml.push(createToHtml(this))
+    this._plugins_toHtml.push()
     if (init.plugins) {
       init.plugins.forEach(this.addPlugin)
     }
@@ -38,7 +29,7 @@ export class SlatePluginator {
   addPlugin = (plugin: TSlatePlugin) => {
     this._plugins.push(plugin)
     if (plugin.extendEditor) {
-      plugin.extendEditor(this.editor)
+      plugin.extendEditor(this.editor, this)
     }
     if (plugin.RenderElement) {
       this._plugins_RenderElement.push(plugin.RenderElement)
@@ -60,6 +51,14 @@ export class SlatePluginator {
     }
     console.warn("INVALID ELEMENT", props)
     return <p>INVALID ELEMENT</p>
+  }
+  RenderLeaf = ({ attributes, children, leaf }: RenderLeafProps) => {
+    Object.keys(EHtmlMarkTag).forEach(tag => {
+      if (leaf[tag]) {
+        children = React.createElement(tag, {}, children)
+      }
+    })
+    return <span {...attributes}>{children}</span>
   }
 
   fromHtmlElement = (element: HTMLElement | ChildNode): any => {

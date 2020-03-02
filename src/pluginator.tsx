@@ -54,7 +54,6 @@ export class SlatePluginator {
 
   RenderElement = (props: RenderElementProps) => {
     const Component = this._plugins_RenderElement.find(r => {
-      // console.log(r, props)
       return r(props)
     })
     if (Component) {

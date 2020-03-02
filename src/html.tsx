@@ -80,10 +80,9 @@ export const createFromHtml = (pluginator: SlatePluginator): TFromHtmlElement =>
       return { text: "\n" }
     }
 
-    const children = pluginator.fromHtmlChildNodes(el.childNodes)
-    const attributes = getAttributes(el)
-
     if (tag in EHtmlBlockTag || tag === LINK_TAG) {
+      const children = pluginator.fromHtmlChildNodes(el.childNodes)
+      const attributes = getAttributes(el)
       if (children.length === 0) {
         children.push({ text: "" } as Text)
       }
@@ -91,13 +90,16 @@ export const createFromHtml = (pluginator: SlatePluginator): TFromHtmlElement =>
     }
 
     if (tag in EHtmlMarkTag) {
+      const children = pluginator.fromHtmlChildNodes(el.childNodes)
       return children.map(child => {
         const text = typeof child === "string" ? child : child.text
+        const attributes = getAttributes(el)
         return { [tag]: true, attributes, text }
       })
     }
 
     if (tag in EHtmlVoidTag) {
+      const attributes = getAttributes(el)
       return {
         tag,
         attributes,
@@ -105,6 +107,6 @@ export const createFromHtml = (pluginator: SlatePluginator): TFromHtmlElement =>
       }
     }
 
-    return children
+    return null
   }
 }

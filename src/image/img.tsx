@@ -11,7 +11,7 @@ import React, { FC, ImgHTMLAttributes, useState } from "react"
 import { Editor, Node, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import { TFromHtmlElement, TTagElement, TToHtml } from "../html"
-import { TSlatePlugin } from "../plugin"
+import { TSlatePlugin, TRenderElement } from "../plugin"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 import { formatVoidToString, getAttributes } from "../util"
 import { insertBlock } from "../util/insert-block"
@@ -224,16 +224,17 @@ export const ImgFormDialog: FC<TImgFormDialogProps> = ({
 }
 ImgFormDialog.displayName = "ImgFormDialog"
 
+const RenderElement: TRenderElement = props => {
+  const element = props.element as TTagElement
+  if (isHtmlImgElement(element)) {
+    return <HtmlImgElement {...props} />
+  }
+  return null
+}
+
 export const createImgPlugin = (): TSlatePlugin => ({
   toHtml: toHtmlImg,
   fromHtmlElement: fromHtmlImg,
   extendEditor: withImg,
-  RenderElement: props => {
-    const element = props.element as TTagElement
-    console.log("RenderElement", element)
-    if (isHtmlImgElement(element)) {
-      return <HtmlImgElement {...props} />
-    }
-    return null
-  },
+  RenderElement,
 })

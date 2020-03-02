@@ -12,13 +12,7 @@ import {
   TTagElement,
   useSticky,
 } from "../src"
-import { HtmlVoidElement, isHtmlVoidElement } from "../src/format"
-import {
-  ButtonLinkElement,
-  BUTTON_LINK_DATA_ATTRIBUTE,
-  isElementButtonLink,
-  withButtonLink,
-} from "./button-link"
+import { BUTTON_LINK_DATA_ATTRIBUTE } from "./button-link"
 import { initial, initial_string } from "./initial"
 import { createPluginator } from "./setup"
 import { CustomToolbar } from "./toolbar"
@@ -30,14 +24,8 @@ const SlateHtmlEditor: FC<{
   pluginator: SlatePluginator
 }> = ({ value, setValue, editor, pluginator }) => {
   const renderElement = useCallback((props: RenderElementProps) => {
-    if (isElementButtonLink(props.element)) {
-      return <ButtonLinkElement {...props} />
-    }
     if (isHtmlBlockElement(props.element)) {
       return <HtmlBlockElement {...props} />
-    }
-    if (isHtmlVoidElement(props.element)) {
-      return <HtmlVoidElement {...props} />
     }
     return pluginator.RenderElement(props)
   }, [])
@@ -128,7 +116,7 @@ const useStyles = makeStyles(
 )
 
 const MyEditor: FC = () => {
-  const editor = useMemo(() => withButtonLink(createHtmlEditor()), [])
+  const editor = useMemo(() => createHtmlEditor(), [])
   const pluginator = useMemo(() => createPluginator(editor), [])
   const [value, setValue] = useState<TTagElement[]>(initial)
 

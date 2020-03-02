@@ -4,6 +4,7 @@ import { createImgPlugin } from "../src/image/img"
 import { createButtonLinkPlugin } from "./button-link"
 import { createPicturePlugin } from "../src/image/picture"
 import { createAnchorPlugin } from "../src/link"
+import { createBrPlugin } from "../src/html/br"
 
 export const createPluginator = (editor: Editor) =>
   new SlatePluginator({
@@ -13,5 +14,6 @@ export const createPluginator = (editor: Editor) =>
       createPicturePlugin(),
       createAnchorPlugin(),
       createButtonLinkPlugin(),
+      createBrPlugin(),
     ],
   })

@@ -20,7 +20,7 @@ import React, {
 } from "react"
 import { Editor, Node, NodeEntry, Range } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TFromHtmlElement, TTagElement, TToHtml } from "../html"
+import { TTagElement } from "../html"
 import { TSlatePlugin } from "../plugin"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 import { formatTagToString, formatVoidToString, getAttributes } from "../util"
@@ -200,16 +200,6 @@ export const isPictureTag = (element: TTagElement) => {
   return element.tag === PICTURE_TAG
 }
 
-export const withPicture = (editor: Editor): Editor => {
-  const { isVoid } = editor
-
-  editor.isVoid = element => {
-    return isPictureTag(element as TTagElement) ? true : isVoid(element)
-  }
-
-  return editor
-}
-
 const setPicture = (editor: Editor, command: TSetPictureCommand) => {
   const { element, range } = command
   insertBlock(editor, element, range)
@@ -317,39 +307,40 @@ const isPicture = (el: Element | any): el is Element => {
   return el.nodeName.toLowerCase() === PICTURE_TAG
 }
 
-const fromHtmlPicture: TFromHtmlElement = el => {
-  if (!isPicture(el)) {
-    return null
-  }
-
-  const attributes = getAttributes(el as Element)
-  const children = Array.from(el.children)
-  const img = children.filter(c => c.nodeName.toLowerCase() === "img").map(getAttributes)[0] || {}
-  const sources = children.filter(c => c.nodeName.toLowerCase() === "source").map(getAttributes)
-
-  const picture: TPictureElement = {
-    tag: PICTURE_TAG,
-    attributes,
-    img,
-    sources,
-    children: [{ text: "" }],
-  }
-  return picture
-}
-
-const toHtmlPicture: TToHtml = (el): string => {
-  if (isHtmlPictureElement(el)) {
-    const sources = el.sources.map(s => formatVoidToString("source", s)).join("")
-    const img = formatVoidToString("img", el.img)
-    return formatTagToString(PICTURE_TAG, el.attributes, sources + img)
-  }
-  return ""
-}
-
 export const createPicturePlugin = (): TSlatePlugin => ({
-  toHtml: toHtmlPicture,
-  fromHtmlElement: fromHtmlPicture,
-  extendEditor: withPicture,
+  toHtml: el => {
+    if (isHtmlPictureElement(el)) {
+      const sources = el.sources.map(s => formatVoidToString("source", s)).join("")
+      const img = formatVoidToString("img", el.img)
+      return formatTagToString(PICTURE_TAG, el.attributes, sources + img)
+    }
+    return ""
+  },
+  fromHtmlElement: el => {
+    if (!isPicture(el)) {
+      return null
+    }
+
+    const attributes = getAttributes(el as Element)
+    const children = Array.from(el.children)
+    const img = children.filter(c => c.nodeName.toLowerCase() === "img").map(getAttributes)[0] || {}
+    const sources = children.filter(c => c.nodeName.toLowerCase() === "source").map(getAttributes)
+
+    const picture: TPictureElement = {
+      tag: PICTURE_TAG,
+      attributes,
+      img,
+      sources,
+      children: [{ text: "" }],
+    }
+    return picture
+  },
+  extendEditor: editor => {
+    const { isVoid } = editor
+    editor.isVoid = element => {
+      return isPictureTag(element as TTagElement) ? true : isVoid(element)
+    }
+  },
   RenderElement: props => {
     const element = props.element as TTagElement
     if (isHtmlPictureElement(element)) {

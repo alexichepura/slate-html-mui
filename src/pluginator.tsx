@@ -8,7 +8,6 @@ import {
   TFromHtmlElement,
   THtmlEditor,
   TPartialNode,
-  TTagElement,
   TToHtml,
 } from "./html"
 import { TRenderElement, TSlatePlugin } from "./plugin"
@@ -38,11 +37,11 @@ export class SlatePluginator {
 
   addPlugin = (plugin: TSlatePlugin) => {
     this._plugins.push(plugin)
-    if (plugin.RenderElement) {
-      this._plugins_RenderElement.push(plugin.RenderElement)
-    }
     if (plugin.extendEditor) {
       plugin.extendEditor(this.editor)
+    }
+    if (plugin.RenderElement) {
+      this._plugins_RenderElement.push(plugin.RenderElement)
     }
     if (plugin.fromHtmlElement) {
       this._plugins_fromHtmlElement.push(plugin.fromHtmlElement)
@@ -63,9 +62,7 @@ export class SlatePluginator {
     return <p>INVALID ELEMENT</p>
   }
 
-  fromHtmlElement = (
-    element: HTMLElement | ChildNode
-  ): (TTagElement | TPartialNode | any) | (TTagElement | TPartialNode | any)[] => {
+  fromHtmlElement = (element: HTMLElement | ChildNode): any => {
     let node = null
     this._plugins_fromHtmlElement.some(from => {
       const _node = from(element, this)

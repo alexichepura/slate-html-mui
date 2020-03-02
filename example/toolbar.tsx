@@ -9,7 +9,6 @@ import React, { FC } from "react"
 import {
   EHtmlBlockTag,
   EHtmlMarkTag,
-  EHtmlVoidTag,
   ImgButton,
   LinkButton,
   PictureButton,
@@ -20,6 +19,7 @@ import {
 import { CustomImgFormDialog } from "./custom-img"
 import { CustomLinkFormDialog } from "./custom-link"
 import { ButtonLinkButton } from "./button-link"
+import { BR_TAG } from "../src/html/br"
 
 export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
   return (
@@ -90,16 +90,7 @@ export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
         tag={EHtmlBlockTag.ul}
         children={<FormatListBulleted />}
       />
-      <TagButton
-        tooltipTitle="Line break"
-        tag={EHtmlVoidTag.br}
-        children={EHtmlVoidTag.br.toUpperCase()}
-      />
-      {/* <TagButton
-        tooltipTitle="Horizontal rule"
-        tag={EHtmlVoidTag.hr}
-        children={EHtmlVoidTag.hr.toUpperCase()}
-      /> */}
+      <TagButton tooltipTitle="Line break" tag={BR_TAG} children={BR_TAG.toUpperCase()} />
     </div>
   )
 }

@@ -10,8 +10,8 @@ import Image from "@material-ui/icons/Image"
 import React, { FC, ImgHTMLAttributes, useState } from "react"
 import { Editor, Node, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TFromHtmlElement, TTagElement, TToHtml } from "../html"
-import { TSlatePlugin, TRenderElement } from "../plugin"
+import { TTagElement } from "../html"
+import { TSlatePlugin } from "../plugin"
 import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
 import { formatVoidToString, getAttributes } from "../util"
 import { insertBlock } from "../util/insert-block"
@@ -144,32 +144,6 @@ const isImgTag = (element: TTagElement) => {
   return element.tag === IMG_TAG
 }
 
-const toHtmlImg: TToHtml = node => {
-  if (isHtmlImgElement(node)) {
-    return formatVoidToString(node.tag, node.attributes)
-  }
-  return ""
-}
-const fromHtmlImg: TFromHtmlElement = el => {
-  const tag = el.nodeName.toLowerCase()
-  if (tag === IMG_TAG) {
-    const attributes = getAttributes(el as Element)
-    const children: any[] = [{ text: "" } as Text]
-    return { tag, attributes, children }
-  }
-  return null
-}
-
-export const withImg = (editor: Editor): Editor => {
-  const { isVoid } = editor
-
-  editor.isVoid = element => {
-    return isImgTag(element as TTagElement) ? true : isVoid(element)
-  }
-
-  return editor
-}
-
 const setImg = (editor: Editor, command: TSetImgCommand) => {
   const { attributes, range } = command
   const img: TTagElement = {
@@ -224,17 +198,33 @@ export const ImgFormDialog: FC<TImgFormDialogProps> = ({
 }
 ImgFormDialog.displayName = "ImgFormDialog"
 
-const RenderElement: TRenderElement = props => {
-  const element = props.element as TTagElement
-  if (isHtmlImgElement(element)) {
-    return <HtmlImgElement {...props} />
-  }
-  return null
-}
-
 export const createImgPlugin = (): TSlatePlugin => ({
-  toHtml: toHtmlImg,
-  fromHtmlElement: fromHtmlImg,
-  extendEditor: withImg,
-  RenderElement,
+  toHtml: node => {
+    if (isHtmlImgElement(node)) {
+      return formatVoidToString(node.tag, node.attributes)
+    }
+    return ""
+  },
+  fromHtmlElement: el => {
+    const tag = el.nodeName.toLowerCase()
+    if (tag === IMG_TAG) {
+      const attributes = getAttributes(el as Element)
+      const children: any[] = [{ text: "" } as Text]
+      return { tag, attributes, children }
+    }
+    return null
+  },
+  extendEditor: editor => {
+    const { isVoid } = editor
+    editor.isVoid = element => {
+      return isImgTag(element as TTagElement) ? true : isVoid(element)
+    }
+  },
+  RenderElement: props => {
+    const element = props.element as TTagElement
+    if (isHtmlImgElement(element)) {
+      return <HtmlImgElement {...props} />
+    }
+    return null
+  },
 })

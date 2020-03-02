@@ -13,10 +13,10 @@ import isUrl from "is-url"
 import React, { AnchorHTMLAttributes, FC, useState } from "react"
 import { Editor, Element as SlateElement, Node, Path, Range, Text, Transforms } from "slate"
 import { RenderElementProps, useSlate } from "slate-react"
-import { TFromHtmlElement, TTagElement, TToHtml } from "./html"
+import { TTagElement } from "./html"
+import { TSlatePlugin } from "./plugin"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 import { formatTagToString, getAttributes } from "./util"
-import { TSlatePlugin } from "./plugin"
 
 export const LINK_TAG = "a"
 
@@ -167,34 +167,6 @@ export const LinkButton: FC<TLinkButtonProps> = ({
 }
 LinkButton.displayName = "LinkButton"
 
-export const withLink = (editor: Editor): Editor => {
-  const { insertData, insertText, isInline } = editor
-
-  editor.isInline = element => {
-    return (element as TTagElement).tag === LINK_TAG ? true : isInline(element)
-  }
-
-  editor.insertText = text => {
-    if (text && isUrl(text)) {
-      wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
-    } else {
-      insertText(text)
-    }
-  }
-
-  editor.insertData = (data: DataTransfer) => {
-    const text = data.getData("text/plain")
-
-    if (text && isUrl(text)) {
-      wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
-    } else {
-      insertData(data)
-    }
-  }
-
-  return editor
-}
-
 const unwrapLink = (editor: Editor) => {
   Transforms.unwrapNodes(editor, { match })
 }
@@ -298,35 +270,55 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({
 }
 LinkFormDialog.displayName = "LinkFormDialog"
 
-const fromHtmlAnchor: TFromHtmlElement = (el, pluginator) => {
-  const tag = el.nodeName.toLowerCase()
-  if (tag === LINK_TAG) {
-    const attributes = getAttributes(el as Element)
-    const children = pluginator.fromHtmlChildNodes(el.childNodes)
-    if (children.length === 0) {
-      children.push({ text: "" })
-    }
-    return { tag, attributes, children }
-  }
-  return null
-}
-
-const toHtmlAnchor: TToHtml = (node, pluginator) => {
-  if (isHtmlAnchorElement(node)) {
-    const attributes = {
-      ...node.attributes,
-      href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
-    }
-    const children = pluginator.toHtmlgetChildren(node)
-    return formatTagToString(node.tag, attributes, children)
-  }
-  return ""
-}
-
 export const createAnchorPlugin = (): TSlatePlugin => ({
-  toHtml: toHtmlAnchor,
-  fromHtmlElement: fromHtmlAnchor,
-  extendEditor: withLink,
+  toHtml: (node, pluginator) => {
+    if (isHtmlAnchorElement(node)) {
+      const attributes = {
+        ...node.attributes,
+        href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
+      }
+      const children = pluginator.toHtmlgetChildren(node)
+      return formatTagToString(node.tag, attributes, children)
+    }
+    return ""
+  },
+  fromHtmlElement: (el, pluginator) => {
+    const tag = el.nodeName.toLowerCase()
+    if (tag === LINK_TAG) {
+      const attributes = getAttributes(el as Element)
+      const children = pluginator.fromHtmlChildNodes(el.childNodes)
+      if (children.length === 0) {
+        children.push({ text: "" })
+      }
+      return { tag, attributes, children }
+    }
+    return null
+  },
+  extendEditor: editor => {
+    const { insertData, insertText, isInline } = editor
+
+    editor.isInline = element => {
+      return (element as TTagElement).tag === LINK_TAG ? true : isInline(element)
+    }
+
+    editor.insertText = text => {
+      if (text && isUrl(text)) {
+        wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
+      } else {
+        insertText(text)
+      }
+    }
+
+    editor.insertData = (data: DataTransfer) => {
+      const text = data.getData("text/plain")
+
+      if (text && isUrl(text)) {
+        wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
+      } else {
+        insertData(data)
+      }
+    }
+  },
   RenderElement: props => {
     const element = props.element as TTagElement
     if (isHtmlAnchorElement(element)) {

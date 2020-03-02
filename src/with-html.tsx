@@ -1,23 +1,13 @@
 import { Editor, Element, Node, Transforms } from "slate"
-import {
-  DEFAULT_TAG,
-  EHtmlBlockTag,
-  EHtmlListTag,
-  EHtmlMarkTag,
-  EHtmlVoidTag,
-  isTagActive,
-} from "./format"
+import { DEFAULT_TAG, EHtmlBlockTag, EHtmlListTag, EHtmlMarkTag, isTagActive } from "./format"
 import { TTagElement } from "./html"
+import { BR_TAG } from "./html/br"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
-import { insertBlock, setBlock } from "./util/insert-block"
 import { SlatePluginator } from "./pluginator"
+import { setBlock } from "./util/insert-block"
 
-export const withHtml = (editor: Editor, pluginator: SlatePluginator): Editor => {
-  const { insertData, isVoid, normalizeNode } = editor
-
-  editor.isVoid = element => {
-    return (element as TTagElement).tag in EHtmlVoidTag ? true : isVoid(element)
-  }
+export const withHtml = (editor: Editor, pluginator: SlatePluginator) => {
+  const { insertData, normalizeNode } = editor
 
   editor.insertData = (data: DataTransfer) => {
     const html = data.getData("text/html")
@@ -55,11 +45,9 @@ export const withHtml = (editor: Editor, pluginator: SlatePluginator): Editor =>
     // Fall back to the original `normalizeNode` to enforce other constraints.
     normalizeNode(entry)
   }
-
-  return editor
 }
 
-export const insertHtmlTag = (editor: Editor, tag: EHtmlBlockTag | EHtmlMarkTag | EHtmlVoidTag) => {
+export const insertHtmlTag = (editor: Editor, tag: string) => {
   const isActive = isTagActive(editor, tag)
   const isList = tag in EHtmlListTag
 
@@ -90,13 +78,8 @@ export const insertHtmlTag = (editor: Editor, tag: EHtmlBlockTag | EHtmlMarkTag 
     return
   }
 
-  if (tag === EHtmlVoidTag.br) {
+  if (tag === BR_TAG) {
     editor.insertText("\n")
-    return
-  }
-
-  if (tag in EHtmlVoidTag) {
-    insertBlock(editor, { tag, children: [] }, editor.selection!)
     return
   }
 }

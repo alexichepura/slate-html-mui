@@ -30,11 +30,6 @@ export enum EHtmlListTag {
   "ul" = "ul",
 }
 
-export enum EHtmlVoidTag {
-  "br" = "br",
-  "hr" = "hr",
-}
-
 export const DEFAULT_TAG = EHtmlBlockTag.p
 
 export const isHtmlBlockElement = (element: SlateElement | TTagElement) => {
@@ -44,14 +39,6 @@ export const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children,
   return React.createElement((element as TTagElement).tag, attributes, children)
 }
 HtmlBlockElement.displayName = "HtmlBlockElement"
-
-export const isHtmlVoidElement = (element: SlateElement | TTagElement) => {
-  return element.tag in EHtmlVoidTag
-}
-export const HtmlVoidElement: FC<RenderElementProps> = ({ attributes, element }) => {
-  return React.createElement((element as TTagElement).tag, attributes)
-}
-HtmlVoidElement.displayName = "HtmlVoidElement"
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   Object.keys(EHtmlMarkTag).forEach(tag => {
@@ -68,13 +55,17 @@ export const isTagActive = (editor: Editor, tag: string) => {
     return marks ? marks[tag] === true : false
   }
 
-  if (tag in EHtmlBlockTag || tag in EHtmlVoidTag) {
-    const [match] = Editor.nodes(editor, {
-      match: n => n.tag === tag,
-    })
-
-    return !!match
+  if (tag in EHtmlBlockTag) {
+    return isTagBlockActive(editor, tag)
   }
 
   return false
+}
+
+export const isTagBlockActive = (editor: Editor, tag: string) => {
+  const [match] = Editor.nodes(editor, {
+    match: n => n.tag === tag,
+  })
+
+  return !!match
 }

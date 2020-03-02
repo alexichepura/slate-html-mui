@@ -1,17 +1,18 @@
+import CodeTwoTone from "@material-ui/icons/CodeTwoTone"
 import FormatBold from "@material-ui/icons/FormatBold"
+import FormatItalicTwoTone from "@material-ui/icons/FormatItalicTwoTone"
 import FormatListBulleted from "@material-ui/icons/FormatListBulleted"
 import FormatListNumbered from "@material-ui/icons/FormatListNumbered"
 import FormatQuote from "@material-ui/icons/FormatQuote"
-import FormatItalicTwoTone from "@material-ui/icons/FormatItalicTwoTone"
 import FormatUnderlinedTwoTone from "@material-ui/icons/FormatUnderlinedTwoTone"
-import CodeTwoTone from "@material-ui/icons/CodeTwoTone"
 import React, { FC } from "react"
-import { UndoButton, RedoButton } from "./history"
-import { LinkButton } from "./link"
-import { TagButton } from "./toolbar-button"
-import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
+import { EHtmlBlockTag, EHtmlMarkTag } from "./format"
+import { RedoButton, UndoButton } from "./history"
+import { BR_TAG } from "./html/br"
 import { ImgButton } from "./image/img"
 import { PictureButton } from "./image/picture"
+import { LinkButton } from "./link"
+import { TagButton } from "./toolbar-button"
 
 export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
   return (
@@ -75,16 +76,7 @@ export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
         tag={EHtmlBlockTag.ul}
         children={<FormatListBulleted />}
       />
-      <TagButton
-        tooltipTitle="Line break"
-        tag={EHtmlVoidTag.br}
-        children={EHtmlVoidTag.br.toUpperCase()}
-      />
-      {/* <TagButton
-        tooltipTitle="Horizontal rule"
-        tag={EHtmlVoidTag.hr}
-        children={EHtmlVoidTag.hr.toUpperCase()}
-      /> */}
+      <TagButton tooltipTitle="Line break" tag={BR_TAG} children={BR_TAG.toUpperCase()} />
     </div>
   )
 }

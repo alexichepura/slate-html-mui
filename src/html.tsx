@@ -1,10 +1,9 @@
 import escapeHtml from "escape-html"
 import { Node, Text } from "slate"
 import { ReactEditor } from "slate-react"
-import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
-import { LINK_TAG } from "./link"
-import { formatTagToString, formatVoidToString, getAttributes } from "./util"
+import { EHtmlBlockTag, EHtmlMarkTag } from "./format"
 import { SlatePluginator } from "./pluginator"
+import { formatTagToString, getAttributes } from "./util"
 
 export type TPartialNode = Partial<Node>
 export type TTagElement = {
@@ -18,7 +17,7 @@ export type TFromHtml = (html: string) => (TTagElement | TPartialNode)[]
 export type TFromHtmlElement = (
   element: HTMLElement | ChildNode,
   pluginator: SlatePluginator
-) => (TTagElement | TPartialNode | any) | (TTagElement | TPartialNode | any)[]
+) => any
 
 export type THtmlEditor = ReactEditor & {
   html: SlatePluginator
@@ -44,10 +43,6 @@ export const createToHtml = (pluginator: SlatePluginator): TToHtml => {
     if (node.tag in EHtmlBlockTag) {
       const children = pluginator.toHtmlgetChildren(node)
       return formatTagToString(node.tag, null, children)
-    }
-
-    if (node.tag in EHtmlVoidTag) {
-      return formatVoidToString(node.tag, null)
     }
 
     const children = pluginator.toHtmlgetChildren(node)
@@ -76,11 +71,7 @@ export const createFromHtml = (pluginator: SlatePluginator): TFromHtmlElement =>
 
     const tag = el.nodeName.toLowerCase()
 
-    if (tag === EHtmlVoidTag.br) {
-      return { text: "\n" }
-    }
-
-    if (tag in EHtmlBlockTag || tag === LINK_TAG) {
+    if (tag in EHtmlBlockTag) {
       const children = pluginator.fromHtmlChildNodes(el.childNodes)
       const attributes = getAttributes(el)
       if (children.length === 0) {
@@ -96,15 +87,6 @@ export const createFromHtml = (pluginator: SlatePluginator): TFromHtmlElement =>
         const attributes = getAttributes(el)
         return { [tag]: true, attributes, text }
       })
-    }
-
-    if (tag in EHtmlVoidTag) {
-      const attributes = getAttributes(el)
-      return {
-        tag,
-        attributes,
-        children: [{ text: "" }],
-      }
     }
 
     return null

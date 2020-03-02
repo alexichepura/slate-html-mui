@@ -1,9 +1,10 @@
 import { Button, Card, makeStyles } from "@material-ui/core"
 import React, { CSSProperties, FC, useMemo, useRef, useState } from "react"
 import { render } from "react-dom"
-import { Editor, Node } from "slate"
-import { Editable, ReactEditor, Slate } from "slate-react"
-import { createHtmlEditor, SlatePluginator, TTagElement, useSticky } from "../src"
+import { createEditor, Editor, Node } from "slate"
+import { withHistory } from "slate-history"
+import { Editable, ReactEditor, Slate, withReact } from "slate-react"
+import { SlatePluginator, TTagElement, useSticky } from "../src"
 import { BUTTON_LINK_DATA_ATTRIBUTE } from "./button-link"
 import { initial, initial_string } from "./initial"
 import { createPluginator } from "./setup"
@@ -99,7 +100,7 @@ const useStyles = makeStyles(
 )
 
 const MyEditor: FC = () => {
-  const editor = useMemo(() => createHtmlEditor(), [])
+  const editor = useMemo(() => withHistory(withReact(createEditor())), [])
   const pluginator = useMemo(() => createPluginator(editor), [])
   const [value, setValue] = useState<TTagElement[]>(initial)
 

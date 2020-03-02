@@ -1,4 +1,3 @@
-export { createHtmlEditor, withHtmlEditor } from "./create"
 export { RedoButton, UndoButton } from "./history"
 export {
   EHtmlBlockTag,

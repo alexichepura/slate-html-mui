@@ -89,35 +89,15 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
       return text.split("\n").join("<br/>")
     }
 
-    if (Array.isArray(node)) {
-      return node.map(n => pluginator.toHtml(n)).join("")
-    }
-
     if (node.tag in EHtmlBlockTag) {
       const children = pluginator.nodeChildrenToHtml(node)
       return formatTagToString(node.tag, null, children)
     }
 
-    return ""
+    return null
   },
   fromHtmlElement: (element, pluginator) => {
     const el: Element = element as Element
-
-    if (el.nodeName === "BODY") {
-      const firstElementChild =
-        el.children && Array.from(el.children).filter(child => child.nodeName !== "META")[0]
-      if (firstElementChild && firstElementChild.nodeName === "B") {
-        return pluginator.fromHtmlChildNodes(firstElementChild.childNodes)
-      }
-      return pluginator.fromHtmlChildNodes(el.children)
-    }
-
-    if (el.nodeType === 3) {
-      const text = el.textContent || ""
-      return { text }
-    }
-    if (el.nodeType !== 1) return null
-
     const tag = el.nodeName.toLowerCase()
 
     if (tag in EHtmlBlockTag) {

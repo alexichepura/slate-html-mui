@@ -17,3 +17,32 @@ export type TSlatePlugin = {
   leaf?: string
   isActive?: TIsActive
 }
+
+export const createBasePlugin = (): TSlatePlugin => ({
+  toHtml: (node, pluginator) => {
+    if (Array.isArray(node)) {
+      return node.map(n => pluginator.toHtml(n)).join("")
+    }
+
+    return null
+  },
+  fromHtmlElement: (element, pluginator) => {
+    const el: Element = element as Element
+
+    if (el.nodeName === "BODY") {
+      const firstElementChild =
+        el.children && Array.from(el.children).filter(child => child.nodeName !== "META")[0]
+      if (firstElementChild && firstElementChild.nodeName === "B") {
+        return pluginator.fromHtmlChildNodes(firstElementChild.childNodes)
+      }
+      return pluginator.fromHtmlChildNodes(el.children)
+    }
+
+    if (el.nodeType === 3) {
+      const text = el.textContent || ""
+      return { text }
+    }
+    if (el.nodeType !== 1) return null
+    return null
+  },
+})

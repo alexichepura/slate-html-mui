@@ -1,5 +1,5 @@
 import escapeHtml from "escape-html"
-import React, { FC } from "react"
+import React, { FC, createElement } from "react"
 import { Editor, Element as SlateElement, Node, Text, Transforms } from "slate"
 import { ReactEditor, RenderElementProps } from "slate-react"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
@@ -185,6 +185,20 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
     const element = props.element as TTagElement
     if (isHtmlBlockElement(element)) {
       return <HtmlBlockElement {...props} />
+    }
+    return null
+  },
+
+  RenderLeaf: ({ attributes, children, leaf }) => {
+    const found = Object.keys(EHtmlMarkTag).some(tag => {
+      if (leaf[tag]) {
+        children = createElement(tag, {}, children)
+        return true
+      }
+      return false
+    })
+    if (found) {
+      return <span {...attributes}>{children}</span>
     }
     return null
   },

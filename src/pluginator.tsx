@@ -1,15 +1,8 @@
 import React, { createElement } from "react"
 import { Editor } from "slate"
 import { RenderElementProps, RenderLeafProps } from "slate-react"
-import {
-  EHtmlMarkTag,
-  TFromHtml,
-  TFromHtmlElement,
-  THtmlEditor,
-  TPartialNode,
-  TToHtml,
-} from "./html"
-import { TRenderElement, TSlatePlugin } from "./plugin"
+import { TFromHtml, TFromHtmlElement, THtmlEditor, TPartialNode, TToHtml } from "./html"
+import { TRenderElement, TRenderLeaf, TSlatePlugin } from "./plugin"
 
 type TSlatePluginatorInit = {
   editor: Editor
@@ -20,6 +13,7 @@ export class SlatePluginator {
   editor: THtmlEditor
   private _plugins: TSlatePlugin[] = []
   private _plugins_RenderElement: TRenderElement[] = []
+  private _plugins_RenderLeaf: TRenderLeaf[] = []
   private _plugins_fromHtmlElement: TFromHtmlElement[] = []
   private _plugins_toHtml: TToHtml[] = []
 
@@ -40,6 +34,9 @@ export class SlatePluginator {
     if (plugin.RenderElement) {
       this._plugins_RenderElement.push(plugin.RenderElement)
     }
+    if (plugin.RenderLeaf) {
+      this._plugins_RenderLeaf.push(plugin.RenderLeaf)
+    }
     if (plugin.fromHtmlElement) {
       this._plugins_fromHtmlElement.push(plugin.fromHtmlElement)
     }
@@ -49,22 +46,30 @@ export class SlatePluginator {
   }
 
   RenderElement = (props: RenderElementProps) => {
-    const Component = this._plugins_RenderElement.find(r => {
+    const Element = this._plugins_RenderElement.find(r => {
       return r(props)
     })
-    if (Component) {
-      return createElement(Component, props)
+    if (Element) {
+      return createElement(Element, props)
     }
     console.warn("INVALID ELEMENT", props)
     return <p>INVALID ELEMENT</p>
   }
-  RenderLeaf = ({ attributes, children, leaf }: RenderLeafProps) => {
-    Object.keys(EHtmlMarkTag).forEach(tag => {
-      if (leaf[tag]) {
-        children = React.createElement(tag, {}, children)
+
+  RenderLeaf = (props: RenderLeafProps): JSX.Element => {
+    let found
+    this._plugins_RenderLeaf.some(renderLeaf => {
+      const leaf = renderLeaf(props)
+      if (leaf) {
+        found = leaf
+        return true
       }
+      return false
     })
-    return <span {...attributes}>{children}</span>
+    if (found) {
+      return found
+    }
+    return <span {...props.attributes}>{props.children}</span>
   }
 
   fromHtmlElement = (element: HTMLElement | ChildNode): any => {

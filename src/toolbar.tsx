@@ -6,14 +6,14 @@ import FormatListNumbered from "@material-ui/icons/FormatListNumbered"
 import FormatQuote from "@material-ui/icons/FormatQuote"
 import FormatUnderlinedTwoTone from "@material-ui/icons/FormatUnderlinedTwoTone"
 import React, { FC } from "react"
-import { EHtmlBlockTag, EHtmlMarkTag } from "./format"
+import { Editor } from "slate"
 import { RedoButton, UndoButton } from "./history"
+import { EHtmlBlockTag, EHtmlMarkTag } from "./html"
 import { insertBr } from "./html/br"
 import { ImgButton } from "./image/img"
 import { PictureButton } from "./image/picture"
 import { LinkButton } from "./link"
 import { TagBlockButton, TagMarkButton, ToolbarButton } from "./toolbar-button"
-import { Editor } from "slate"
 
 export const Toolbar: FC<JSX.IntrinsicElements["div"] & { editor: Editor }> = ({
   editor,

@@ -1,5 +1,4 @@
-import { EHtmlBlockTag } from "../src/format"
-import { TTagElement } from "../src/html"
+import { EHtmlBlockTag, TTagElement } from "../src/html"
 
 export const initial: TTagElement[] = [
   {

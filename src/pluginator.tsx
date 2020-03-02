@@ -1,9 +1,15 @@
 import React, { createElement } from "react"
 import { Editor } from "slate"
 import { RenderElementProps, RenderLeafProps } from "slate-react"
-import { TFromHtml, TFromHtmlElement, THtmlEditor, TPartialNode, TToHtml } from "./html"
+import {
+  EHtmlMarkTag,
+  TFromHtml,
+  TFromHtmlElement,
+  THtmlEditor,
+  TPartialNode,
+  TToHtml,
+} from "./html"
 import { TRenderElement, TSlatePlugin } from "./plugin"
-import { EHtmlMarkTag } from "./format"
 
 type TSlatePluginatorInit = {
   editor: Editor

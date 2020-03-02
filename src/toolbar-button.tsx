@@ -3,8 +3,7 @@ import { ButtonProps } from "@material-ui/core/Button"
 import React, { FC } from "react"
 import { Editor } from "slate"
 import { useSlate } from "slate-react"
-import { isTagBlockActive, isTagMarkActive } from "./format"
-import { insertHtmlBlockTag, insertHtmlMarkTag } from "./html"
+import { insertHtmlBlockTag, insertHtmlMarkTag, isTagBlockActive, isTagMarkActive } from "./html"
 
 export type TToolbarButtonProps = { tooltipTitle: string } & ButtonProps
 export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(

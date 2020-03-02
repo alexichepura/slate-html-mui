@@ -1,6 +1,5 @@
 import { Editor, Element, Node, Text } from "slate"
-import { EHtmlBlockTag } from "../format"
-import { TTagElement } from "../html"
+import { EHtmlBlockTag, TTagElement } from "../html"
 
 // https://github.com/ianstormtaylor/slate/issues/3457
 export const wrapInlineAndText = (editor: Editor, fragment: Node[]): TTagElement[] => {

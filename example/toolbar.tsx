@@ -13,8 +13,9 @@ import {
   LinkButton,
   PictureButton,
   RedoButton,
-  TagButton,
+  TagMarkButton,
   UndoButton,
+  TagBlockButton,
 } from "../src"
 import { CustomImgFormDialog } from "./custom-img"
 import { CustomLinkFormDialog } from "./custom-link"
@@ -27,19 +28,23 @@ export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
       <UndoButton />
       <RedoButton />
 
-      <TagButton tooltipTitle="Bold" tag={EHtmlMarkTag.b} children={<FormatBold />} />
-      <TagButton tooltipTitle="Strong" tag={EHtmlMarkTag.strong} children={<strong>S</strong>} />
-      <TagButton
+      <TagMarkButton tooltipTitle="Bold" tag={EHtmlMarkTag.b} children={<FormatBold />} />
+      <TagMarkButton
+        tooltipTitle="Strong"
+        tag={EHtmlMarkTag.strong}
+        children={<strong>S</strong>}
+      />
+      <TagMarkButton
         tooltipTitle="Code (monospace)"
         tag={EHtmlMarkTag.code}
         children={<CodeTwoTone />}
       />
-      <TagButton
+      <TagMarkButton
         tooltipTitle="Italic (emphasis)"
         tag={EHtmlMarkTag.em}
         children={<FormatItalicTwoTone />}
       />
-      <TagButton
+      <TagMarkButton
         tooltipTitle="Code (monospace)"
         tag={EHtmlMarkTag.u}
         children={<FormatUnderlinedTwoTone />}
@@ -55,42 +60,42 @@ export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
       <ImgButton ImgFormDialog={CustomImgFormDialog} />
       <PictureButton />
 
-      <TagButton
+      <TagBlockButton
         tooltipTitle="Heading 1"
         tag={EHtmlBlockTag.h1}
         children={EHtmlBlockTag.h1.toUpperCase()}
       />
-      <TagButton
+      <TagBlockButton
         tooltipTitle="Heading 2"
         tag={EHtmlBlockTag.h2}
         children={EHtmlBlockTag.h2.toUpperCase()}
       />
-      <TagButton
+      <TagBlockButton
         tooltipTitle="Heading 3"
         tag={EHtmlBlockTag.h3}
         children={EHtmlBlockTag.h3.toUpperCase()}
       />
-      <TagButton
+      <TagBlockButton
         tooltipTitle="Heading 4"
         tag={EHtmlBlockTag.h4}
         children={EHtmlBlockTag.h4.toUpperCase()}
       />
-      <TagButton
+      <TagBlockButton
         tooltipTitle="Blockquote"
         tag={EHtmlBlockTag.blockquote}
         children={<FormatQuote />}
       />
-      <TagButton
+      <TagBlockButton
         tooltipTitle="Numbered (ordered) list"
         tag={EHtmlBlockTag.ol}
         children={<FormatListNumbered />}
       />
-      <TagButton
+      <TagBlockButton
         tooltipTitle="Bulleted (unordered) list"
         tag={EHtmlBlockTag.ul}
         children={<FormatListBulleted />}
       />
-      <TagButton
+      <TagBlockButton
         tooltipTitle="Line break"
         tag={BR_TAG}
         children={BR_TAG.toUpperCase()}

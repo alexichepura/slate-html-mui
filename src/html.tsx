@@ -2,7 +2,14 @@ import escapeHtml from "escape-html"
 import React, { FC } from "react"
 import { Editor, Element as SlateElement, Node, Text, Transforms } from "slate"
 import { ReactEditor, RenderElementProps } from "slate-react"
-import { DEFAULT_TAG, EHtmlBlockTag, EHtmlListTag, EHtmlMarkTag, isTagActive } from "./format"
+import {
+  DEFAULT_TAG,
+  EHtmlBlockTag,
+  EHtmlListTag,
+  EHtmlMarkTag,
+  isTagBlockActive,
+  isTagMarkActive,
+} from "./format"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
 import { TSlatePlugin } from "./plugin"
 import { SlatePluginator } from "./pluginator"
@@ -149,34 +156,34 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
   },
 })
 
-export const insertHtmlTag = (editor: Editor, tag: string) => {
-  const isActive = isTagActive(editor, tag)
-  const isList = tag in EHtmlListTag
-
+export const insertHtmlMarkTag = (editor: Editor, tag: string) => {
+  const isActive = isTagMarkActive(editor, tag)
   if (tag in EHtmlMarkTag) {
     isActive ? Editor.removeMark(editor, tag) : Editor.addMark(editor, tag, true)
     return
   }
+}
 
-  if (tag in EHtmlBlockTag) {
-    Object.keys(EHtmlListTag).forEach(tag => {
-      Transforms.unwrapNodes(editor, {
-        match: node => (node as TTagElement).tag === tag,
-        split: true,
-      })
+export const insertHtmlBlockTag = (editor: Editor, tag: string) => {
+  const isActive = isTagBlockActive(editor, tag)
+  const isList = tag in EHtmlListTag
+
+  Object.keys(EHtmlListTag).forEach(tag => {
+    Transforms.unwrapNodes(editor, {
+      match: node => (node as TTagElement).tag === tag,
+      split: true,
     })
+  })
 
-    setBlock(
-      editor,
-      {
-        tag: isActive ? DEFAULT_TAG : isList ? EHtmlBlockTag.li : tag,
-      },
-      editor.selection!
-    )
+  setBlock(
+    editor,
+    {
+      tag: isActive ? DEFAULT_TAG : isList ? EHtmlBlockTag.li : tag,
+    },
+    editor.selection!
+  )
 
-    if (!isActive && isList) {
-      Transforms.wrapNodes(editor, { tag, children: [] })
-    }
-    return
+  if (!isActive && isList) {
+    Transforms.wrapNodes(editor, { tag, children: [] })
   }
 }

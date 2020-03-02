@@ -1,6 +1,4 @@
-import React from "react"
 import { Editor } from "slate"
-import { RenderLeafProps } from "slate-react"
 
 export enum EHtmlMarkTag {
   "b" = "b",
@@ -31,26 +29,9 @@ export enum EHtmlListTag {
 
 export const DEFAULT_TAG = EHtmlBlockTag.p
 
-export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
-  Object.keys(EHtmlMarkTag).forEach(tag => {
-    if (leaf[tag]) {
-      children = React.createElement(tag, {}, children)
-    }
-  })
-  return <span {...attributes}>{children}</span>
-}
-
-export const isTagActive = (editor: Editor, tag: string) => {
-  if (tag in EHtmlMarkTag) {
-    const marks = Editor.marks(editor)
-    return marks ? marks[tag] === true : false
-  }
-
-  if (tag in EHtmlBlockTag) {
-    return isTagBlockActive(editor, tag)
-  }
-
-  return false
+export const isTagMarkActive = (editor: Editor, tag: string) => {
+  const marks = Editor.marks(editor)
+  return marks ? marks[tag] === true : false
 }
 
 export const isTagBlockActive = (editor: Editor, tag: string) => {

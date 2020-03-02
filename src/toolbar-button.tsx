@@ -3,8 +3,8 @@ import { ButtonProps } from "@material-ui/core/Button"
 import React, { FC } from "react"
 import { Editor } from "slate"
 import { useSlate } from "slate-react"
-import { isTagActive } from "./format"
-import { insertHtmlTag } from "./html"
+import { isTagBlockActive, isTagMarkActive } from "./format"
+import { insertHtmlBlockTag, insertHtmlMarkTag } from "./html"
 
 export type TToolbarButtonProps = { tooltipTitle: string } & ButtonProps
 export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
@@ -25,14 +25,14 @@ export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
 )
 ToolbarButton.displayName = "ToolbarButton"
 
-type TTagButtonProps = {
+type TTagMarkButtonProps = {
   tag: string
   onActivate?: (editor: Editor, tag: string) => void
 } & TToolbarButtonProps
-export const TagButton: FC<TTagButtonProps> = React.forwardRef(
+export const TagMarkButton: FC<TTagMarkButtonProps> = React.forwardRef(
   ({ tag, onActivate, ...rest }, ref) => {
     const editor = useSlate()
-    const isActive = isTagActive(editor, tag)
+    const isActive = isTagMarkActive(editor, tag)
     return (
       <ToolbarButton
         ref={ref}
@@ -42,7 +42,7 @@ export const TagButton: FC<TTagButtonProps> = React.forwardRef(
           if (onActivate) {
             onActivate(editor, tag)
           } else {
-            insertHtmlTag(editor, tag)
+            insertHtmlMarkTag(editor, tag)
           }
         }}
         {...rest}
@@ -50,4 +50,31 @@ export const TagButton: FC<TTagButtonProps> = React.forwardRef(
     )
   }
 )
-TagButton.displayName = "TagButton"
+TagMarkButton.displayName = "TagMarkButton"
+
+type TTagBlockButtonProps = {
+  tag: string
+  onActivate?: (editor: Editor, tag: string) => void
+} & TToolbarButtonProps
+export const TagBlockButton: FC<TTagBlockButtonProps> = React.forwardRef(
+  ({ tag, onActivate, ...rest }, ref) => {
+    const editor = useSlate()
+    const isActive = isTagBlockActive(editor, tag)
+    return (
+      <ToolbarButton
+        ref={ref}
+        color={isActive ? "primary" : "default"}
+        variant={isActive ? "contained" : "text"}
+        onClick={() => {
+          if (onActivate) {
+            onActivate(editor, tag)
+          } else {
+            insertHtmlBlockTag(editor, tag)
+          }
+        }}
+        {...rest}
+      />
+    )
+  }
+)
+TagBlockButton.displayName = "TagBlockButton"

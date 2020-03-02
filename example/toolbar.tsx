@@ -6,6 +6,7 @@ import FormatListNumbered from "@material-ui/icons/FormatListNumbered"
 import FormatQuote from "@material-ui/icons/FormatQuote"
 import FormatUnderlinedTwoTone from "@material-ui/icons/FormatUnderlinedTwoTone"
 import React, { FC } from "react"
+import { Editor } from "slate"
 import {
   EHtmlBlockTag,
   EHtmlMarkTag,
@@ -13,18 +14,22 @@ import {
   LinkButton,
   PictureButton,
   RedoButton,
-  TagMarkButton,
-  UndoButton,
   TagBlockButton,
+  TagMarkButton,
+  ToolbarButton,
+  UndoButton,
 } from "../src"
+import { insertBr } from "../src/html/br"
+import { ButtonLinkButton } from "./button-link"
 import { CustomImgFormDialog } from "./custom-img"
 import { CustomLinkFormDialog } from "./custom-link"
-import { ButtonLinkButton } from "./button-link"
-import { BR_TAG } from "../src/html/br"
 
-export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
+export const CustomToolbar: FC<JSX.IntrinsicElements["div"] & { editor: Editor }> = ({
+  editor,
+  ...rest
+}) => {
   return (
-    <div {...props}>
+    <div {...rest}>
       <UndoButton />
       <RedoButton />
 
@@ -95,11 +100,14 @@ export const CustomToolbar: FC<JSX.IntrinsicElements["div"]> = props => {
         tag={EHtmlBlockTag.ul}
         children={<FormatListBulleted />}
       />
-      <TagBlockButton
+      <ToolbarButton
         tooltipTitle="Line break"
-        tag={BR_TAG}
-        children={BR_TAG.toUpperCase()}
-        onActivate={editor => editor.insertText("\n")}
+        color="default"
+        variant="text"
+        onClick={() => {
+          insertBr(editor)
+        }}
+        children={"BR"}
       />
     </div>
   )

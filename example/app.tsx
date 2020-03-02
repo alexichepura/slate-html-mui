@@ -35,6 +35,7 @@ const SlateHtmlEditor: FC<{
         <div className={classes.toolbarPlaceholder} ref={stickyPlaceholderRef}>
           <CustomToolbar
             className={classes.toolbar + (isSticky ? " " + classes.toolbarSticky : "")}
+            editor={editor}
           />
         </div>
         <Editable

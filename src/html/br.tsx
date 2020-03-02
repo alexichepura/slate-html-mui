@@ -1,5 +1,5 @@
 import React from "react"
-import { isTagBlockActive } from "../format"
+import { Editor } from "slate"
 import { TTagElement } from "../html"
 import { TSlatePlugin } from "../plugin"
 import { formatVoidToString } from "../util"
@@ -33,5 +33,6 @@ export const createBrPlugin = (): TSlatePlugin => ({
     }
     return null
   },
-  isActive: editor => isTagBlockActive(editor, BR_TAG),
 })
+
+export const insertBr = (editor: Editor) => editor.insertText("\n")

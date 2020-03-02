@@ -8,15 +8,19 @@ import FormatUnderlinedTwoTone from "@material-ui/icons/FormatUnderlinedTwoTone"
 import React, { FC } from "react"
 import { EHtmlBlockTag, EHtmlMarkTag } from "./format"
 import { RedoButton, UndoButton } from "./history"
-import { BR_TAG } from "./html/br"
+import { insertBr } from "./html/br"
 import { ImgButton } from "./image/img"
 import { PictureButton } from "./image/picture"
 import { LinkButton } from "./link"
-import { TagMarkButton, TagBlockButton } from "./toolbar-button"
+import { TagBlockButton, TagMarkButton, ToolbarButton } from "./toolbar-button"
+import { Editor } from "slate"
 
-export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
+export const Toolbar: FC<JSX.IntrinsicElements["div"] & { editor: Editor }> = ({
+  editor,
+  ...rest
+}) => {
   return (
-    <div {...props}>
+    <div {...rest}>
       <UndoButton />
       <RedoButton />
 
@@ -80,11 +84,14 @@ export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
         tag={EHtmlBlockTag.ul}
         children={<FormatListBulleted />}
       />
-      <TagMarkButton
+      <ToolbarButton
         tooltipTitle="Line break"
-        tag={BR_TAG}
-        children={BR_TAG.toUpperCase()}
-        onActivate={editor => editor.insertText("\n")}
+        color="default"
+        variant="text"
+        onClick={() => {
+          insertBr(editor)
+        }}
+        children={"BR"}
       />
     </div>
   )

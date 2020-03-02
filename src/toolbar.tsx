@@ -76,7 +76,12 @@ export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
         tag={EHtmlBlockTag.ul}
         children={<FormatListBulleted />}
       />
-      <TagButton tooltipTitle="Line break" tag={BR_TAG} children={BR_TAG.toUpperCase()} />
+      <TagButton
+        tooltipTitle="Line break"
+        tag={BR_TAG}
+        children={BR_TAG.toUpperCase()}
+        onActivate={editor => editor.insertText("\n")}
+      />
     </div>
   )
 }

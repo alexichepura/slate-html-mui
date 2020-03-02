@@ -1,7 +1,6 @@
 import { Editor, Element, Node, Transforms } from "slate"
 import { DEFAULT_TAG, EHtmlBlockTag, EHtmlListTag, EHtmlMarkTag, isTagActive } from "./format"
 import { TTagElement } from "./html"
-import { BR_TAG } from "./html/br"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
 import { SlatePluginator } from "./pluginator"
 import { setBlock } from "./util/insert-block"
@@ -75,11 +74,6 @@ export const insertHtmlTag = (editor: Editor, tag: string) => {
     if (!isActive && isList) {
       Transforms.wrapNodes(editor, { tag, children: [] })
     }
-    return
-  }
-
-  if (tag === BR_TAG) {
-    editor.insertText("\n")
     return
   }
 }

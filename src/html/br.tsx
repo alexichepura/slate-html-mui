@@ -1,9 +1,8 @@
-import React, { createElement, FC } from "react"
+import React from "react"
 import { isTagBlockActive } from "../format"
 import { TTagElement } from "../html"
 import { TSlatePlugin } from "../plugin"
 import { formatVoidToString } from "../util"
-import { RenderElementProps } from "slate-react"
 
 export const BR_TAG = "br"
 
@@ -30,14 +29,9 @@ export const createBrPlugin = (): TSlatePlugin => ({
   RenderElement: props => {
     const element = props.element as TTagElement
     if ((element as TTagElement).tag === "br") {
-      return <HtmlVoidElement {...props} />
+      return <br {...props.attributes} />
     }
     return null
   },
   isActive: editor => isTagBlockActive(editor, BR_TAG),
 })
-
-const HtmlVoidElement: FC<RenderElementProps> = ({ attributes, element }) => {
-  return createElement((element as TTagElement).tag, attributes)
-}
-HtmlVoidElement.displayName = "HtmlVoidElement"

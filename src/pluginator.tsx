@@ -12,6 +12,7 @@ import {
   TToHtml,
 } from "./html"
 import { TRenderElement, TSlatePlugin } from "./plugin"
+import { withHtml } from "./with-html"
 
 type TSlatePluginatorInit = {
   editor: Editor
@@ -28,6 +29,7 @@ export class SlatePluginator {
   constructor(init: TSlatePluginatorInit) {
     this.editor = init.editor as THtmlEditor
     this.editor.html = this
+    withHtml(this.editor, this)
     this._plugins_toHtml.push(createToHtml(this))
     if (init.plugins) {
       init.plugins.forEach(this.addPlugin)
@@ -52,7 +54,7 @@ export class SlatePluginator {
 
   RenderElement = (props: RenderElementProps) => {
     const Component = this._plugins_RenderElement.find(r => {
-      console.log(r, props)
+      // console.log(r, props)
       return r(props)
     })
     if (Component) {

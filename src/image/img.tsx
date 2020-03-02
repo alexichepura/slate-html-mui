@@ -230,6 +230,7 @@ export const createImgPlugin = (): TSlatePlugin => ({
   extendEditor: withImg,
   RenderElement: props => {
     const element = props.element as TTagElement
+    console.log("RenderElement", element)
     if (isHtmlImgElement(element)) {
       return <HtmlImgElement {...props} />
     }

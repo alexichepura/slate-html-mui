@@ -7,11 +7,12 @@ import {
   EHtmlVoidTag,
   isTagActive,
 } from "./format"
-import { THtmlEditor, TTagElement } from "./html"
+import { TTagElement } from "./html"
 import { wrapInlineAndText } from "./html/wrap-inline-and-text"
 import { insertBlock, setBlock } from "./util/insert-block"
+import { SlatePluginator } from "./pluginator"
 
-export const withHtml = (editor: Editor): Editor => {
+export const withHtml = (editor: Editor, pluginator: SlatePluginator): Editor => {
   const { insertData, isVoid, normalizeNode } = editor
 
   editor.isVoid = element => {
@@ -22,7 +23,7 @@ export const withHtml = (editor: Editor): Editor => {
     const html = data.getData("text/html")
 
     if (html) {
-      const fragment = (editor as THtmlEditor).fromHtml(html)
+      const fragment = pluginator.fromHtml(html)
       const blocks = wrapInlineAndText(editor, fragment as Node[])
 
       const [node] = Editor.node(editor, editor.selection as any)

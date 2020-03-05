@@ -20,11 +20,11 @@ import React, {
 } from "react"
 import { Editor, Node, NodeEntry, Range } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TTagElement } from "../html"
-import { TSlatePlugin } from "../plugin"
-import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
-import { formatTagToString, formatVoidToString, getAttributes } from "../util"
-import { insertBlock } from "../util/insert-block"
+import { TTagElement } from "./html"
+import { TSlatePlugin } from "../pen/plugin"
+import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
+import { formatTagToString, formatVoidToString, getAttributes } from "../pen/util"
+import { insertBlock } from "../pen/insert-block"
 
 export const PICTURE_TAG = "picture"
 

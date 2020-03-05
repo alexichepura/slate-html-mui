@@ -7,7 +7,7 @@ import {
   TextField,
 } from "@material-ui/core"
 import React, { FC } from "react"
-import { TLinkFormDialogProps } from "../src"
+import { TLinkFormDialogProps } from "../src/html"
 
 export const CustomLinkFormDialog: FC<TLinkFormDialogProps> = ({
   open,

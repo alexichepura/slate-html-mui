@@ -18,8 +18,8 @@ import {
   TagMarkButton,
   ToolbarButton,
   UndoButton,
-} from "../src"
-import { insertBr } from "../src/html/br"
+} from "../src/html"
+import { insertBr } from "../src/html"
 import { ButtonLinkButton } from "./button-link"
 import { CustomImgFormDialog } from "./custom-img"
 import { CustomLinkFormDialog } from "./custom-link"

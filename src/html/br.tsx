@@ -1,8 +1,8 @@
 import React from "react"
 import { Editor } from "slate"
-import { TTagElement } from "../html"
-import { TSlatePlugin } from "../plugin"
-import { formatVoidToString } from "../util"
+import { TTagElement } from "./html"
+import { TSlatePlugin } from "../pen/plugin"
+import { formatVoidToString } from "../pen/util"
 
 export const BR_TAG = "br"
 

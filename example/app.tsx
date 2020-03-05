@@ -4,18 +4,19 @@ import { render } from "react-dom"
 import { createEditor, Editor, Node } from "slate"
 import { withHistory } from "slate-history"
 import { Editable, ReactEditor, Slate, withReact } from "slate-react"
-import { SlatePluginator, TTagElement, useSticky } from "../src"
+import { TTagElement } from "../src/html"
+import { SlatePen, useSticky } from "../src/pen"
 import { BUTTON_LINK_DATA_ATTRIBUTE } from "./button-link"
 import { initial, initial_string } from "./initial"
-import { createPluginator } from "./setup"
+import { createSlatePen } from "./setup"
 import { CustomToolbar } from "./toolbar"
 
 const SlateHtmlEditor: FC<{
   value: TTagElement[]
   setValue: (value: TTagElement[]) => void
   editor: Editor
-  pluginator: SlatePluginator
-}> = ({ value, setValue, editor, pluginator }) => {
+  slatePen: SlatePen
+}> = ({ value, setValue, editor, slatePen }) => {
   const [isSticky, stickyPlaceholderRef] = useSticky()
   const isPasteCapture = useRef<boolean>(false)
   const classes = useStyles()
@@ -40,8 +41,8 @@ const SlateHtmlEditor: FC<{
           />
         </div>
         <Editable
-          renderElement={pluginator.RenderElement}
-          renderLeaf={pluginator.RenderLeaf}
+          renderElement={slatePen.RenderElement}
+          renderLeaf={slatePen.RenderLeaf}
           onPasteCapture={e => {
             // workaround for https://github.com/ianstormtaylor/slate/issues/3394
             if (!isPasteCapture.current) return
@@ -101,22 +102,22 @@ const useStyles = makeStyles(
 
 const MyEditor: FC = () => {
   const editor = useMemo(() => withHistory(withReact(createEditor())), [])
-  const pluginator = useMemo(() => createPluginator(editor), [])
+  const slatePen = useMemo(() => createSlatePen(editor), [])
   const [value, setValue] = useState<TTagElement[]>(initial)
 
   const saveToLocalstorage = () => {
     console.log("saveToLocalstorage value", value)
-    const str = pluginator.toHtml(value)
+    const str = slatePen.toHtml(value)
     console.log("saveToLocalstorage html string", str)
     localStorage.setItem("slate-mui-value", str)
   }
   const loadFromLocalstorage = () => {
     const savedStr = localStorage.getItem("slate-mui-value") || ""
-    const savedValue = pluginator.fromHtml(savedStr)
+    const savedValue = slatePen.fromHtml(savedStr)
     setValue(savedValue as any)
   }
   const loadFromSample = () => {
-    const savedValue = pluginator.fromHtml(initial_string)
+    const savedValue = slatePen.fromHtml(initial_string)
     setValue(savedValue as any)
   }
   return (
@@ -133,7 +134,7 @@ const MyEditor: FC = () => {
       <Button color="primary" onClick={() => console.log(value)}>
         log value
       </Button>
-      <SlateHtmlEditor value={value} setValue={setValue} editor={editor} pluginator={pluginator} />
+      <SlateHtmlEditor value={value} setValue={setValue} editor={editor} slatePen={slatePen} />
     </div>
   )
 }

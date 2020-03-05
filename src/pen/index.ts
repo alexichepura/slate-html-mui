@@ -1,0 +1,7 @@
+export { createBasePlugin } from "./base-plugin"
+export { SlatePen } from "./pen"
+export { TSlatePlugin } from "./plugin"
+export { insertBlock, setBlock } from "./insert-block"
+export { formatTagToString, getAttributes } from "./util"
+export { wrapInlineAndText } from "./wrap-inline-and-text"
+export { useSticky } from "./sticky"

@@ -1,12 +1,15 @@
 import escapeHtml from "escape-html"
-import React, { FC, createElement } from "react"
+import React, { createElement, FC } from "react"
 import { Editor, Element as SlateElement, Node, Text, Transforms } from "slate"
 import { ReactEditor, RenderElementProps } from "slate-react"
-import { wrapInlineAndText } from "./html/wrap-inline-and-text"
-import { TSlatePlugin } from "./plugin"
-import { SlatePluginator } from "./pluginator"
-import { formatTagToString, getAttributes } from "./util"
-import { setBlock } from "./util/insert-block"
+import {
+  formatTagToString,
+  getAttributes,
+  setBlock,
+  SlatePen,
+  TSlatePlugin,
+  wrapInlineAndText,
+} from "../pen"
 
 export enum EHtmlMarkTag {
   "b" = "b",
@@ -57,15 +60,12 @@ export type TTagElement = {
   [key: string]: any
 }
 
-export type TToHtml = (element: TPartialNode, pluginator: SlatePluginator) => string | null
+export type TToHtml = (element: TPartialNode, slatePen: SlatePen) => string | null
 export type TFromHtml = (html: string) => (TTagElement | TPartialNode)[]
-export type TFromHtmlElement = (
-  element: HTMLElement | ChildNode,
-  pluginator: SlatePluginator
-) => any
+export type TFromHtmlElement = (element: HTMLElement | ChildNode, slatePen: SlatePen) => any
 
 export type THtmlEditor = ReactEditor & {
-  html: SlatePluginator
+  html: SlatePen
 }
 
 const isHtmlBlockElement = (element: SlateElement | TTagElement) => {
@@ -77,7 +77,7 @@ const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, elemen
 HtmlBlockElement.displayName = "HtmlBlockElement"
 
 export const createHtmlPlugin = (): TSlatePlugin => ({
-  toHtml: (node, pluginator) => {
+  toHtml: (node, slatePen) => {
     if (Text.isText(node)) {
       const markTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
       let text
@@ -90,18 +90,18 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
     }
 
     if (node.tag in EHtmlBlockTag) {
-      const children = pluginator.nodeChildrenToHtml(node)
+      const children = slatePen.nodeChildrenToHtml(node)
       return formatTagToString(node.tag, null, children)
     }
 
     return null
   },
-  fromHtmlElement: (element, pluginator) => {
+  fromHtmlElement: (element, slatePen) => {
     const el: Element = element as Element
     const tag = el.nodeName.toLowerCase()
 
     if (tag in EHtmlBlockTag) {
-      const children = pluginator.fromHtmlChildNodes(el.childNodes)
+      const children = slatePen.fromHtmlChildNodes(el.childNodes)
       const attributes = getAttributes(el)
       if (children.length === 0) {
         children.push({ text: "" } as Text)
@@ -110,7 +110,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
     }
 
     if (tag in EHtmlMarkTag) {
-      const children = pluginator.fromHtmlChildNodes(el.childNodes)
+      const children = slatePen.fromHtmlChildNodes(el.childNodes)
       return children.map(child => {
         const text = typeof child === "string" ? child : child.text
         const attributes = getAttributes(el)
@@ -120,14 +120,14 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
 
     return null
   },
-  extendEditor: (editor, pluginator) => {
+  extendEditor: (editor, slatePen) => {
     const { insertData, normalizeNode } = editor
 
     editor.insertData = (data: DataTransfer) => {
       const html = data.getData("text/html")
 
       if (html) {
-        const fragment = pluginator.fromHtml(html)
+        const fragment = slatePen.fromHtml(html)
         const blocks = wrapInlineAndText(editor, fragment as Node[])
 
         const [node] = Editor.node(editor, editor.selection as any)

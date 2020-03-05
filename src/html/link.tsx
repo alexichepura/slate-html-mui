@@ -14,9 +14,9 @@ import React, { AnchorHTMLAttributes, FC, useState } from "react"
 import { Editor, Element as SlateElement, Node, Path, Range, Text, Transforms } from "slate"
 import { RenderElementProps, useSlate } from "slate-react"
 import { TTagElement } from "./html"
-import { TSlatePlugin } from "./plugin"
+import { TSlatePlugin } from "../pen/plugin"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
-import { formatTagToString, getAttributes } from "./util"
+import { formatTagToString, getAttributes } from "../pen/util"
 
 export const LINK_TAG = "a"
 
@@ -271,22 +271,22 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({
 LinkFormDialog.displayName = "LinkFormDialog"
 
 export const createAnchorPlugin = (): TSlatePlugin => ({
-  toHtml: (node, pluginator) => {
+  toHtml: (node, slatePen) => {
     if (isHtmlAnchorElement(node)) {
       const attributes = {
         ...node.attributes,
         href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
       }
-      const children = pluginator.nodeChildrenToHtml(node)
+      const children = slatePen.nodeChildrenToHtml(node)
       return formatTagToString(node.tag, attributes, children)
     }
     return null
   },
-  fromHtmlElement: (el, pluginator) => {
+  fromHtmlElement: (el, slatePen) => {
     const tag = el.nodeName.toLowerCase()
     if (tag === LINK_TAG) {
       const attributes = getAttributes(el as Element)
-      const children = pluginator.fromHtmlChildNodes(el.childNodes)
+      const children = slatePen.fromHtmlChildNodes(el.childNodes)
       if (children.length === 0) {
         children.push({ text: "" })
       }

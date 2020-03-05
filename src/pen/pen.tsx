@@ -1,15 +1,15 @@
 import React, { createElement } from "react"
 import { Editor } from "slate"
 import { RenderElementProps, RenderLeafProps } from "slate-react"
-import { TFromHtml, TFromHtmlElement, THtmlEditor, TPartialNode, TToHtml } from "./html"
+import { TFromHtml, TFromHtmlElement, THtmlEditor, TPartialNode, TToHtml } from "../html/html"
 import { TRenderElement, TRenderLeaf, TSlatePlugin } from "./plugin"
 
-type TSlatePluginatorInit = {
+type TSlatePenInit = {
   editor: Editor
   plugins?: TSlatePlugin[]
 }
 
-export class SlatePluginator {
+export class SlatePen {
   editor: THtmlEditor
   private _plugins: TSlatePlugin[] = []
   private _plugins_RenderElement: TRenderElement[] = []
@@ -17,7 +17,7 @@ export class SlatePluginator {
   private _plugins_fromHtmlElement: TFromHtmlElement[] = []
   private _plugins_toHtml: TToHtml[] = []
 
-  constructor(init: TSlatePluginatorInit) {
+  constructor(init: TSlatePenInit) {
     this.editor = init.editor as THtmlEditor
     this.editor.html = this
     this._plugins_toHtml.push()

@@ -6,7 +6,7 @@ export {
   EHtmlMarkTag,
   TFromHtmlElement,
   THtmlEditor,
-  TTagElement,
+  TSlateTypeElement,
   TToHtml,
 } from "./html"
 export { createImgPlugin, ImgButton, TImgFormDialogProps } from "./img"

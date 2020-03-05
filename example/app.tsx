@@ -4,7 +4,7 @@ import { render } from "react-dom"
 import { createEditor, Editor, Node } from "slate"
 import { withHistory } from "slate-history"
 import { Editable, ReactEditor, Slate, withReact } from "slate-react"
-import { TTagElement } from "../src/html"
+import { TSlateTypeElement } from "../src/html"
 import { SlatePen, useSticky } from "../src/pen"
 import { BUTTON_LINK_DATA_ATTRIBUTE } from "./button-link"
 import { initial, initial_string } from "./initial"
@@ -12,8 +12,8 @@ import { createSlatePen } from "./setup"
 import { CustomToolbar } from "./toolbar"
 
 const SlateHtmlEditor: FC<{
-  value: TTagElement[]
-  setValue: (value: TTagElement[]) => void
+  value: TSlateTypeElement[]
+  setValue: (value: TSlateTypeElement[]) => void
   editor: Editor
   slatePen: SlatePen
 }> = ({ value, setValue, editor, slatePen }) => {
@@ -25,7 +25,7 @@ const SlateHtmlEditor: FC<{
       editor={editor as ReactEditor}
       defaultValue={value}
       onChange={value => {
-        setValue(value as TTagElement[])
+        setValue(value as TSlateTypeElement[])
       }}
       value={value as Node[]}
     >
@@ -103,7 +103,7 @@ const useStyles = makeStyles(
 const MyEditor: FC = () => {
   const editor = useMemo(() => withHistory(withReact(createEditor())), [])
   const slatePen = useMemo(() => createSlatePen(editor), [])
-  const [value, setValue] = useState<TTagElement[]>(initial)
+  const [value, setValue] = useState<TSlateTypeElement[]>(initial)
 
   const saveToLocalstorage = () => {
     console.log("saveToLocalstorage value", value)

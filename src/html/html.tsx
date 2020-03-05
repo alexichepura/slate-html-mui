@@ -54,25 +54,25 @@ export const isTagBlockActive = (editor: Editor, tag: string) => {
 }
 
 export type TPartialNode = Partial<Node>
-export type TTagElement = {
-  tag: string
+export type TSlateTypeElement = {
+  type: string
   children?: TPartialNode[]
   [key: string]: any
 }
 
 export type TToHtml = (element: TPartialNode, slatePen: SlatePen) => string | null
-export type TFromHtml = (html: string) => (TTagElement | TPartialNode)[]
+export type TFromHtml = (html: string) => (TSlateTypeElement | TPartialNode)[]
 export type TFromHtmlElement = (element: HTMLElement | ChildNode, slatePen: SlatePen) => any
 
 export type THtmlEditor = ReactEditor & {
   html: SlatePen
 }
 
-const isHtmlBlockElement = (element: SlateElement | TTagElement) => {
-  return element.tag in EHtmlBlockTag
+const isHtmlBlockElement = (element: SlateElement | TSlateTypeElement) => {
+  return element.type in EHtmlBlockTag
 }
 const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
-  return React.createElement((element as TTagElement).tag, attributes, children)
+  return React.createElement((element as TSlateTypeElement).type, attributes, children)
 }
 HtmlBlockElement.displayName = "HtmlBlockElement"
 
@@ -144,7 +144,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
 
     editor.normalizeNode = entry => {
       const [_node, path] = entry
-      const node = _node as Editor | Element | TTagElement
+      const node = _node as Editor | Element | TSlateTypeElement
 
       // If the element is a paragraph, ensure it's children are valid.
       if (SlateElement.isElement(node) && node.tag === EHtmlBlockTag.p) {
@@ -161,7 +161,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
     }
   },
   RenderElement: props => {
-    const element = props.element as TTagElement
+    const element = props.element as TSlateTypeElement
     if (isHtmlBlockElement(element)) {
       return <HtmlBlockElement {...props} />
     }
@@ -197,7 +197,7 @@ export const insertHtmlBlockTag = (editor: Editor, tag: string) => {
 
   Object.keys(EHtmlListTag).forEach(tag => {
     Transforms.unwrapNodes(editor, {
-      match: node => (node as TTagElement).tag === tag,
+      match: node => (node as TSlateTypeElement).type === tag,
       split: true,
     })
   })

@@ -20,7 +20,7 @@ import React, {
 } from "react"
 import { Editor, Node, NodeEntry, Range } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TTagElement } from "./html"
+import { TSlateTypeElement } from "./html"
 import { TSlatePlugin } from "../pen/plugin"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 import { formatTagToString, formatVoidToString, getAttributes } from "../pen/util"
@@ -28,7 +28,7 @@ import { insertBlock } from "../pen/insert-block"
 
 export const PICTURE_TAG = "picture"
 
-type TPictureElement = TTagElement & {
+type TPictureElement = TSlateTypeElement & {
   attributes: HTMLAttributes<any>
   img: ImgHTMLAttributes<any>
   sources: SourceHTMLAttributes<any>[]
@@ -41,7 +41,7 @@ type TSetPictureCommand = {
 }
 
 const defaults: TPictureElement = {
-  tag: PICTURE_TAG,
+  type: PICTURE_TAG,
   attributes: {},
   img: {},
   sources: [],
@@ -49,7 +49,7 @@ const defaults: TPictureElement = {
 }
 
 const match = (node: Node): boolean => {
-  return (node as TTagElement).tag === PICTURE_TAG
+  return (node as TSlateTypeElement).type === PICTURE_TAG
 }
 
 const isPictureActive = (editor: Editor) => {
@@ -196,8 +196,8 @@ export const PictureButton: FC<TPictureButtonProps> = ({
 }
 PictureButton.displayName = "PictureButton"
 
-export const isPictureTag = (element: TTagElement) => {
-  return element.tag === PICTURE_TAG
+export const isPictureTag = (element: TSlateTypeElement) => {
+  return element.type === PICTURE_TAG
 }
 
 const setPicture = (editor: Editor, command: TSetPictureCommand) => {
@@ -327,7 +327,7 @@ export const createPicturePlugin = (): TSlatePlugin => ({
     const sources = children.filter(c => c.nodeName.toLowerCase() === "source").map(getAttributes)
 
     const picture: TPictureElement = {
-      tag: PICTURE_TAG,
+      type: PICTURE_TAG,
       attributes,
       img,
       sources,
@@ -338,11 +338,11 @@ export const createPicturePlugin = (): TSlatePlugin => ({
   extendEditor: editor => {
     const { isVoid } = editor
     editor.isVoid = element => {
-      return isPictureTag(element as TTagElement) ? true : isVoid(element)
+      return isPictureTag(element as TSlateTypeElement) ? true : isVoid(element)
     }
   },
   RenderElement: props => {
-    const element = props.element as TTagElement
+    const element = props.element as TSlateTypeElement
     if (isHtmlPictureElement(element)) {
       return <HtmlPictureElement {...props} />
     }

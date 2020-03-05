@@ -1,17 +1,17 @@
 import { Editor, Element, Node, Text } from "slate"
-import { EHtmlBlockTag, TTagElement } from "../html/html"
+import { EHtmlBlockTag, TSlateTypeElement } from "../html/html"
 
 // https://github.com/ianstormtaylor/slate/issues/3457
-export const wrapInlineAndText = (editor: Editor, fragment: Node[]): TTagElement[] => {
+export const wrapInlineAndText = (editor: Editor, fragment: Node[]): TSlateTypeElement[] => {
   let non_blocks: (Text | Element)[] = []
-  const blocks: TTagElement[] = []
+  const blocks: TSlateTypeElement[] = []
 
   const pushNewBlock = () => {
     if (non_blocks.length === 0) {
       return
     }
     blocks.push({
-      tag: EHtmlBlockTag.p,
+      type: EHtmlBlockTag.p,
       children: non_blocks,
     })
     non_blocks = []

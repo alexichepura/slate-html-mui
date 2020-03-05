@@ -1,8 +1,8 @@
-import { EHtmlBlockTag, TTagElement } from "../src/html"
+import { EHtmlBlockTag, TSlateTypeElement } from "../src/html"
 
-export const initial: TTagElement[] = [
+export const initial: TSlateTypeElement[] = [
   {
-    tag: EHtmlBlockTag.p,
+    type: EHtmlBlockTag.p,
     children: [{ text: "A line of text in a paragraph." }],
   },
 ]

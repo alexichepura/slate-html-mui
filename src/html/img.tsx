@@ -10,7 +10,7 @@ import Image from "@material-ui/icons/Image"
 import React, { FC, ImgHTMLAttributes, useState } from "react"
 import { Editor, Node, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TTagElement } from "./html"
+import { TSlateTypeElement } from "./html"
 import { TSlatePlugin } from "../pen/plugin"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 import { formatVoidToString, getAttributes } from "../pen/util"
@@ -22,7 +22,7 @@ type TSetImgCommand = {
   attributes: ImgHTMLAttributes<any>
   range: Range
 }
-export type THtmlImgSlateElement = TTagElement & {
+export type THtmlImgSlateElement = TSlateTypeElement & {
   attributes: ImgHTMLAttributes<any>
 }
 
@@ -41,7 +41,7 @@ const defaults: TImgButtonState = {
 }
 
 const match = (node: Node): boolean => {
-  return (node as TTagElement).tag === IMG_TAG
+  return (node as TSlateTypeElement).type === IMG_TAG
 }
 
 const isImgActive = (editor: Editor) => {
@@ -140,14 +140,14 @@ export const ImgButton: FC<TImgButtonProps> = ({ ImgFormDialog: _ImgFormDialog, 
 }
 ImgButton.displayName = "ImgButton"
 
-const isImgTag = (element: TTagElement) => {
-  return element.tag === IMG_TAG
+const isImgTag = (element: TSlateTypeElement) => {
+  return element.type === IMG_TAG
 }
 
 const setImg = (editor: Editor, command: TSetImgCommand) => {
   const { attributes, range } = command
-  const img: TTagElement = {
-    tag: IMG_TAG,
+  const img: TSlateTypeElement = {
+    type: IMG_TAG,
     attributes,
     children: [{ text: "" }],
   }
@@ -201,7 +201,7 @@ ImgFormDialog.displayName = "ImgFormDialog"
 export const createImgPlugin = (): TSlatePlugin => ({
   toHtml: node => {
     if (isHtmlImgElement(node)) {
-      return formatVoidToString(node.tag, node.attributes)
+      return formatVoidToString(node.type, node.attributes)
     }
     return ""
   },
@@ -217,11 +217,11 @@ export const createImgPlugin = (): TSlatePlugin => ({
   extendEditor: editor => {
     const { isVoid } = editor
     editor.isVoid = element => {
-      return isImgTag(element as TTagElement) ? true : isVoid(element)
+      return isImgTag(element as TSlateTypeElement) ? true : isVoid(element)
     }
   },
   RenderElement: props => {
-    const element = props.element as TTagElement
+    const element = props.element as TSlateTypeElement
     if (isHtmlImgElement(element)) {
       return <HtmlImgElement {...props} />
     }

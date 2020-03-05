@@ -1,7 +1,7 @@
 import React, { CSSProperties, FC, useState } from "react"
 import { Editor, Element as SlateElement, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TAnchorAnyAttributes, ToolbarButton, TTagElement } from "../src/html"
+import { TAnchorAnyAttributes, ToolbarButton, TSlateTypeElement } from "../src/html"
 import { TSlatePlugin, formatTagToString, getAttributes, insertBlock } from "../src/pen"
 import { CustomLinkFormDialog } from "./custom-link"
 
@@ -189,7 +189,7 @@ export const createButtonLinkPlugin = (): TSlatePlugin => ({
     }
   },
   RenderElement: props => {
-    const element = props.element as TTagElement
+    const element = props.element as TSlateTypeElement
     if (isElementButtonLink(element)) {
       return <ButtonLinkElement {...props} />
     }

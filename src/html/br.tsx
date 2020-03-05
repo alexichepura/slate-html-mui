@@ -1,6 +1,6 @@
 import React from "react"
 import { Editor } from "slate"
-import { TTagElement } from "./html"
+import { TSlateTypeElement } from "./html"
 import { TSlatePlugin } from "../pen/plugin"
 import { formatVoidToString } from "../pen/util"
 
@@ -8,7 +8,7 @@ export const BR_TAG = "br"
 
 export const createBrPlugin = (): TSlatePlugin => ({
   toHtml: node => {
-    if ((node as TTagElement).tag === "br") {
+    if ((node as TSlateTypeElement).type === "br") {
       return formatVoidToString(node.tag, node.attributes)
     }
     return null
@@ -23,12 +23,12 @@ export const createBrPlugin = (): TSlatePlugin => ({
   extendEditor: editor => {
     const { isVoid } = editor
     editor.isVoid = element => {
-      return (element as TTagElement).tag === BR_TAG ? true : isVoid(element)
+      return (element as TSlateTypeElement).type === BR_TAG ? true : isVoid(element)
     }
   },
   RenderElement: props => {
-    const element = props.element as TTagElement
-    if ((element as TTagElement).tag === "br") {
+    const element = props.element as TSlateTypeElement
+    if ((element as TSlateTypeElement).type === "br") {
       return <br {...props.attributes} />
     }
     return null

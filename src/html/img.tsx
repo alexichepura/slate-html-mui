@@ -65,7 +65,7 @@ const getInitialImgData = (editor: Editor): TImgButtonStateInitial => {
 }
 
 export const isHtmlImgElement = (element: any): element is THtmlImgSlateElement => {
-  return element.tag === IMG_TAG
+  return (element as TSlateTypeElement).type === IMG_TAG
 }
 const cleanAttributesMutate = (attributes: ImgHTMLAttributes<any>) =>
   Object.entries(attributes).forEach(([key, value]) => {
@@ -146,7 +146,7 @@ const isImgTag = (element: TSlateTypeElement) => {
 
 const setImg = (editor: Editor, command: TSetImgCommand) => {
   const { attributes, range } = command
-  const img: TSlateTypeElement = {
+  const img: THtmlImgSlateElement = {
     type: IMG_TAG,
     attributes,
     children: [{ text: "" }],

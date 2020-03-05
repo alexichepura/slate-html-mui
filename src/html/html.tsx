@@ -11,7 +11,7 @@ import {
   wrapInlineAndText,
 } from "../pen"
 
-export enum EHtmlMarkTag {
+export enum EHtmlMark {
   "b" = "b",
   "strong" = "strong",
   "code" = "code",
@@ -19,7 +19,7 @@ export enum EHtmlMarkTag {
   "u" = "u",
 }
 
-export enum EHtmlBlockTag {
+export enum EHtmlBlock {
   "p" = "p",
   "h1" = "h1",
   "h2" = "h2",
@@ -38,16 +38,16 @@ export enum EHtmlListTag {
   "ul" = "ul",
 }
 
-export const DEFAULT_TAG = EHtmlBlockTag.p
+export const DEFAULT_TAG = EHtmlBlock.p
 
-export const isTagMarkActive = (editor: Editor, tag: string) => {
+export const isMarkActive = (editor: Editor, type: string) => {
   const marks = Editor.marks(editor)
-  return marks ? marks[tag] === true : false
+  return marks ? marks[type] === true : false
 }
 
-export const isTagBlockActive = (editor: Editor, tag: string) => {
+export const isBlockActive = (editor: Editor, type: string) => {
   const [match] = Editor.nodes(editor, {
-    match: n => n.tag === tag,
+    match: node => (node as TSlateTypeElement).type === type,
   })
 
   return !!match
@@ -57,7 +57,7 @@ export type TPartialNode = Partial<Node>
 export type TSlateTypeElement = {
   type: string
   children?: TPartialNode[]
-  [key: string]: any
+  // [key: string]: any
 }
 
 export type TToHtml = (element: TPartialNode, slatePen: SlatePen) => string | null
@@ -69,7 +69,7 @@ export type THtmlEditor = ReactEditor & {
 }
 
 const isHtmlBlockElement = (element: SlateElement | TSlateTypeElement) => {
-  return element.type in EHtmlBlockTag
+  return element.type in EHtmlBlock
 }
 const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
   return React.createElement((element as TSlateTypeElement).type, attributes, children)
@@ -79,19 +79,19 @@ HtmlBlockElement.displayName = "HtmlBlockElement"
 export const createHtmlPlugin = (): TSlatePlugin => ({
   toHtml: (node, slatePen) => {
     if (Text.isText(node)) {
-      const markTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
+      const mark = Object.entries(node).find(([k, v]) => k in EHtmlMark && v === true)
       let text
-      if (markTag && markTag[0]) {
-        text = formatTagToString(markTag[0], null, escapeHtml(node.text))
+      if (mark && mark[0]) {
+        text = formatTagToString(mark[0], null, escapeHtml(node.text))
       } else {
         text = escapeHtml(node.text)
       }
       return text.split("\n").join("<br/>")
     }
 
-    if (node.tag in EHtmlBlockTag) {
+    if ((node as TSlateTypeElement).type in EHtmlBlock) {
       const children = slatePen.nodeChildrenToHtml(node)
-      return formatTagToString(node.tag, null, children)
+      return formatTagToString((node as TSlateTypeElement).type, null, children)
     }
 
     return null
@@ -100,7 +100,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
     const el: Element = element as Element
     const tag = el.nodeName.toLowerCase()
 
-    if (tag in EHtmlBlockTag) {
+    if (tag in EHtmlBlock) {
       const children = slatePen.fromHtmlChildNodes(el.childNodes)
       const attributes = getAttributes(el)
       if (children.length === 0) {
@@ -109,7 +109,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
       return { tag, attributes, children }
     }
 
-    if (tag in EHtmlMarkTag) {
+    if (tag in EHtmlMark) {
       const children = slatePen.fromHtmlChildNodes(el.childNodes)
       return children.map(child => {
         const text = typeof child === "string" ? child : child.text
@@ -144,10 +144,10 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
 
     editor.normalizeNode = entry => {
       const [_node, path] = entry
-      const node = _node as Editor | Element | TSlateTypeElement
+      const node = _node as TSlateTypeElement
 
       // If the element is a paragraph, ensure it's children are valid.
-      if (SlateElement.isElement(node) && node.tag === EHtmlBlockTag.p) {
+      if (SlateElement.isElement(node) && node.tag === EHtmlBlock.p) {
         for (const [child, childPath] of Node.children(editor, path)) {
           if (SlateElement.isElement(child) && !editor.isInline(child)) {
             Transforms.unwrapNodes(editor, { at: childPath })
@@ -169,7 +169,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
   },
 
   RenderLeaf: ({ attributes, children, leaf }) => {
-    const found = Object.keys(EHtmlMarkTag).some(tag => {
+    const found = Object.keys(EHtmlMark).some(tag => {
       if (leaf[tag]) {
         children = createElement(tag, {}, children)
         return true
@@ -183,21 +183,21 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
   },
 })
 
-export const insertHtmlMarkTag = (editor: Editor, tag: string) => {
-  const isActive = isTagMarkActive(editor, tag)
-  if (tag in EHtmlMarkTag) {
+export const insertHtmlMark = (editor: Editor, tag: string) => {
+  const isActive = isMarkActive(editor, tag)
+  if (tag in EHtmlMark) {
     isActive ? Editor.removeMark(editor, tag) : Editor.addMark(editor, tag, true)
     return
   }
 }
 
-export const insertHtmlBlockTag = (editor: Editor, tag: string) => {
-  const isActive = isTagBlockActive(editor, tag)
-  const isList = tag in EHtmlListTag
+export const insertHtmlBlock = (editor: Editor, type: string) => {
+  const isActive = isBlockActive(editor, type)
+  const isList = type in EHtmlListTag
 
-  Object.keys(EHtmlListTag).forEach(tag => {
+  Object.keys(EHtmlListTag).forEach(type => {
     Transforms.unwrapNodes(editor, {
-      match: node => (node as TSlateTypeElement).type === tag,
+      match: node => (node as TSlateTypeElement).type === type,
       split: true,
     })
   })
@@ -205,12 +205,12 @@ export const insertHtmlBlockTag = (editor: Editor, tag: string) => {
   setBlock(
     editor,
     {
-      tag: isActive ? DEFAULT_TAG : isList ? EHtmlBlockTag.li : tag,
+      type: isActive ? DEFAULT_TAG : isList ? EHtmlBlock.li : type,
     },
     editor.selection!
   )
 
   if (!isActive && isList) {
-    Transforms.wrapNodes(editor, { tag, children: [] })
+    Transforms.wrapNodes(editor, { type, children: [] })
   }
 }

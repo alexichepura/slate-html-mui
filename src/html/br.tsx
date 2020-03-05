@@ -9,7 +9,7 @@ export const BR_TAG = "br"
 export const createBrPlugin = (): TSlatePlugin => ({
   toHtml: node => {
     if ((node as TSlateTypeElement).type === "br") {
-      return formatVoidToString(node.tag, node.attributes)
+      return formatVoidToString((node as TSlateTypeElement).type, node.attributes)
     }
     return null
   },

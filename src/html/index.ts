@@ -2,8 +2,8 @@ export { createBrPlugin, insertBr } from "./br"
 export { RedoButton, UndoButton } from "./history"
 export {
   createHtmlPlugin,
-  EHtmlBlockTag,
-  EHtmlMarkTag,
+  EHtmlBlock,
+  EHtmlMark,
   TFromHtmlElement,
   THtmlEditor,
   TSlateTypeElement,
@@ -21,4 +21,4 @@ export {
 } from "./link"
 export { createPicturePlugin, PictureButton, TPictureFormDialogProps } from "./picture"
 export { Toolbar } from "./toolbar"
-export { TagBlockButton, TagMarkButton, ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
+export { BlockButton, MarkButton, ToolbarButton, TToolbarButtonProps } from "./toolbar-button"

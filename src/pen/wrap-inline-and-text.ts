@@ -1,5 +1,5 @@
 import { Editor, Element, Node, Text } from "slate"
-import { EHtmlBlockTag, TSlateTypeElement } from "../html/html"
+import { EHtmlBlock, TSlateTypeElement } from "../html/html"
 
 // https://github.com/ianstormtaylor/slate/issues/3457
 export const wrapInlineAndText = (editor: Editor, fragment: Node[]): TSlateTypeElement[] => {
@@ -11,7 +11,7 @@ export const wrapInlineAndText = (editor: Editor, fragment: Node[]): TSlateTypeE
       return
     }
     blocks.push({
-      type: EHtmlBlockTag.p,
+      type: EHtmlBlock.p,
       children: non_blocks,
     })
     non_blocks = []

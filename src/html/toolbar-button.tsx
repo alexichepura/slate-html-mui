@@ -3,7 +3,7 @@ import { ButtonProps } from "@material-ui/core/Button"
 import React, { FC } from "react"
 import { Editor } from "slate"
 import { useSlate } from "slate-react"
-import { insertHtmlBlockTag, insertHtmlMarkTag, isTagBlockActive, isTagMarkActive } from "./html"
+import { insertHtmlBlock, insertHtmlMark, isBlockActive, isMarkActive } from "./html"
 
 export type TToolbarButtonProps = { tooltipTitle: string } & ButtonProps
 export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
@@ -24,14 +24,14 @@ export const ToolbarButton: FC<TToolbarButtonProps> = React.forwardRef(
 )
 ToolbarButton.displayName = "ToolbarButton"
 
-type TTagMarkButtonProps = {
-  tag: string
-  onActivate?: (editor: Editor, tag: string) => void
-} & TToolbarButtonProps
-export const TagMarkButton: FC<TTagMarkButtonProps> = React.forwardRef(
-  ({ tag, onActivate, ...rest }, ref) => {
+type TMarkButtonProps = {
+  type: string
+  onActivate?: (editor: Editor, type: string) => void
+} & Omit<TToolbarButtonProps, "type">
+export const MarkButton: FC<TMarkButtonProps> = React.forwardRef(
+  ({ type, onActivate, ...rest }, ref) => {
     const editor = useSlate()
-    const isActive = isTagMarkActive(editor, tag)
+    const isActive = isMarkActive(editor, type)
     return (
       <ToolbarButton
         ref={ref}
@@ -39,9 +39,9 @@ export const TagMarkButton: FC<TTagMarkButtonProps> = React.forwardRef(
         variant={isActive ? "contained" : "text"}
         onClick={() => {
           if (onActivate) {
-            onActivate(editor, tag)
+            onActivate(editor, type)
           } else {
-            insertHtmlMarkTag(editor, tag)
+            insertHtmlMark(editor, type)
           }
         }}
         {...rest}
@@ -49,16 +49,16 @@ export const TagMarkButton: FC<TTagMarkButtonProps> = React.forwardRef(
     )
   }
 )
-TagMarkButton.displayName = "TagMarkButton"
+MarkButton.displayName = "MarkButton"
 
-type TTagBlockButtonProps = {
-  tag: string
-  onActivate?: (editor: Editor, tag: string) => void
-} & TToolbarButtonProps
-export const TagBlockButton: FC<TTagBlockButtonProps> = React.forwardRef(
-  ({ tag, onActivate, ...rest }, ref) => {
+type TBlockButtonProps = {
+  type: string
+  onActivate?: (editor: Editor, type: string) => void
+} & Omit<TToolbarButtonProps, "type">
+export const BlockButton: FC<TBlockButtonProps> = React.forwardRef(
+  ({ type, onActivate, ...rest }, ref) => {
     const editor = useSlate()
-    const isActive = isTagBlockActive(editor, tag)
+    const isActive = isBlockActive(editor, type)
     return (
       <ToolbarButton
         ref={ref}
@@ -66,9 +66,9 @@ export const TagBlockButton: FC<TTagBlockButtonProps> = React.forwardRef(
         variant={isActive ? "contained" : "text"}
         onClick={() => {
           if (onActivate) {
-            onActivate(editor, tag)
+            onActivate(editor, type)
           } else {
-            insertHtmlBlockTag(editor, tag)
+            insertHtmlBlock(editor, type)
           }
         }}
         {...rest}
@@ -76,4 +76,4 @@ export const TagBlockButton: FC<TTagBlockButtonProps> = React.forwardRef(
     )
   }
 )
-TagBlockButton.displayName = "TagBlockButton"
+BlockButton.displayName = "BlockButton"

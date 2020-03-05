@@ -67,7 +67,7 @@ const findPicture = (editor: Editor): TPictureElement | null => {
 export const isHtmlPictureElement = (
   element: TPictureElement | any
 ): element is TPictureElement => {
-  return element.tag === PICTURE_TAG
+  return (element as TSlateTypeElement).type === PICTURE_TAG
 }
 const cleanAttributesMutate = (attributes: HTMLAttributes<any>) =>
   Object.entries(attributes).forEach(([key, value]) => {
@@ -163,7 +163,7 @@ export const PictureButton: FC<TPictureButtonProps> = ({
 
   const removeSource = (i: number) => {
     mergeState({
-      sources: [...state.items.slice(0, i), ...state.items.slice(i + 1)],
+      sources: [...state.sources.slice(0, i), ...state.sources.slice(i + 1)],
     })
   }
 

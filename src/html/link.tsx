@@ -87,7 +87,7 @@ const getInitialLinkData = (editor: Editor): TLinkButtonStateInitial => {
 }
 
 export const isHtmlAnchorElement = (element: any): element is THtmlLinkSlateElement => {
-  return element.tag === LINK_TAG
+  return (element as TSlateTypeElement).type === LINK_TAG
 }
 const cleanAttributesMutate = (attributes: TAnchorAnyAttributes) =>
   Object.entries(attributes).forEach(([key, value]) => {
@@ -177,10 +177,11 @@ const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
   Transforms.setSelection(editor, range)
   const isCollapsed = range && Range.isCollapsed(range)
 
-  const link: TSlateTypeElement = {
+  const link: THtmlLinkSlateElement = {
     type: LINK_TAG,
     attributes,
-    children: [{ text }],
+    text,
+    children: [{ text: "" }],
   }
 
   if (!foundLinkEntry && isCollapsed) {

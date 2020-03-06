@@ -1,7 +1,6 @@
 import React, { HTMLAttributes } from "react"
 import { Editor } from "slate"
-import { TSlatePlugin, isSlateTypeElement, TSlateTypeElement } from "../pen/plugin"
-import { formatVoidToString } from "../pen/util"
+import { formatVoidToString, isSlateTypeElement, TSlatePlugin, TSlateTypeElement } from "../pen"
 
 export const BR_TAG = "br"
 export type THtmlBrSlateElement = TSlateTypeElement & {

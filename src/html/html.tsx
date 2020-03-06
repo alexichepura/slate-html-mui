@@ -5,13 +5,13 @@ import { ReactEditor, RenderElementProps } from "slate-react"
 import {
   formatTagToString,
   getAttributes,
+  isSlateTypeElement,
   setBlock,
   SlatePen,
   TSlatePlugin,
   TSlateTypeElement,
   wrapInlineAndText,
 } from "../pen"
-import { isSlateTypeElement } from "../pen/plugin"
 
 export enum EHtmlMark {
   "b" = "b",

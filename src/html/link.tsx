@@ -13,8 +13,13 @@ import isUrl from "is-url"
 import React, { AnchorHTMLAttributes, FC, useState } from "react"
 import { Editor, Node, Path, Range, Text, Transforms } from "slate"
 import { RenderElementProps, useSlate } from "slate-react"
-import { isSlateTypeElement, TSlatePlugin, TSlateTypeElement } from "../pen/plugin"
-import { formatTagToString, getAttributes } from "../pen/util"
+import {
+  formatTagToString,
+  getAttributes,
+  isSlateTypeElement,
+  TSlatePlugin,
+  TSlateTypeElement,
+} from "../pen"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
 export const LINK_TAG = "a"

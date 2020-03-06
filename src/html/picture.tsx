@@ -20,10 +20,16 @@ import React, {
 } from "react"
 import { Editor, Node, NodeEntry, Range } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TSlatePlugin, isSlateTypeElement, TSlateTypeElement } from "../pen/plugin"
+import {
+  formatTagToString,
+  formatVoidToString,
+  getAttributes,
+  insertBlock,
+  isSlateTypeElement,
+  TSlatePlugin,
+  TSlateTypeElement,
+} from "../pen"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
-import { formatTagToString, formatVoidToString, getAttributes } from "../pen/util"
-import { insertBlock } from "../pen/insert-block"
 
 export const PICTURE_TAG = "picture"
 

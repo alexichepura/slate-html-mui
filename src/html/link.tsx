@@ -11,12 +11,11 @@ import Link from "@material-ui/icons/Link"
 import escapeHtml from "escape-html"
 import isUrl from "is-url"
 import React, { AnchorHTMLAttributes, FC, useState } from "react"
-import { Editor, Element as SlateElement, Node, Path, Range, Text, Transforms } from "slate"
+import { Editor, Node, Path, Range, Text, Transforms } from "slate"
 import { RenderElementProps, useSlate } from "slate-react"
-import { TSlateTypeElement } from "./html"
-import { TSlatePlugin } from "../pen/plugin"
-import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
+import { isSlateTypeElement, TSlatePlugin, TSlateTypeElement } from "../pen/plugin"
 import { formatTagToString, getAttributes } from "../pen/util"
+import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
 export const LINK_TAG = "a"
 
@@ -53,13 +52,11 @@ const defaults: TLinkButtonState = {
   attributes: {},
 }
 
-const match = (node: Node): boolean => (node as TSlateTypeElement).type === LINK_TAG
-
 const isLinkActive = (editor: Editor) => {
   return !!findLink(editor)
 }
 const findLinkEntry = (editor: Editor): [THtmlLinkSlateElement, Path] => {
-  const [linkEntry] = Editor.nodes(editor, { match })
+  const [linkEntry] = Editor.nodes(editor, { match: isHtmlAnchorElement })
   return linkEntry as [THtmlLinkSlateElement, Path]
 }
 const findLink = (editor: Editor): THtmlLinkSlateElement | null => {
@@ -87,7 +84,7 @@ const getInitialLinkData = (editor: Editor): TLinkButtonStateInitial => {
 }
 
 export const isHtmlAnchorElement = (element: any): element is THtmlLinkSlateElement => {
-  return (element as TSlateTypeElement).type === LINK_TAG
+  return isSlateTypeElement(element) && element.type === LINK_TAG
 }
 const cleanAttributesMutate = (attributes: TAnchorAnyAttributes) =>
   Object.entries(attributes).forEach(([key, value]) => {
@@ -168,7 +165,7 @@ export const LinkButton: FC<TLinkButtonProps> = ({
 LinkButton.displayName = "LinkButton"
 
 const unwrapLink = (editor: Editor) => {
-  Transforms.unwrapNodes(editor, { match })
+  Transforms.unwrapNodes(editor, { match: isHtmlAnchorElement })
 }
 
 const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
@@ -185,13 +182,13 @@ const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
   }
 
   if (!foundLinkEntry && isCollapsed) {
-    Transforms.insertNodes(editor, [link as SlateElement], { at: range })
+    Transforms.insertNodes(editor, [link], { at: range })
   } else {
     if (isCollapsed) {
       const path = foundLinkEntry[1]
       Transforms.setNodes(editor, link, { at: path, split: true })
     } else {
-      Transforms.wrapNodes(editor, link as SlateElement, { at: range, split: true })
+      Transforms.wrapNodes(editor, link as any, { at: range, split: true })
     }
     Transforms.collapse(editor, { edge: "end" })
   }
@@ -271,7 +268,7 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({
 }
 LinkFormDialog.displayName = "LinkFormDialog"
 
-export const createAnchorPlugin = (): TSlatePlugin => ({
+export const createAnchorPlugin = (): TSlatePlugin<THtmlLinkSlateElement> => ({
   toHtml: (node, slatePen) => {
     if (isHtmlAnchorElement(node)) {
       const attributes = {
@@ -283,11 +280,11 @@ export const createAnchorPlugin = (): TSlatePlugin => ({
     }
     return null
   },
-  fromHtmlElement: (el, slatePen) => {
-    const tag = el.nodeName.toLowerCase()
+  fromHtmlElement: (htmlElement, slatePen) => {
+    const tag = htmlElement.nodeName.toLowerCase()
     if (tag === LINK_TAG) {
-      const attributes = getAttributes(el as Element)
-      const children = slatePen.fromHtmlChildNodes(el.childNodes)
+      const attributes = getAttributes(htmlElement)
+      const children = slatePen.fromHtmlChildNodes(htmlElement.childNodes)
       if (children.length === 0) {
         children.push({ text: "" })
       }
@@ -299,7 +296,7 @@ export const createAnchorPlugin = (): TSlatePlugin => ({
     const { insertData, insertText, isInline } = editor
 
     editor.isInline = element => {
-      return (element as TSlateTypeElement).type === LINK_TAG ? true : isInline(element)
+      return isSlateTypeElement(element) && element.type === LINK_TAG ? true : isInline(element)
     }
 
     editor.insertText = text => {
@@ -321,8 +318,7 @@ export const createAnchorPlugin = (): TSlatePlugin => ({
     }
   },
   RenderElement: props => {
-    const element = props.element as TSlateTypeElement
-    if (isHtmlAnchorElement(element)) {
+    if (isHtmlAnchorElement(props.element)) {
       return <HtmlAnchorElement {...props} />
     }
     return null

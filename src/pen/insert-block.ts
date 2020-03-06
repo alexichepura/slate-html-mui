@@ -1,6 +1,7 @@
 import { Editor, Node, Range, Transforms } from "slate"
+import { TPartialNode } from "./plugin"
 
-export const insertBlock = (editor: Editor, slateElement: Partial<Node>, range: Range) => {
+export const insertBlock = (editor: Editor, slateElement: TPartialNode, range: Range) => {
   const [node] = Editor.node(editor, range)
   if (node && node.text === "") {
     const [parent] = Editor.parent(editor, range)
@@ -11,7 +12,7 @@ export const insertBlock = (editor: Editor, slateElement: Partial<Node>, range: 
   }
 }
 
-export const setBlock = (editor: Editor, slateElement: Partial<Node>, range: Range) => {
+export const setBlock = (editor: Editor, slateElement: TPartialNode, range: Range) => {
   const [node] = Editor.node(editor, range)
   if (!Editor.isEditor(node)) {
     const [parent] = Editor.parent(editor, range)

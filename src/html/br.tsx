@@ -1,15 +1,17 @@
-import React from "react"
+import React, { HTMLAttributes } from "react"
 import { Editor } from "slate"
-import { TSlateTypeElement } from "./html"
-import { TSlatePlugin } from "../pen/plugin"
+import { TSlatePlugin, isSlateTypeElement, TSlateTypeElement } from "../pen/plugin"
 import { formatVoidToString } from "../pen/util"
 
 export const BR_TAG = "br"
+export type THtmlBrSlateElement = TSlateTypeElement & {
+  attributes: HTMLAttributes<any>
+}
 
-export const createBrPlugin = (): TSlatePlugin => ({
-  toHtml: node => {
-    if ((node as TSlateTypeElement).type === "br") {
-      return formatVoidToString((node as TSlateTypeElement).type, node.attributes)
+export const createBrPlugin = (): TSlatePlugin<THtmlBrSlateElement> => ({
+  toHtml: slateElement => {
+    if (isHtmlBrElement(slateElement)) {
+      return formatVoidToString(slateElement.type, slateElement.attributes)
     }
     return null
   },
@@ -23,12 +25,11 @@ export const createBrPlugin = (): TSlatePlugin => ({
   extendEditor: editor => {
     const { isVoid } = editor
     editor.isVoid = element => {
-      return (element as TSlateTypeElement).type === BR_TAG ? true : isVoid(element)
+      return isSlateTypeElement(element) && element.type === BR_TAG ? true : isVoid(element)
     }
   },
   RenderElement: props => {
-    const element = props.element as TSlateTypeElement
-    if ((element as TSlateTypeElement).type === "br") {
+    if (isHtmlBrElement(props.element)) {
       return <br {...props.attributes} />
     }
     return null
@@ -36,3 +37,6 @@ export const createBrPlugin = (): TSlatePlugin => ({
 })
 
 export const insertBr = (editor: Editor) => editor.insertText("\n")
+export const isHtmlBrElement = (node: any): node is THtmlBrSlateElement => {
+  return isSlateTypeElement(node) && node.type === BR_TAG
+}

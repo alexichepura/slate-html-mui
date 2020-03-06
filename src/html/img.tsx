@@ -10,11 +10,15 @@ import Image from "@material-ui/icons/Image"
 import React, { FC, ImgHTMLAttributes, useState } from "react"
 import { Editor, Node, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TSlateTypeElement } from "./html"
-import { TSlatePlugin } from "../pen/plugin"
+import {
+  formatVoidToString,
+  getAttributes,
+  insertBlock,
+  isSlateTypeElement,
+  TSlatePlugin,
+  TSlateTypeElement,
+} from "../pen"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
-import { formatVoidToString, getAttributes } from "../pen/util"
-import { insertBlock } from "../pen/insert-block"
 
 export const IMG_TAG = "img"
 
@@ -65,8 +69,9 @@ const getInitialImgData = (editor: Editor): TImgButtonStateInitial => {
 }
 
 export const isHtmlImgElement = (element: any): element is THtmlImgSlateElement => {
-  return (element as TSlateTypeElement).type === IMG_TAG
+  return isSlateTypeElement(element) && element.type === IMG_TAG
 }
+
 const cleanAttributesMutate = (attributes: ImgHTMLAttributes<any>) =>
   Object.entries(attributes).forEach(([key, value]) => {
     return (value === null || value === undefined) && delete (attributes as any)[key]
@@ -199,9 +204,9 @@ export const ImgFormDialog: FC<TImgFormDialogProps> = ({
 ImgFormDialog.displayName = "ImgFormDialog"
 
 export const createImgPlugin = (): TSlatePlugin => ({
-  toHtml: node => {
-    if (isHtmlImgElement(node)) {
-      return formatVoidToString(node.type, node.attributes)
+  toHtml: slateElement => {
+    if (isHtmlImgElement(slateElement)) {
+      return formatVoidToString(slateElement.type, slateElement.attributes)
     }
     return ""
   },

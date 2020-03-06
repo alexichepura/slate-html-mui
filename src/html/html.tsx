@@ -8,8 +8,10 @@ import {
   setBlock,
   SlatePen,
   TSlatePlugin,
+  TSlateTypeElement,
   wrapInlineAndText,
 } from "../pen"
+import { isSlateTypeElement } from "../pen/plugin"
 
 export enum EHtmlMark {
   "b" = "b",
@@ -47,22 +49,11 @@ export const isMarkActive = (editor: Editor, type: string) => {
 
 export const isBlockActive = (editor: Editor, type: string) => {
   const [match] = Editor.nodes(editor, {
-    match: node => (node as TSlateTypeElement).type === type,
+    match: node => isSlateTypeElement(node) && node.type === type,
   })
 
   return !!match
 }
-
-export type TPartialNode = Partial<Node>
-export type TSlateTypeElement = {
-  type: string
-  children?: TPartialNode[]
-  // [key: string]: any
-}
-
-export type TToHtml = (element: TPartialNode, slatePen: SlatePen) => string | null
-export type TFromHtml = (html: string) => (TSlateTypeElement | TPartialNode)[]
-export type TFromHtmlElement = (element: HTMLElement | ChildNode, slatePen: SlatePen) => any
 
 export type THtmlEditor = ReactEditor & {
   html: SlatePen
@@ -89,9 +80,9 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
       return text.split("\n").join("<br/>")
     }
 
-    if ((node as TSlateTypeElement).type in EHtmlBlock) {
+    if (isSlateTypeElement(node) && node.type in EHtmlBlock) {
       const children = slatePen.nodeChildrenToHtml(node)
-      return formatTagToString((node as TSlateTypeElement).type, null, children)
+      return formatTagToString(node.type, null, children)
     }
 
     return null
@@ -128,7 +119,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
 
       if (html) {
         const fragment = slatePen.fromHtml(html)
-        const blocks = wrapInlineAndText(editor, fragment as Node[])
+        const blocks = wrapInlineAndText(editor, fragment as Node[], EHtmlBlock.p)
 
         const [node] = Editor.node(editor, editor.selection as any)
         if (node && node.text === "") {
@@ -143,9 +134,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
     }
 
     editor.normalizeNode = entry => {
-      const [_node, path] = entry
-      const node = _node as TSlateTypeElement
-
+      const [node, path] = entry
       // If the element is a paragraph, ensure it's children are valid.
       if (SlateElement.isElement(node) && node.tag === EHtmlBlock.p) {
         for (const [child, childPath] of Node.children(editor, path)) {
@@ -161,8 +150,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
     }
   },
   RenderElement: props => {
-    const element = props.element as TSlateTypeElement
-    if (isHtmlBlockElement(element)) {
+    if (isHtmlBlockElement(props.element)) {
       return <HtmlBlockElement {...props} />
     }
     return null
@@ -197,7 +185,7 @@ export const insertHtmlBlock = (editor: Editor, type: string) => {
 
   Object.keys(EHtmlListTag).forEach(type => {
     Transforms.unwrapNodes(editor, {
-      match: node => (node as TSlateTypeElement).type === type,
+      match: node => isSlateTypeElement(node) && node.type === type,
       split: true,
     })
   })

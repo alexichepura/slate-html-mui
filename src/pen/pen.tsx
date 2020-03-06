@@ -1,32 +1,38 @@
 import React, { createElement } from "react"
 import { Editor } from "slate"
 import { RenderElementProps, RenderLeafProps } from "slate-react"
-import { TFromHtml, TFromHtmlElement, THtmlEditor, TPartialNode, TToHtml } from "../html/html"
-import { TRenderElement, TRenderLeaf, TSlatePlugin } from "./plugin"
+import {
+  TRenderElement,
+  TRenderLeaf,
+  TSlatePlugin,
+  TPartialNode,
+  TFromHtmlElement,
+  TToHtml,
+  TFromHtml,
+} from "./plugin"
 
 type TSlatePenInit = {
   editor: Editor
-  plugins?: TSlatePlugin[]
+  plugins?: TSlatePlugin<any>[]
 }
 
 export class SlatePen {
-  editor: THtmlEditor
-  private _plugins: TSlatePlugin[] = []
+  editor: Editor
+  private _plugins: TSlatePlugin<any>[] = []
   private _plugins_RenderElement: TRenderElement[] = []
   private _plugins_RenderLeaf: TRenderLeaf[] = []
   private _plugins_fromHtmlElement: TFromHtmlElement[] = []
   private _plugins_toHtml: TToHtml[] = []
 
   constructor(init: TSlatePenInit) {
-    this.editor = init.editor as THtmlEditor
-    this.editor.html = this
+    this.editor = init.editor
     this._plugins_toHtml.push()
     if (init.plugins) {
       init.plugins.forEach(this.addPlugin)
     }
   }
 
-  addPlugin = (plugin: TSlatePlugin) => {
+  addPlugin = (plugin: TSlatePlugin<any>) => {
     this._plugins.push(plugin)
     if (plugin.extendEditor) {
       plugin.extendEditor(this.editor, this)
@@ -72,7 +78,7 @@ export class SlatePen {
     return <span {...props.attributes}>{props.children}</span>
   }
 
-  fromHtmlElement = (element: HTMLElement | ChildNode): any => {
+  fromHtmlElement = (element: HTMLElement): any => {
     let node = null
     this._plugins_fromHtmlElement.some(from => {
       const _node = from(element, this)
@@ -106,7 +112,7 @@ export class SlatePen {
 
   fromHtmlChildNodes = (nodes: NodeListOf<ChildNode> | HTMLCollection) => {
     return Array.from(nodes)
-      .map(this.fromHtmlElement)
+      .map(el => this.fromHtmlElement(el as HTMLElement))
       .flat()
   }
 

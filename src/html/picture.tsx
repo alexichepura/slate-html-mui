@@ -20,8 +20,7 @@ import React, {
 } from "react"
 import { Editor, Node, NodeEntry, Range } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TSlateTypeElement } from "./html"
-import { TSlatePlugin } from "../pen/plugin"
+import { TSlatePlugin, isSlateTypeElement, TSlateTypeElement } from "../pen/plugin"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 import { formatTagToString, formatVoidToString, getAttributes } from "../pen/util"
 import { insertBlock } from "../pen/insert-block"
@@ -67,7 +66,7 @@ const findPicture = (editor: Editor): TPictureElement | null => {
 export const isHtmlPictureElement = (
   element: TPictureElement | any
 ): element is TPictureElement => {
-  return (element as TSlateTypeElement).type === PICTURE_TAG
+  return isSlateTypeElement(element) && element.type === PICTURE_TAG
 }
 const cleanAttributesMutate = (attributes: HTMLAttributes<any>) =>
   Object.entries(attributes).forEach(([key, value]) => {

@@ -1,14 +1,6 @@
 export { createBrPlugin, insertBr } from "./br"
 export { RedoButton, UndoButton } from "./history"
-export {
-  createHtmlPlugin,
-  EHtmlBlock,
-  EHtmlMark,
-  TFromHtmlElement,
-  THtmlEditor,
-  TSlateTypeElement,
-  TToHtml,
-} from "./html"
+export { createHtmlPlugin, EHtmlBlock, EHtmlMark, THtmlEditor } from "./html"
 export { createImgPlugin, ImgButton, TImgFormDialogProps } from "./img"
 export {
   createAnchorPlugin,

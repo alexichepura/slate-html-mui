@@ -1,8 +1,14 @@
 import React, { CSSProperties, FC, useState } from "react"
 import { Editor, Element as SlateElement, Path, Range, Text } from "slate"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TAnchorAnyAttributes, ToolbarButton, TSlateTypeElement } from "../src/html"
-import { TSlatePlugin, formatTagToString, getAttributes, insertBlock } from "../src/pen"
+import { TAnchorAnyAttributes, ToolbarButton } from "../src/html"
+import {
+  TSlatePlugin,
+  formatTagToString,
+  getAttributes,
+  insertBlock,
+  TSlateTypeElement,
+} from "../src/pen"
 import { CustomLinkFormDialog } from "./custom-link"
 
 export const BUTTON_LINK_DATA_ATTRIBUTE = "data-article-link-button"

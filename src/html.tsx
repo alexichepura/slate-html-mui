@@ -67,7 +67,7 @@ const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, elemen
 }
 HtmlBlockElement.displayName = "HtmlBlockElement"
 
-export const createHtmlPlugin = (): TSlatePlugin => ({
+export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement> => ({
   toHtml: (node, slatePen) => {
     if (Text.isText(node)) {
       const mark = Object.entries(node).find(([k, v]) => k in EHtmlMark && v === true)
@@ -89,23 +89,23 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
   },
   fromHtmlElement: (element, slatePen) => {
     const el: Element = element as Element
-    const tag = el.nodeName.toLowerCase()
+    const type = el.nodeName.toLowerCase()
 
-    if (tag in EHtmlBlock) {
+    if (type in EHtmlBlock) {
       const children = slatePen.fromHtmlChildNodes(el.childNodes)
       const attributes = getAttributes(el)
       if (children.length === 0) {
         children.push({ text: "" } as Text)
       }
-      return { type: tag, attributes, children } as TSlateTypeElement
+      return { type, attributes, children }
     }
 
-    if (tag in EHtmlMark) {
+    if (type in EHtmlMark) {
       const children = slatePen.fromHtmlChildNodes(el.childNodes)
       return children.map(child => {
         const text = typeof child === "string" ? child : child.text
         const attributes = getAttributes(el)
-        return { [tag]: true, attributes, text }
+        return { [type]: true, attributes, text }
       })
     }
 

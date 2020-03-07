@@ -1,6 +1,12 @@
 import React, { HTMLAttributes } from "react"
 import { Editor } from "slate"
-import { formatVoidToString, isSlateTypeElement, TSlatePlugin, TSlateTypeElement } from "slate-pen"
+import {
+  formatVoidToString,
+  isSlateTypeElement,
+  TSlatePlugin,
+  TSlateTypeElement,
+  getAttributes,
+} from "slate-pen"
 
 export const BR_TAG = "br"
 export type THtmlBrSlateElement = TSlateTypeElement & {
@@ -16,8 +22,9 @@ export const createBrPlugin = (): TSlatePlugin<THtmlBrSlateElement> => ({
   },
   fromHtmlElement: el => {
     const tag = el.nodeName.toLowerCase()
+    const attributes = getAttributes(el as Element)
     if (tag === BR_TAG) {
-      return { text: "\n" }
+      return { text: "\n", type: BR_TAG, attributes }
     }
     return null
   },

@@ -8,11 +8,17 @@ import {
 } from "@material-ui/core"
 import Image from "@material-ui/icons/Image"
 import React, { FC, ImgHTMLAttributes, useState } from "react"
-import { Editor, Element as SlateElement, Node, Path, Range, Text } from "slate"
+import { Editor, Node, Path, Range, Text } from "slate"
+import {
+  formatVoidToString,
+  getAttributes,
+  insertBlock,
+  isSlateTypeElement,
+  TSlatePlugin,
+  TSlateTypeElement,
+} from "slate-pen"
 import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
-import { TTagElement } from "../html"
-import { ToolbarButton, TToolbarButtonProps } from "../toolbar-button"
-import { insertBlock } from "../util/insert-block"
+import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
 export const IMG_TAG = "img"
 
@@ -20,7 +26,7 @@ type TSetImgCommand = {
   attributes: ImgHTMLAttributes<any>
   range: Range
 }
-export type THtmlImgSlateElement = TTagElement & {
+export type THtmlImgSlateElement = TSlateTypeElement & {
   attributes: ImgHTMLAttributes<any>
 }
 
@@ -39,7 +45,7 @@ const defaults: TImgButtonState = {
 }
 
 const match = (node: Node): boolean => {
-  return (node as TTagElement).tag === IMG_TAG
+  return (node as TSlateTypeElement).type === IMG_TAG
 }
 
 const isImgActive = (editor: Editor) => {
@@ -62,11 +68,10 @@ const getInitialImgData = (editor: Editor): TImgButtonStateInitial => {
   }
 }
 
-export const isHtmlImgElement = (
-  element: SlateElement | TTagElement | Text
-): element is THtmlImgSlateElement => {
-  return element.tag === IMG_TAG
+export const isHtmlImgElement = (element: any): element is THtmlImgSlateElement => {
+  return isSlateTypeElement(element) && element.type === IMG_TAG
 }
+
 const cleanAttributesMutate = (attributes: ImgHTMLAttributes<any>) =>
   Object.entries(attributes).forEach(([key, value]) => {
     return (value === null || value === undefined) && delete (attributes as any)[key]
@@ -140,24 +145,14 @@ export const ImgButton: FC<TImgButtonProps> = ({ ImgFormDialog: _ImgFormDialog, 
 }
 ImgButton.displayName = "ImgButton"
 
-const isImgTag = (element: TTagElement) => {
-  return element.tag === IMG_TAG
-}
-
-export const withImg = (editor: Editor) => {
-  const { isVoid } = editor
-
-  editor.isVoid = element => {
-    return isImgTag(element as TTagElement) ? true : isVoid(element)
-  }
-
-  return editor
+const isImgTag = (element: TSlateTypeElement) => {
+  return element.type === IMG_TAG
 }
 
 const setImg = (editor: Editor, command: TSetImgCommand) => {
   const { attributes, range } = command
-  const img: TTagElement = {
-    tag: IMG_TAG,
+  const img: THtmlImgSlateElement = {
+    type: IMG_TAG,
     attributes,
     children: [{ text: "" }],
   }
@@ -207,3 +202,33 @@ export const ImgFormDialog: FC<TImgFormDialogProps> = ({
   )
 }
 ImgFormDialog.displayName = "ImgFormDialog"
+
+export const createImgPlugin = (): TSlatePlugin => ({
+  toHtml: slateElement => {
+    if (isHtmlImgElement(slateElement)) {
+      return formatVoidToString(slateElement.type, slateElement.attributes)
+    }
+    return ""
+  },
+  fromHtmlElement: el => {
+    const tag = el.nodeName.toLowerCase()
+    if (tag === IMG_TAG) {
+      const attributes = getAttributes(el as Element)
+      const children: any[] = [{ text: "" } as Text]
+      return { type: tag, attributes, children } as THtmlImgSlateElement
+    }
+    return null
+  },
+  extendEditor: editor => {
+    const { isVoid } = editor
+    editor.isVoid = element => {
+      return isImgTag(element as TSlateTypeElement) ? true : isVoid(element)
+    }
+  },
+  RenderElement: props => {
+    if (isHtmlImgElement(props.element)) {
+      return <HtmlImgElement {...props} />
+    }
+    return null
+  },
+})

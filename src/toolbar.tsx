@@ -1,90 +1,94 @@
+import CodeTwoTone from "@material-ui/icons/CodeTwoTone"
 import FormatBold from "@material-ui/icons/FormatBold"
+import FormatItalicTwoTone from "@material-ui/icons/FormatItalicTwoTone"
 import FormatListBulleted from "@material-ui/icons/FormatListBulleted"
 import FormatListNumbered from "@material-ui/icons/FormatListNumbered"
 import FormatQuote from "@material-ui/icons/FormatQuote"
-import FormatItalicTwoTone from "@material-ui/icons/FormatItalicTwoTone"
 import FormatUnderlinedTwoTone from "@material-ui/icons/FormatUnderlinedTwoTone"
-import CodeTwoTone from "@material-ui/icons/CodeTwoTone"
 import React, { FC } from "react"
-import { UndoButton, RedoButton } from "./history"
+import { Editor } from "slate"
+import { RedoButton, UndoButton } from "./history"
+import { EHtmlBlock, EHtmlMark } from "./html"
+import { insertBr } from "./br"
+import { ImgButton } from "./img"
+import { PictureButton } from "./picture"
 import { LinkButton } from "./link"
-import { TagButton } from "./toolbar-button"
-import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
-import { ImgButton } from "./image/img"
-import { PictureButton } from "./image/picture"
+import { BlockButton, MarkButton, ToolbarButton } from "./toolbar-button"
 
-export const Toolbar: FC<JSX.IntrinsicElements["div"]> = props => {
+export const Toolbar: FC<JSX.IntrinsicElements["div"] & { editor: Editor }> = ({
+  editor,
+  ...rest
+}) => {
   return (
-    <div {...props}>
+    <div {...rest}>
       <UndoButton />
       <RedoButton />
 
-      <TagButton tooltipTitle="Bold" tag={EHtmlMarkTag.b} children={<FormatBold />} />
-      <TagButton tooltipTitle="Strong" tag={EHtmlMarkTag.strong} children={<strong>S</strong>} />
-      <TagButton
+      <MarkButton tooltipTitle="Bold" type={EHtmlMark.b} children={<FormatBold />} />
+      <MarkButton tooltipTitle="Strong" type={EHtmlMark.strong} children={<strong>S</strong>} />
+      <MarkButton
         tooltipTitle="Code (monospace)"
-        tag={EHtmlMarkTag.code}
+        type={EHtmlMark.code}
         children={<CodeTwoTone />}
       />
-      <TagButton
+      <MarkButton
         tooltipTitle="Italic (emphasis)"
-        tag={EHtmlMarkTag.em}
+        type={EHtmlMark.em}
         children={<FormatItalicTwoTone />}
       />
-      <TagButton
+      <MarkButton
         tooltipTitle="Code (monospace)"
-        tag={EHtmlMarkTag.u}
+        type={EHtmlMark.u}
         children={<FormatUnderlinedTwoTone />}
       />
       <LinkButton />
       <ImgButton />
       <PictureButton />
 
-      <TagButton
+      <BlockButton
         tooltipTitle="Heading 1"
-        tag={EHtmlBlockTag.h1}
-        children={EHtmlBlockTag.h1.toUpperCase()}
+        type={EHtmlBlock.h1}
+        children={EHtmlBlock.h1.toUpperCase()}
       />
-      <TagButton
+      <BlockButton
         tooltipTitle="Heading 2"
-        tag={EHtmlBlockTag.h2}
-        children={EHtmlBlockTag.h2.toUpperCase()}
+        type={EHtmlBlock.h2}
+        children={EHtmlBlock.h2.toUpperCase()}
       />
-      <TagButton
+      <BlockButton
         tooltipTitle="Heading 3"
-        tag={EHtmlBlockTag.h3}
-        children={EHtmlBlockTag.h3.toUpperCase()}
+        type={EHtmlBlock.h3}
+        children={EHtmlBlock.h3.toUpperCase()}
       />
-      <TagButton
+      <BlockButton
         tooltipTitle="Heading 4"
-        tag={EHtmlBlockTag.h4}
-        children={EHtmlBlockTag.h4.toUpperCase()}
+        type={EHtmlBlock.h4}
+        children={EHtmlBlock.h4.toUpperCase()}
       />
-      <TagButton
+      <BlockButton
         tooltipTitle="Blockquote"
-        tag={EHtmlBlockTag.blockquote}
+        type={EHtmlBlock.blockquote}
         children={<FormatQuote />}
       />
-      <TagButton
+      <BlockButton
         tooltipTitle="Numbered (ordered) list"
-        tag={EHtmlBlockTag.ol}
+        type={EHtmlBlock.ol}
         children={<FormatListNumbered />}
       />
-      <TagButton
+      <BlockButton
         tooltipTitle="Bulleted (unordered) list"
-        tag={EHtmlBlockTag.ul}
+        type={EHtmlBlock.ul}
         children={<FormatListBulleted />}
       />
-      <TagButton
+      <ToolbarButton
         tooltipTitle="Line break"
-        tag={EHtmlVoidTag.br}
-        children={EHtmlVoidTag.br.toUpperCase()}
+        color="default"
+        variant="text"
+        onClick={() => {
+          insertBr(editor)
+        }}
+        children={"BR"}
       />
-      {/* <TagButton
-        tooltipTitle="Horizontal rule"
-        tag={EHtmlVoidTag.hr}
-        children={EHtmlVoidTag.hr.toUpperCase()}
-      /> */}
     </div>
   )
 }

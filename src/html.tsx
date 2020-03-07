@@ -1,139 +1,204 @@
 import escapeHtml from "escape-html"
-import { Descendant, Editor, Element as SlateElement, Node, Text } from "slate"
-import { EHtmlBlockTag, EHtmlMarkTag, EHtmlVoidTag } from "./format"
-import { IMG_TAG, isHtmlImgElement } from "./image/img"
-import { deserializePicture, serializePicture } from "./image/picture"
-import { isHtmlAnchorElement, LINK_TAG } from "./link"
-import { formatTagToString, formatVoidToString, getAttributes } from "./util"
+import React, { createElement, FC } from "react"
+import { Editor, Element as SlateElement, Node, Text, Transforms } from "slate"
+import {
+  formatTagToString,
+  getAttributes,
+  isSlateTypeElement,
+  setBlock,
+  SlatePen,
+  TSlatePlugin,
+  TSlateTypeElement,
+  wrapInlineAndText,
+} from "slate-pen"
+import { ReactEditor, RenderElementProps } from "slate-react"
 
-type TPartialNode = Partial<Node>
-export type TTagElement = {
-  tag: string
-  children?: TPartialNode[]
-  [key: string]: any
+export enum EHtmlMark {
+  "b" = "b",
+  "strong" = "strong",
+  "code" = "code",
+  "em" = "em",
+  "u" = "u",
 }
 
-const isTagElement = (el: any): el is TTagElement => {
-  return "tag" in el
+export enum EHtmlBlock {
+  "p" = "p",
+  "h1" = "h1",
+  "h2" = "h2",
+  "h3" = "h3",
+  "h4" = "h4",
+  "h5" = "h5",
+  "h6" = "h6",
+  "blockquote" = "blockquote",
+  "ol" = "ol",
+  "ul" = "ul",
+  "li" = "li",
 }
 
-// SERIALIZE
-export type TSerialize<T = Node> = (node: TPartialNode | TPartialNode | T) => string
+export enum EHtmlListTag {
+  "ol" = "ol",
+  "ul" = "ul",
+}
 
-export const createSerializer = (editor: Editor): TSerialize => {
-  return function serialize<T = Node>(node: TPartialNode | TPartialNode | T): string {
-    const picture = serializePicture(node)
-    if (picture) return picture
+export const DEFAULT_TAG = EHtmlBlock.p
 
+export const isMarkActive = (editor: Editor, type: string) => {
+  const marks = Editor.marks(editor)
+  return marks ? marks[type] === true : false
+}
+
+export const isBlockActive = (editor: Editor, type: string) => {
+  const [match] = Editor.nodes(editor, {
+    match: node => isSlateTypeElement(node) && node.type === type,
+  })
+
+  return !!match
+}
+
+export type THtmlEditor = ReactEditor & {
+  html: SlatePen
+}
+
+const isHtmlBlockElement = (element: SlateElement | TSlateTypeElement) => {
+  return element.type in EHtmlBlock
+}
+const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
+  return React.createElement((element as TSlateTypeElement).type, attributes, children)
+}
+HtmlBlockElement.displayName = "HtmlBlockElement"
+
+export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement> => ({
+  toHtml: (node, slatePen) => {
     if (Text.isText(node)) {
-      const markTag = Object.entries(node).find(([k, v]) => k in EHtmlMarkTag && v === true)
+      const mark = Object.entries(node).find(([k, v]) => k in EHtmlMark && v === true)
       let text
-      if (markTag && markTag[0]) {
-        text = formatTagToString(markTag[0], null, escapeHtml(node.text))
+      if (mark && mark[0]) {
+        text = formatTagToString(mark[0], null, escapeHtml(node.text))
       } else {
         text = escapeHtml(node.text)
       }
       return text.split("\n").join("<br/>")
     }
 
-    if (Array.isArray(node)) {
-      return node.map(n => editor.serializeToHtmlString(n)).join("")
+    if (isSlateTypeElement(node) && node.type in EHtmlBlock) {
+      const children = slatePen.nodeChildrenToHtml(node)
+      return formatTagToString(node.type, null, children)
     }
 
-    const children =
-      (Editor.isBlock(editor, node) || Editor.isInline(editor, node)) && node.children
-        ? node.children.map(n => editor.serializeToHtmlString(n)).join("")
-        : ""
-
-    if (isTagElement(node)) {
-      if (node.tag in EHtmlBlockTag) {
-        return formatTagToString(node.tag, null, children)
-      }
-
-      if (isHtmlAnchorElement(node)) {
-        const attributes = {
-          ...node.attributes,
-          href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
-        }
-        return formatTagToString(node.tag, attributes, children)
-      }
-
-      if (isHtmlImgElement(node)) {
-        return formatVoidToString(node.tag, node.attributes)
-      }
-
-      if (node.tag in EHtmlVoidTag) {
-        return formatVoidToString(node.tag, null)
-      }
-    }
-
-    return children
-  }
-}
-
-// DESEREALIZE
-type TDeserializeInput = Element | ChildNode
-type TDeserializeOutput = SlateElement | Text | string | null | Descendant[] | TTagElement
-export type TDeserialize<T = unknown> = (el: TDeserializeInput) => TDeserializeOutput | T
-
-export const createDeserializer = (editor: Editor): TDeserialize => {
-  function deserializeChildNodes(nodes: NodeListOf<ChildNode> | HTMLCollection) {
-    return Array.from(nodes)
-      .map(editor.deserializeHtmlElement)
-      .flat()
-  }
-  return function deserialize<T>(element: TDeserializeInput): TDeserializeOutput | T {
+    return null
+  },
+  fromHtmlElement: (element, slatePen) => {
     const el: Element = element as Element
+    const type = el.nodeName.toLowerCase()
 
-    if (el.nodeName === "BODY") {
-      const firstElementChild =
-        el.children && Array.from(el.children).filter(child => child.nodeName !== "META")[0]
-      if (firstElementChild && firstElementChild.nodeName === "B") {
-        return deserializeChildNodes(firstElementChild.childNodes)
-      }
-      return deserializeChildNodes(el.children)
-    }
-
-    if (el.nodeType === 3) {
-      const text = el.textContent || ""
-      return { text }
-    }
-    if (el.nodeType !== 1) return null
-
-    const picture = deserializePicture(el)
-    if (picture) return picture
-
-    const tag = el.nodeName.toLowerCase()
-
-    if (tag === EHtmlVoidTag.br) {
-      return { text: "\n" }
-    }
-
-    const children = deserializeChildNodes(el.childNodes)
-    const attributes = getAttributes(el)
-
-    if (tag in EHtmlBlockTag || tag === LINK_TAG || tag === IMG_TAG) {
+    if (type in EHtmlBlock) {
+      const children = slatePen.fromHtmlChildNodes(el.childNodes)
+      const attributes = getAttributes(el)
       if (children.length === 0) {
         children.push({ text: "" } as Text)
       }
-      return { tag, attributes, children }
+      return { type, attributes, children }
     }
 
-    if (tag in EHtmlMarkTag) {
+    if (type in EHtmlMark) {
+      const children = slatePen.fromHtmlChildNodes(el.childNodes)
       return children.map(child => {
         const text = typeof child === "string" ? child : child.text
-        return { [tag]: true, attributes, text }
+        const attributes = getAttributes(el)
+        return { [type]: true, attributes, text }
       })
     }
 
-    if (tag in EHtmlVoidTag) {
-      return {
-        tag,
-        attributes,
-        children: [{ text: "" }],
+    return null
+  },
+  extendEditor: (editor, slatePen) => {
+    const { insertData, normalizeNode } = editor
+
+    editor.insertData = (data: DataTransfer) => {
+      const html = data.getData("text/html")
+
+      if (html) {
+        const fragment = slatePen.fromHtml(html)
+        const blocks = wrapInlineAndText(editor, fragment as Node[], EHtmlBlock.p)
+
+        const [node] = Editor.node(editor, editor.selection as any)
+        if (node && node.text === "") {
+          Transforms.removeNodes(editor) // clean from single text node
+          Transforms.insertNodes(editor, blocks as Node[])
+        } else {
+          Transforms.insertFragment(editor, blocks as Node[])
+        }
+        return
       }
+      insertData(data)
     }
 
-    return children
+    editor.normalizeNode = entry => {
+      const [node, path] = entry
+      // If the element is a paragraph, ensure it's children are valid.
+      if (SlateElement.isElement(node) && isSlateTypeElement(node) && node.type === EHtmlBlock.p) {
+        for (const [child, childPath] of Node.children(editor, path)) {
+          if (SlateElement.isElement(child) && !editor.isInline(child)) {
+            Transforms.unwrapNodes(editor, { at: childPath })
+            return
+          }
+        }
+      }
+
+      // Fall back to the original `normalizeNode` to enforce other constraints.
+      normalizeNode(entry)
+    }
+  },
+  RenderElement: props => {
+    if (isHtmlBlockElement(props.element)) {
+      return <HtmlBlockElement {...props} />
+    }
+    return null
+  },
+
+  RenderLeaf: ({ attributes, children, leaf }) => {
+    const found = Object.keys(EHtmlMark).some(mark => {
+      if (leaf[mark]) {
+        children = createElement(mark, {}, children)
+        return true
+      }
+      return false
+    })
+    if (found) {
+      return <span {...attributes}>{children}</span>
+    }
+    return null
+  },
+})
+
+export const insertHtmlMark = (editor: Editor, mark: string) => {
+  const isActive = isMarkActive(editor, mark)
+  if (mark in EHtmlMark) {
+    isActive ? Editor.removeMark(editor, mark) : Editor.addMark(editor, mark, true)
+    return
+  }
+}
+
+export const insertHtmlBlock = (editor: Editor, type: string) => {
+  const isActive = isBlockActive(editor, type)
+  const isList = type in EHtmlListTag
+
+  Object.keys(EHtmlListTag).forEach(type => {
+    Transforms.unwrapNodes(editor, {
+      match: node => isSlateTypeElement(node) && node.type === type,
+      split: true,
+    })
+  })
+
+  setBlock(
+    editor,
+    {
+      type: isActive ? DEFAULT_TAG : isList ? EHtmlBlock.li : type,
+    },
+    editor.selection!
+  )
+
+  if (!isActive && isList) {
+    Transforms.wrapNodes(editor, { type, children: [] })
   }
 }

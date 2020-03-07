@@ -4,16 +4,23 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
   MenuItem,
+  TextField,
 } from "@material-ui/core"
 import Link from "@material-ui/icons/Link"
+import escapeHtml from "escape-html"
 import isUrl from "is-url"
-import React, { FC, useState, AnchorHTMLAttributes } from "react"
-import { Editor, Element as SlateElement, Text, Node, Range, Path, Transforms } from "slate"
-import { useSlate, RenderElementProps } from "slate-react"
+import React, { AnchorHTMLAttributes, FC, useState } from "react"
+import { Editor, Node, Path, Range, Text, Transforms } from "slate"
+import {
+  formatTagToString,
+  getAttributes,
+  isSlateTypeElement,
+  TSlatePlugin,
+  TSlateTypeElement,
+} from "slate-pen"
+import { RenderElementProps, useSlate } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
-import { TTagElement } from "./html"
 
 export const LINK_TAG = "a"
 
@@ -23,7 +30,7 @@ type TSetLinkCommand = {
   text: string
   range: Range
 }
-export type THtmlLinkSlateElement = TTagElement & {
+export type THtmlLinkSlateElement = TSlateTypeElement & {
   text: Text["text"]
   attributes: TAnchorAnyAttributes
 }
@@ -50,13 +57,11 @@ const defaults: TLinkButtonState = {
   attributes: {},
 }
 
-const match = (node: Node): boolean => (node as TTagElement).tag === LINK_TAG
-
 const isLinkActive = (editor: Editor) => {
   return !!findLink(editor)
 }
 const findLinkEntry = (editor: Editor): [THtmlLinkSlateElement, Path] => {
-  const [linkEntry] = Editor.nodes(editor, { match })
+  const [linkEntry] = Editor.nodes(editor, { match: isHtmlAnchorElement })
   return linkEntry as [THtmlLinkSlateElement, Path]
 }
 const findLink = (editor: Editor): THtmlLinkSlateElement | null => {
@@ -83,10 +88,8 @@ const getInitialLinkData = (editor: Editor): TLinkButtonStateInitial => {
   }
 }
 
-export const isHtmlAnchorElement = (
-  element: SlateElement | TTagElement | Text
-): element is THtmlLinkSlateElement => {
-  return element.tag === LINK_TAG
+export const isHtmlAnchorElement = (element: any): element is THtmlLinkSlateElement => {
+  return isSlateTypeElement(element) && element.type === LINK_TAG
 }
 const cleanAttributesMutate = (attributes: TAnchorAnyAttributes) =>
   Object.entries(attributes).forEach(([key, value]) => {
@@ -166,36 +169,8 @@ export const LinkButton: FC<TLinkButtonProps> = ({
 }
 LinkButton.displayName = "LinkButton"
 
-export const withLink = (editor: Editor) => {
-  const { insertData, insertText, isInline } = editor
-
-  editor.isInline = element => {
-    return (element as TTagElement).tag === LINK_TAG ? true : isInline(element)
-  }
-
-  editor.insertText = text => {
-    if (text && isUrl(text)) {
-      wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
-    } else {
-      insertText(text)
-    }
-  }
-
-  editor.insertData = (data: DataTransfer) => {
-    const text = data.getData("text/plain")
-
-    if (text && isUrl(text)) {
-      wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
-    } else {
-      insertData(data)
-    }
-  }
-
-  return editor
-}
-
 const unwrapLink = (editor: Editor) => {
-  Transforms.unwrapNodes(editor, { match })
+  Transforms.unwrapNodes(editor, { match: isHtmlAnchorElement })
 }
 
 const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
@@ -204,20 +179,21 @@ const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
   Transforms.setSelection(editor, range)
   const isCollapsed = range && Range.isCollapsed(range)
 
-  const link: TTagElement = {
-    tag: LINK_TAG,
+  const link: THtmlLinkSlateElement = {
+    type: LINK_TAG,
     attributes,
-    children: [{ text }],
+    text,
+    children: [{ text: "" }],
   }
 
   if (!foundLinkEntry && isCollapsed) {
-    Transforms.insertNodes(editor, [link as SlateElement], { at: range })
+    Transforms.insertNodes(editor, [link], { at: range })
   } else {
     if (isCollapsed) {
       const path = foundLinkEntry[1]
       Transforms.setNodes(editor, link, { at: path, split: true })
     } else {
-      Transforms.wrapNodes(editor, link as SlateElement, { at: range, split: true })
+      Transforms.wrapNodes(editor, link as any, { at: range, split: true })
     }
     Transforms.collapse(editor, { edge: "end" })
   }
@@ -296,3 +272,60 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({
   )
 }
 LinkFormDialog.displayName = "LinkFormDialog"
+
+export const createAnchorPlugin = (): TSlatePlugin<THtmlLinkSlateElement> => ({
+  toHtml: (node, slatePen) => {
+    if (isHtmlAnchorElement(node)) {
+      const attributes = {
+        ...node.attributes,
+        href: node.attributes.href ? escapeHtml(node.attributes.href || "") : null,
+      }
+      const children = slatePen.nodeChildrenToHtml(node)
+      return formatTagToString(node.type, attributes, children)
+    }
+    return null
+  },
+  fromHtmlElement: (htmlElement, slatePen) => {
+    const tag = htmlElement.nodeName.toLowerCase()
+    if (tag === LINK_TAG) {
+      const attributes = getAttributes(htmlElement)
+      const children = slatePen.fromHtmlChildNodes(htmlElement.childNodes)
+      if (children.length === 0) {
+        children.push({ text: "" })
+      }
+      return { type: tag, attributes, children } as THtmlLinkSlateElement
+    }
+    return null
+  },
+  extendEditor: editor => {
+    const { insertData, insertText, isInline } = editor
+
+    editor.isInline = element => {
+      return isSlateTypeElement(element) && element.type === LINK_TAG ? true : isInline(element)
+    }
+
+    editor.insertText = text => {
+      if (text && isUrl(text)) {
+        wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
+      } else {
+        insertText(text)
+      }
+    }
+
+    editor.insertData = (data: DataTransfer) => {
+      const text = data.getData("text/plain")
+
+      if (text && isUrl(text)) {
+        wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
+      } else {
+        insertData(data)
+      }
+    }
+  },
+  RenderElement: props => {
+    if (isHtmlAnchorElement(props.element)) {
+      return <HtmlAnchorElement {...props} />
+    }
+    return null
+  },
+})

@@ -1,41 +1,30 @@
 import { Button, Card, makeStyles } from "@material-ui/core"
-import React, { CSSProperties, FC, useCallback, useMemo, useRef, useState } from "react"
+import React, { CSSProperties, FC, useMemo, useRef, useState } from "react"
 import { render } from "react-dom"
-import { Editor, Node } from "slate"
-import { Editable, ReactEditor, RenderElementProps, Slate } from "slate-react"
-import { createHtmlEditor, Leaf, RenderElement, TTagElement, useSticky } from "../src"
-import {
-  ButtonLinkElement,
-  BUTTON_LINK_DATA_ATTRIBUTE,
-  isElementButtonLink,
-  withButtonLink,
-} from "./button-link"
+import { createEditor, Editor, Node } from "slate"
+import { withHistory } from "slate-history"
+import { Editable, ReactEditor, Slate, withReact } from "slate-react"
+import { SlatePen, TSlateTypeElement, useSticky } from "slate-pen"
+import { BUTTON_LINK_DATA_ATTRIBUTE } from "./button-link"
 import { initial, initial_string } from "./initial"
+import { createSlatePen } from "./setup"
 import { CustomToolbar } from "./toolbar"
 
 const SlateHtmlEditor: FC<{
-  value: TTagElement[]
-  setValue: (value: TTagElement[]) => void
+  value: TSlateTypeElement[]
+  setValue: (value: TSlateTypeElement[]) => void
   editor: Editor
-}> = ({ value, setValue, editor }) => {
-  const renderElement = useCallback((props: RenderElementProps) => {
-    if (isElementButtonLink(props.element)) {
-      return <ButtonLinkElement {...props} />
-    }
-    return <RenderElement {...props} />
-  }, [])
-  const renderLeaf = useCallback(Leaf, [])
+  slatePen: SlatePen
+}> = ({ value, setValue, editor, slatePen }) => {
   const [isSticky, stickyPlaceholderRef] = useSticky()
-
   const isPasteCapture = useRef<boolean>(false)
-
   const classes = useStyles()
   return (
     <Slate
       editor={editor as ReactEditor}
       defaultValue={value}
       onChange={value => {
-        setValue(value as TTagElement[])
+        setValue(value as TSlateTypeElement[])
       }}
       value={value as Node[]}
     >
@@ -47,11 +36,12 @@ const SlateHtmlEditor: FC<{
         <div className={classes.toolbarPlaceholder} ref={stickyPlaceholderRef}>
           <CustomToolbar
             className={classes.toolbar + (isSticky ? " " + classes.toolbarSticky : "")}
+            editor={editor}
           />
         </div>
         <Editable
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
+          renderElement={slatePen.RenderElement}
+          renderLeaf={slatePen.RenderLeaf}
           onPasteCapture={e => {
             // workaround for https://github.com/ianstormtaylor/slate/issues/3394
             if (!isPasteCapture.current) return
@@ -110,22 +100,23 @@ const useStyles = makeStyles(
 )
 
 const MyEditor: FC = () => {
-  const editor = useMemo(() => withButtonLink(createHtmlEditor()), [])
-  const [value, setValue] = useState<TTagElement[]>(initial)
+  const editor = useMemo(() => withHistory(withReact(createEditor())), [])
+  const slatePen = useMemo(() => createSlatePen(editor), [])
+  const [value, setValue] = useState<TSlateTypeElement[]>(initial)
 
   const saveToLocalstorage = () => {
     console.log("saveToLocalstorage value", value)
-    const str = editor.serializeToHtmlString(value)
+    const str = slatePen.toHtml(value)
     console.log("saveToLocalstorage html string", str)
     localStorage.setItem("slate-mui-value", str)
   }
   const loadFromLocalstorage = () => {
     const savedStr = localStorage.getItem("slate-mui-value") || ""
-    const savedValue = editor.deserializeHtml(savedStr)
+    const savedValue = slatePen.fromHtml(savedStr)
     setValue(savedValue as any)
   }
   const loadFromSample = () => {
-    const savedValue = editor.deserializeHtml(initial_string)
+    const savedValue = slatePen.fromHtml(initial_string)
     setValue(savedValue as any)
   }
   return (
@@ -142,7 +133,7 @@ const MyEditor: FC = () => {
       <Button color="primary" onClick={() => console.log(value)}>
         log value
       </Button>
-      <SlateHtmlEditor value={value} setValue={setValue} editor={editor} />
+      <SlateHtmlEditor value={value} setValue={setValue} editor={editor} slatePen={slatePen} />
     </div>
   )
 }

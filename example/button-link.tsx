@@ -1,39 +1,15 @@
 import React, { CSSProperties, FC, useState } from "react"
 import { Editor, Element as SlateElement, Path, Range, Text } from "slate"
-import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import {
   formatTagToString,
   getAttributes,
   insertBlock,
-  TAnchorAnyAttributes,
-  TDeserialize,
-  ToolbarButton,
-  TSerialize,
-  TTagElement,
-} from "../src"
+  TSlatePlugin,
+  TSlateTypeElement,
+} from "slate-pen"
+import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
+import { TAnchorAnyAttributes, ToolbarButton } from "../src"
 import { CustomLinkFormDialog } from "./custom-link"
-
-export const withButtonLink = (editor: Editor) => {
-  const { isVoid, deserializeHtmlElement, serializeToHtmlString } = editor
-
-  editor.isVoid = element => {
-    return isElementButtonLink((element as any) as TButtonLinkElement) ? true : isVoid(element)
-  }
-
-  const _deserializeHtmlElement = (element: HTMLElement) => {
-    const buttonLink = deserializeWithButtonLink(element)
-    return buttonLink || deserializeHtmlElement(element)
-  }
-  editor.deserializeHtmlElement = _deserializeHtmlElement
-
-  const _serializeToHtmlString: TSerialize<TTagElement> = element => {
-    const buttonLink = serializeWithButtonLink(element)
-    return buttonLink || serializeToHtmlString(element)
-  }
-  editor.serializeToHtmlString = _serializeToHtmlString
-
-  return editor
-}
 
 export const BUTTON_LINK_DATA_ATTRIBUTE = "data-article-link-button"
 const dataAttributeObject = { [BUTTON_LINK_DATA_ATTRIBUTE]: "true" }
@@ -185,28 +161,44 @@ const getInitialLinkData = (editor: Editor): TButtonLinkButtonStateInitial => {
   }
 }
 
-export const serializeWithButtonLink: TSerialize<TButtonLinkElement> = node => {
-  if (isElementButtonLink(node)) {
-    const text = formatTagToString("a", node.attributes, node.txt)
-    return `<div ${BUTTON_LINK_DATA_ATTRIBUTE}="true">${text}</div>`
-  }
-  return ""
-}
-export const deserializeWithButtonLink: TDeserialize<TButtonLinkElement> = el => {
-  if (el.nodeName.toLowerCase() !== "div") {
-    return null
-  }
-  const attr = (el as Element).attributes.getNamedItem(BUTTON_LINK_DATA_ATTRIBUTE)
-
-  if (attr && attr.value === "true") {
-    const a = (el as Element).firstChild! as Element
-    const link: TButtonLinkElement = {
-      type: BUTTON_LINK_TYPE,
-      txt: a.textContent || "",
-      attributes: getAttributes(a),
-      children: [{ text: "" }],
+export const createButtonLinkPlugin = (): TSlatePlugin => ({
+  toHtml: node => {
+    if (isElementButtonLink(node)) {
+      const text = formatTagToString("a", node.attributes, node.txt)
+      return `<div ${BUTTON_LINK_DATA_ATTRIBUTE}="true">${text}</div>`
     }
-    return link
-  }
-  return null
-}
+    return null
+  },
+  fromHtmlElement: el => {
+    if (el.nodeName.toLowerCase() !== "div") {
+      return null
+    }
+    const attr = (el as Element).attributes.getNamedItem(BUTTON_LINK_DATA_ATTRIBUTE)
+
+    if (attr && attr.value === "true") {
+      const a = (el as Element).firstChild! as Element
+      const link: TButtonLinkElement = {
+        type: BUTTON_LINK_TYPE,
+        txt: a.textContent || "",
+        attributes: getAttributes(a),
+        children: [{ text: "" }],
+      }
+      return link
+    }
+    return null
+  },
+  extendEditor: editor => {
+    const { isVoid } = editor
+
+    editor.isVoid = element => {
+      return isElementButtonLink((element as any) as TButtonLinkElement) ? true : isVoid(element)
+    }
+  },
+  RenderElement: props => {
+    const element = props.element as TSlateTypeElement
+    if (isElementButtonLink(element)) {
+      return <ButtonLinkElement {...props} />
+    }
+    return null
+  },
+})

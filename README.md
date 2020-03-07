@@ -1,4 +1,4 @@
-# slate-html-mui
+# slate-html-mui (alpha)
 
 ---
 

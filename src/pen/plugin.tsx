@@ -5,7 +5,6 @@ import { SlatePen } from "./pen"
 export type TRenderElement = (props: RenderElementProps) => JSX.Element | null
 export type TRenderLeaf = (props: RenderLeafProps) => JSX.Element | null
 export type TExtendEditor = (editor: Editor, slatePen: SlatePen) => void
-export type TIsActive = (editor: Editor) => boolean
 
 export type TPartialNode = Partial<Editor> | Partial<Element> | Partial<Text>
 export type TSlateTypeElement = {
@@ -27,8 +26,6 @@ export type TSlatePlugin<T = TPartialNode> = {
   extendEditor?: TExtendEditor
   RenderElement?: TRenderElement
   RenderLeaf?: TRenderLeaf
-  leaf?: string
-  isActive?: TIsActive
 }
 
 export const isSlateTypeElement = (el: any): el is TSlateTypeElement => {

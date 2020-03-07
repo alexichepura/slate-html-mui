@@ -1,7 +1,6 @@
 import escapeHtml from "escape-html"
 import React, { createElement, FC } from "react"
 import { Editor, Element as SlateElement, Node, Text, Transforms } from "slate"
-import { ReactEditor, RenderElementProps } from "slate-react"
 import {
   formatTagToString,
   getAttributes,
@@ -11,7 +10,8 @@ import {
   TSlatePlugin,
   TSlateTypeElement,
   wrapInlineAndText,
-} from "../pen"
+} from "slate-pen"
+import { ReactEditor, RenderElementProps } from "slate-react"
 
 export enum EHtmlMark {
   "b" = "b",

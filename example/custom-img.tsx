@@ -7,7 +7,7 @@ import {
   TextField,
 } from "@material-ui/core"
 import React, { FC } from "react"
-import { TImgFormDialogProps } from "../src/html"
+import { TImgFormDialogProps } from "../src"
 
 export const CustomImgFormDialog: FC<TImgFormDialogProps> = ({
   open,

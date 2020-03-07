@@ -1,5 +1,5 @@
-import { EHtmlBlock } from "../src/html"
-import { TSlateTypeElement } from "../src/pen"
+import { TSlateTypeElement } from "slate-pen"
+import { EHtmlBlock } from "../src"
 
 export const initial: TSlateTypeElement[] = [
   {

@@ -19,7 +19,6 @@ import React, {
   useState,
 } from "react"
 import { Editor, Node, NodeEntry, Range } from "slate"
-import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import {
   formatTagToString,
   formatVoidToString,
@@ -28,7 +27,8 @@ import {
   isSlateTypeElement,
   TSlatePlugin,
   TSlateTypeElement,
-} from "../pen"
+} from "slate-pen"
+import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
 export const PICTURE_TAG = "picture"

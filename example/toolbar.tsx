@@ -8,18 +8,18 @@ import FormatUnderlinedTwoTone from "@material-ui/icons/FormatUnderlinedTwoTone"
 import React, { FC } from "react"
 import { Editor } from "slate"
 import {
+  BlockButton,
   EHtmlBlock,
   EHtmlMark,
   ImgButton,
+  insertBr,
   LinkButton,
+  MarkButton,
   PictureButton,
   RedoButton,
-  BlockButton,
-  MarkButton,
   ToolbarButton,
   UndoButton,
-} from "../src/html"
-import { insertBr } from "../src/html"
+} from "../src"
 import { ButtonLinkButton } from "./button-link"
 import { CustomImgFormDialog } from "./custom-img"
 import { CustomLinkFormDialog } from "./custom-link"

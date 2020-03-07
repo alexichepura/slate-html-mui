@@ -9,7 +9,6 @@ import {
 import Image from "@material-ui/icons/Image"
 import React, { FC, ImgHTMLAttributes, useState } from "react"
 import { Editor, Node, Path, Range, Text } from "slate"
-import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import {
   formatVoidToString,
   getAttributes,
@@ -17,7 +16,8 @@ import {
   isSlateTypeElement,
   TSlatePlugin,
   TSlateTypeElement,
-} from "../pen"
+} from "slate-pen"
+import { RenderElementProps, useFocused, useSelected, useSlate } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
 export const IMG_TAG = "img"

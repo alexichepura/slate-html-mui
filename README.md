@@ -7,7 +7,7 @@ It uses custom slate plugin engine - https://github.com/palessit/slate-pen
 
 <img width="547" alt="Slate HTML editor with MaterialUI" src="https://repository-images.githubusercontent.com/216015198/949bc200-37b7-11ea-91a0-54244e00132b">
 
-## Demo https://codesandbox.io/s/gallant-shamir-j35zi
+## Demo https://codesandbox.io/s/sleepy-swartz-r26xi
 
 ## Installation
 

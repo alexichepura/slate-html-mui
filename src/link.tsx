@@ -293,7 +293,7 @@ export const createAnchorPlugin = (): TSlatePlugin<THtmlLinkSlateElement> => ({
       if (children.length === 0) {
         children.push({ text: "" })
       }
-      return { tag, attributes, children }
+      return { type: tag, attributes, children } as THtmlLinkSlateElement
     }
     return null
   },

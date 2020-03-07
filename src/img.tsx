@@ -215,7 +215,7 @@ export const createImgPlugin = (): TSlatePlugin => ({
     if (tag === IMG_TAG) {
       const attributes = getAttributes(el as Element)
       const children: any[] = [{ text: "" } as Text]
-      return { tag, attributes, children }
+      return { type: tag, attributes, children } as THtmlImgSlateElement
     }
     return null
   },
@@ -226,8 +226,7 @@ export const createImgPlugin = (): TSlatePlugin => ({
     }
   },
   RenderElement: props => {
-    const element = props.element as TSlateTypeElement
-    if (isHtmlImgElement(element)) {
+    if (isHtmlImgElement(props.element)) {
       return <HtmlImgElement {...props} />
     }
     return null

@@ -97,7 +97,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
       if (children.length === 0) {
         children.push({ text: "" } as Text)
       }
-      return { tag, attributes, children }
+      return { type: tag, attributes, children } as TSlateTypeElement
     }
 
     if (tag in EHtmlMark) {
@@ -136,7 +136,7 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
     editor.normalizeNode = entry => {
       const [node, path] = entry
       // If the element is a paragraph, ensure it's children are valid.
-      if (SlateElement.isElement(node) && node.tag === EHtmlBlock.p) {
+      if (SlateElement.isElement(node) && isSlateTypeElement(node) && node.type === EHtmlBlock.p) {
         for (const [child, childPath] of Node.children(editor, path)) {
           if (SlateElement.isElement(child) && !editor.isInline(child)) {
             Transforms.unwrapNodes(editor, { at: childPath })
@@ -157,9 +157,9 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
   },
 
   RenderLeaf: ({ attributes, children, leaf }) => {
-    const found = Object.keys(EHtmlMark).some(tag => {
-      if (leaf[tag]) {
-        children = createElement(tag, {}, children)
+    const found = Object.keys(EHtmlMark).some(mark => {
+      if (leaf[mark]) {
+        children = createElement(mark, {}, children)
         return true
       }
       return false
@@ -171,10 +171,10 @@ export const createHtmlPlugin = (): TSlatePlugin => ({
   },
 })
 
-export const insertHtmlMark = (editor: Editor, tag: string) => {
-  const isActive = isMarkActive(editor, tag)
-  if (tag in EHtmlMark) {
-    isActive ? Editor.removeMark(editor, tag) : Editor.addMark(editor, tag, true)
+export const insertHtmlMark = (editor: Editor, mark: string) => {
+  const isActive = isMarkActive(editor, mark)
+  if (mark in EHtmlMark) {
+    isActive ? Editor.removeMark(editor, mark) : Editor.addMark(editor, mark, true)
     return
   }
 }

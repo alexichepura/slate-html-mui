@@ -155,27 +155,24 @@ export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement> => ({
     }
     return null
   },
-
   RenderLeaf: ({ attributes, children, leaf }) => {
-    const found = Object.keys(EHtmlMark).some(mark => {
-      if (leaf[mark]) {
-        children = createElement(mark, {}, children)
-        return true
-      }
-      return false
+    const marks = Object.keys(EHtmlMark).filter(mark => leaf[mark])
+    marks.forEach(mark => {
+      children = createElement(mark, {}, children)
     })
-    if (found) {
+    if (marks.length > 0) {
       return <span {...attributes}>{children}</span>
     }
     return null
   },
 })
 
-export const insertHtmlMark = (editor: Editor, mark: string) => {
+export const insertHtmlMark = (editor: Editor, mark: string): void => {
   const isActive = isMarkActive(editor, mark)
-  if (mark in EHtmlMark) {
-    isActive ? Editor.removeMark(editor, mark) : Editor.addMark(editor, mark, true)
-    return
+  if (isActive) {
+    Editor.removeMark(editor, mark)
+  } else {
+    Editor.addMark(editor, mark, true)
   }
 }
 

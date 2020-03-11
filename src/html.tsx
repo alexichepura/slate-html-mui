@@ -70,10 +70,12 @@ HtmlBlockElement.displayName = "HtmlBlockElement"
 export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement> => ({
   toHtml: (node, slatePen) => {
     if (Text.isText(node)) {
-      const mark = Object.entries(node).find(([k, v]) => k in EHtmlMark && v === true)
-      let text
-      if (mark && mark[0]) {
-        text = formatTagToString(mark[0], null, escapeHtml(node.text))
+      const marks = Object.entries(node).filter(([k, v]) => k in EHtmlMark && v === true)
+      let text: string = ""
+      if (marks.length > 0) {
+        marks.forEach(([mark]) => {
+          text = formatTagToString(mark, null, text || escapeHtml(node.text))
+        })
       } else {
         text = escapeHtml(node.text)
       }

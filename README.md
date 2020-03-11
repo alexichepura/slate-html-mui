@@ -1,6 +1,6 @@
 # slate-html-mui (alpha)
 
----
+[![Build Status](https://travis-ci.com/palessit/slate-html-mui.svg?branch=master)](https://travis-ci.com/palessit/slate-html-mui)
 
 Ready to use [Slate](https://www.slatejs.org/) and [Material-UI](https://material-ui.com/) based HTML WYSIWYG editor.
 It uses custom slate plugin engine - https://github.com/palessit/slate-pen

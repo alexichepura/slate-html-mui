@@ -1,24 +1,10 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  MenuItem,
-  TextField,
-} from "@material-ui/core"
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField } from "@material-ui/core"
 import Link from "@material-ui/icons/Link"
 import escapeHtml from "escape-html"
 import isUrl from "is-url"
 import React, { AnchorHTMLAttributes, FC, useState } from "react"
-import { Editor, Node, Path, Range, Text, Transforms } from "slate"
-import {
-  formatTagToString,
-  getAttributes,
-  isSlateTypeElement,
-  TSlatePlugin,
-  TSlateTypeElement,
-} from "slate-pen"
+import { Editor, Element, Node, Path, Range, Text, Transforms } from "slate"
+import { formatTagToString, getAttributes, isSlateTypeElement, TSlatePlugin, TSlateTypeElement } from "slate-pen"
 import { RenderElementProps, useSlate } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
@@ -34,6 +20,8 @@ export type THtmlLinkSlateElement = TSlateTypeElement & {
   text: Text["text"]
   attributes: TAnchorAnyAttributes
 }
+
+type THtmlLinkElement = Omit<THtmlLinkSlateElement, "text">
 
 type TLinkSelection = {
   range: Range | null
@@ -179,15 +167,14 @@ const wrapLink = (editor: Editor, command: TSetLinkCommand): void => {
   Transforms.setSelection(editor, range)
   const isCollapsed = range && Range.isCollapsed(range)
 
-  const link: THtmlLinkSlateElement = {
+  const link: THtmlLinkElement = {
     type: LINK_TAG,
     attributes,
-    text,
-    children: [{ text: "" }],
+    children: [{ text: text }],
   }
 
   if (!foundLinkEntry && isCollapsed) {
-    Transforms.insertNodes(editor, [link], { at: range })
+    Transforms.insertNodes(editor, [link as Element], { at: range })
   } else {
     if (isCollapsed) {
       const path = foundLinkEntry[1]

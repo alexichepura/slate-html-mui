@@ -47,7 +47,7 @@
     "escape-html": "^1.0.3",
     "is-hotkey": "^0.1.6",
     "is-url": "^1.2.4",
-    "slate-pen": "0.57.1-3"
+    "slate-pen": "0.58.1-1"
   },
   "peerDependencies": {
     "@material-ui/core": "^4",
@@ -66,5 +66,5 @@
   "sideEffects": false,
   "types": "dist/index.d.ts",
   "typings": "dist/index.d.ts",
-  "version": "0.9.1"
+  "version": "0.10.0"
 }

@@ -3,8 +3,8 @@ import React, { CSSProperties, FC, useMemo, useRef, useState } from "react"
 import { render } from "react-dom"
 import { createEditor, Editor, Node } from "slate"
 import { withHistory } from "slate-history"
+import { SlatePen, TPartialNode, TSlateTypeElement, useSticky } from "slate-pen"
 import { Editable, ReactEditor, Slate, withReact } from "slate-react"
-import { SlatePen, TSlateTypeElement, useSticky } from "slate-pen"
 import { BUTTON_LINK_DATA_ATTRIBUTE } from "./button-link"
 import { initial, initial_string } from "./initial"
 import { createSlatePen } from "./setup"
@@ -23,13 +23,13 @@ const SlateHtmlEditor: FC<{
     <Slate
       editor={editor as ReactEditor}
       defaultValue={value}
-      onChange={value => {
+      onChange={(value) => {
         setValue(value as TSlateTypeElement[])
       }}
       value={value as Node[]}
     >
       <Card
-        onKeyDown={e => {
+        onKeyDown={(e) => {
           isPasteCapture.current = e.ctrlKey && e.shiftKey && e.keyCode === 86 ? true : false
         }}
       >
@@ -42,7 +42,7 @@ const SlateHtmlEditor: FC<{
         <Editable
           renderElement={slatePen.RenderElement}
           renderLeaf={slatePen.RenderLeaf}
-          onPasteCapture={e => {
+          onPasteCapture={(e) => {
             // workaround for https://github.com/ianstormtaylor/slate/issues/3394
             if (!isPasteCapture.current) return
             const text = e.clipboardData.getData("text/plain")
@@ -62,7 +62,7 @@ const SlateHtmlEditor: FC<{
 SlateHtmlEditor.displayName = "SlateHtmlEditor"
 
 const useStyles = makeStyles(
-  theme => ({
+  (theme) => ({
     toolbarPlaceholder: {
       height: "47px",
     },
@@ -106,7 +106,7 @@ const MyEditor: FC = () => {
 
   const saveToLocalstorage = () => {
     console.log("saveToLocalstorage value", value)
-    const str = slatePen.toHtml(value)
+    const str = slatePen.toHtml(value as TPartialNode)
     console.log("saveToLocalstorage html string", str)
     localStorage.setItem("slate-mui-value", str)
   }

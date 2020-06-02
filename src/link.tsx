@@ -1,11 +1,25 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField } from "@material-ui/core"
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  TextField,
+} from "@material-ui/core"
 import Link from "@material-ui/icons/Link"
 import escapeHtml from "escape-html"
 import isUrl from "is-url"
 import React, { AnchorHTMLAttributes, FC, useState } from "react"
 import { Editor, Element, Node, Path, Range, Text, Transforms } from "slate"
-import { formatTagToString, getAttributes, isSlateTypeElement, TSlatePlugin, TSlateTypeElement } from "slate-pen"
-import { RenderElementProps, useSlate } from "slate-react"
+import {
+  formatTagToString,
+  getAttributes,
+  isSlateTypeElement,
+  TSlatePlugin,
+  TSlateTypeElement,
+} from "slate-pen"
+import { ReactEditor, RenderElementProps, useSlate } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
 export const LINK_TAG = "a"
@@ -86,7 +100,7 @@ const cleanAttributesMutate = (attributes: TAnchorAnyAttributes) =>
 export const HtmlAnchorElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
   const resultAttributes: TAnchorAnyAttributes = {
     ...attributes,
-    ...element.attributes,
+    ...(element.attributes as any),
   }
   cleanAttributesMutate(resultAttributes)
   return React.createElement(LINK_TAG, resultAttributes, children)
@@ -147,7 +161,7 @@ export const LinkButton: FC<TLinkButtonProps> = ({
         attributes={state.attributes}
         text={state.text}
         onOk={onOk}
-        updateText={text => mergeState({ text })}
+        updateText={(text) => mergeState({ text })}
         updateAttribute={updateAttribute}
         onRemove={onRemove}
         onClose={() => mergeState({ open: false })}
@@ -213,25 +227,25 @@ export const LinkFormDialog: FC<TLinkFormDialogProps> = ({
         <TextField
           label="Text to display"
           value={text}
-          onChange={e => updateText(e.target.value)}
+          onChange={(e) => updateText(e.target.value)}
           fullWidth
         />
         <TextField
           label="Attribute: title"
           value={attributes.title}
-          onChange={e => updateAttribute("title", e.target.value)}
+          onChange={(e) => updateAttribute("title", e.target.value)}
           fullWidth
         />
         <TextField
           label="Attribute: href"
           value={attributes.href}
-          onChange={e => updateAttribute("href", e.target.value)}
+          onChange={(e) => updateAttribute("href", e.target.value)}
           fullWidth
         />
         <TextField
           label="Attribute: target"
           value={attributes.target}
-          onChange={e => updateAttribute("target", e.target.value)}
+          onChange={(e) => updateAttribute("target", e.target.value)}
           select
           fullWidth
         >
@@ -284,16 +298,16 @@ export const createAnchorPlugin = (): TSlatePlugin<THtmlLinkSlateElement> => ({
     }
     return null
   },
-  extendEditor: editor => {
-    const { insertData, insertText, isInline } = editor
+  extendEditor: (editor) => {
+    const { insertData, insertText, isInline } = editor as ReactEditor
 
-    editor.isInline = element => {
+    editor.isInline = (element) => {
       return isSlateTypeElement(element) && element.type === LINK_TAG ? true : isInline(element)
     }
 
-    editor.insertText = text => {
+    editor.insertText = (text) => {
       if (text && isUrl(text)) {
-        wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
+        wrapLink(editor, { attributes: { href: text }, range: editor.range as Range, text })
       } else {
         insertText(text)
       }
@@ -303,13 +317,13 @@ export const createAnchorPlugin = (): TSlatePlugin<THtmlLinkSlateElement> => ({
       const text = data.getData("text/plain")
 
       if (text && isUrl(text)) {
-        wrapLink(editor, { attributes: { href: text }, range: editor.range, text })
+        wrapLink(editor, { attributes: { href: text }, range: editor.range as Range, text })
       } else {
         insertData(data)
       }
     }
   },
-  RenderElement: props => {
+  RenderElement: (props) => {
     if (isHtmlAnchorElement(props.element)) {
       return <HtmlAnchorElement {...props} />
     }

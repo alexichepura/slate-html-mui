@@ -19,7 +19,7 @@ import {
   TSlatePlugin,
   TSlateTypeElement,
 } from "slate-pen"
-import { RenderElementProps, useSlate } from "slate-react"
+import { ReactEditor, RenderElementProps, useSlate } from "slate-react"
 import { ToolbarButton, TToolbarButtonProps } from "./toolbar-button"
 
 export const LINK_TAG = "a"
@@ -299,7 +299,7 @@ export const createAnchorPlugin = (): TSlatePlugin<THtmlLinkSlateElement> => ({
     return null
   },
   extendEditor: (editor) => {
-    const { insertData, insertText, isInline } = editor
+    const { insertData, insertText, isInline } = editor as ReactEditor
 
     editor.isInline = (element) => {
       return isSlateTypeElement(element) && element.type === LINK_TAG ? true : isInline(element)
@@ -319,7 +319,7 @@ export const createAnchorPlugin = (): TSlatePlugin<THtmlLinkSlateElement> => ({
       if (text && isUrl(text)) {
         wrapLink(editor, { attributes: { href: text }, range: editor.range as Range, text })
       } else {
-        typeof insertData === "function" && insertData(data)
+        insertData(data)
       }
     }
   },

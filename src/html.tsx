@@ -114,8 +114,7 @@ export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement | any> => ({
     return null
   },
   extendEditor: (editor, slatePen) => {
-    const { insertData, normalizeNode } = editor
-
+    const { insertData, normalizeNode } = editor as ReactEditor
     editor.insertData = (data: DataTransfer) => {
       const html = data.getData("text/html")
 
@@ -132,7 +131,7 @@ export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement | any> => ({
         }
         return
       }
-      typeof insertData === "function" && insertData(data)
+      insertData(data)
     }
 
     editor.normalizeNode = (entry) => {

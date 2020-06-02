@@ -49,7 +49,7 @@ export const isMarkActive = (editor: Editor, type: string) => {
 
 export const isBlockActive = (editor: Editor, type: string) => {
   const [match] = Editor.nodes(editor, {
-    match: node => isSlateTypeElement(node) && node.type === type,
+    match: (node) => isSlateTypeElement(node) && node.type === type,
   })
 
   return !!match
@@ -60,7 +60,7 @@ export type THtmlEditor = ReactEditor & {
 }
 
 const isHtmlBlockElement = (element: SlateElement | TSlateTypeElement) => {
-  return element.type in EHtmlBlock
+  return typeof element.type === "string" && element.type in EHtmlBlock
 }
 const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, element }) => {
   return React.createElement((element as TSlateTypeElement).type, attributes, children)
@@ -105,7 +105,7 @@ export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement | any> => ({
     if (type in EHtmlMark) {
       const children = slatePen.fromHtmlChildNodes(el.childNodes)
       const attributes = getAttributes(el)
-      const marks = children.map(child => {
+      const marks = children.map((child) => {
         return { [type]: true, ...child, attributes }
       })
       return marks
@@ -132,10 +132,10 @@ export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement | any> => ({
         }
         return
       }
-      insertData(data)
+      typeof insertData === "function" && insertData(data)
     }
 
-    editor.normalizeNode = entry => {
+    editor.normalizeNode = (entry) => {
       const [node, path] = entry
       // If the element is a paragraph, ensure it's children are valid.
       if (SlateElement.isElement(node) && isSlateTypeElement(node) && node.type === EHtmlBlock.p) {
@@ -151,15 +151,15 @@ export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement | any> => ({
       normalizeNode(entry)
     }
   },
-  RenderElement: props => {
+  RenderElement: (props) => {
     if (isHtmlBlockElement(props.element)) {
       return <HtmlBlockElement {...props} />
     }
     return null
   },
   RenderLeaf: ({ attributes, children, leaf }) => {
-    const marks = Object.keys(EHtmlMark).filter(mark => leaf[mark])
-    marks.forEach(mark => {
+    const marks = Object.keys(EHtmlMark).filter((mark) => leaf[mark])
+    marks.forEach((mark) => {
       children = createElement(mark, {}, children)
     })
     if (marks.length > 0) {
@@ -182,9 +182,9 @@ export const insertHtmlBlock = (editor: Editor, type: string) => {
   const isActive = isBlockActive(editor, type)
   const isList = type in EHtmlListTag
 
-  Object.keys(EHtmlListTag).forEach(type => {
+  Object.keys(EHtmlListTag).forEach((type) => {
     Transforms.unwrapNodes(editor, {
-      match: node => isSlateTypeElement(node) && node.type === type,
+      match: (node) => isSlateTypeElement(node) && node.type === type,
       split: true,
     })
   })

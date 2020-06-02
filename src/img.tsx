@@ -87,7 +87,7 @@ export const HtmlImgElement: FC<RenderElementProps> = ({ attributes, children, e
   return (
     <span {...attributes}>
       <span contentEditable={false} style={style}>
-        <img {...element.attributes} />
+        <img {...(element.attributes as ImgHTMLAttributes<any>)} />
       </span>
       {children}
     </span>
@@ -180,13 +180,13 @@ export const ImgFormDialog: FC<TImgFormDialogProps> = ({
         <TextField
           label="Attribute: src"
           value={attributes.src || ""}
-          onChange={e => updateAttribute("src", e.target.value)}
+          onChange={(e) => updateAttribute("src", e.target.value)}
           fullWidth
         />
         <TextField
           label="Attribute: alt"
           value={attributes.alt || ""}
-          onChange={e => updateAttribute("alt", e.target.value)}
+          onChange={(e) => updateAttribute("alt", e.target.value)}
           fullWidth
         />
       </DialogContent>
@@ -204,13 +204,13 @@ export const ImgFormDialog: FC<TImgFormDialogProps> = ({
 ImgFormDialog.displayName = "ImgFormDialog"
 
 export const createImgPlugin = (): TSlatePlugin => ({
-  toHtml: slateElement => {
+  toHtml: (slateElement) => {
     if (isHtmlImgElement(slateElement)) {
       return formatVoidToString(slateElement.type, slateElement.attributes)
     }
     return ""
   },
-  fromHtmlElement: el => {
+  fromHtmlElement: (el) => {
     const tag = el.nodeName.toLowerCase()
     if (tag === IMG_TAG) {
       const attributes = getAttributes(el as Element)
@@ -219,13 +219,13 @@ export const createImgPlugin = (): TSlatePlugin => ({
     }
     return null
   },
-  extendEditor: editor => {
+  extendEditor: (editor) => {
     const { isVoid } = editor
-    editor.isVoid = element => {
+    editor.isVoid = (element) => {
       return isImgTag(element as TSlateTypeElement) ? true : isVoid(element)
     }
   },
-  RenderElement: props => {
+  RenderElement: (props) => {
     if (isHtmlImgElement(props.element)) {
       return <HtmlImgElement {...props} />
     }

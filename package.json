@@ -8,7 +8,7 @@
     "@types/escape-html": "^1.0.0",
     "@types/is-hotkey": "^0.1.1",
     "@types/is-url": "^1.2.28",
-    "@types/jest": "^25.1.4",
+    "@types/jest": "^25.2.3",
     "@types/node": "^14.0.9",
     "@types/react-dom": "^16.9.4",
     "@types/react-router-dom": "^5.1.3",

@@ -5,7 +5,7 @@
     "@material-ui/icons": ">=4.5.1",
     "@types/enzyme": "^3.10.5",
     "@types/enzyme-adapter-react-16": "^1.0.6",
-    "@types/escape-html": "^0.0.20",
+    "@types/escape-html": "^1.0.0",
     "@types/is-hotkey": "^0.1.1",
     "@types/is-url": "^1.2.28",
     "@types/jest": "^25.1.4",

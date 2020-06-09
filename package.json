@@ -47,7 +47,7 @@
     "escape-html": "^1.0.3",
     "is-hotkey": "^0.1.6",
     "is-url": "^1.2.4",
-    "slate-pen": "0.58.1-2"
+    "slate-pen": "0.58.1-4"
   },
   "peerDependencies": {
     "@material-ui/core": "^4",

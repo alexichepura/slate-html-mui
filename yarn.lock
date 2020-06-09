@@ -6724,10 +6724,10 @@ slate-history@^0.58.1:
     immer "^5.0.0"
     is-plain-object "^3.0.0"
 
-slate-pen@0.58.1-2:
-  version "0.58.1-2"
-  resolved "https://registry.yarnpkg.com/slate-pen/-/slate-pen-0.58.1-2.tgz#3db00b11962a0fc24f3bf85db45b05d23bafb5a6"
-  integrity sha512-mLrzdli4eDpzEQQCToX4JLNba53k1cE454vTeLE+KZQ4B09OWegnWk7sU+w3Fb6HuN6rrPYWZhpmUl1QAj4Hlg==
+slate-pen@0.58.1-4:
+  version "0.58.1-4"
+  resolved "https://registry.yarnpkg.com/slate-pen/-/slate-pen-0.58.1-4.tgz#a93dcf1747f2f352f2d0e04ff69acaed57df31e4"
+  integrity sha512-tz9d+gh2sTJt8uVLV8fxxM2i492fW8ugPvQ3e3SoQwe8YvBQCKoCFKfCuZZBaXXgFIYJthLsQiUBgf4ys5K/qg==
   dependencies:
     slate "^0.58.1"
     slate-react "^0.58.2"

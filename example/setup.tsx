@@ -7,6 +7,7 @@ import {
   createImgPlugin,
   createPicturePlugin,
 } from "../src"
+import { createSpanToParagraphPlugin } from "../src/span-to-paragraph"
 import { createButtonLinkPlugin } from "./button-link"
 
 export const createSlatePen = (editor: Editor) =>
@@ -14,6 +15,7 @@ export const createSlatePen = (editor: Editor) =>
     editor,
     plugins: [
       createBasePlugin(),
+      createSpanToParagraphPlugin(),
       createHtmlPlugin(),
       createImgPlugin(),
       createPicturePlugin(),

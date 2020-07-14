@@ -12,7 +12,6 @@ import {
   wrapInlineAndText,
 } from "slate-pen"
 import { ReactEditor, RenderElementProps } from "slate-react"
-import { createSpanToParagraphPlugin } from "./span-to-paragraph"
 
 export enum EHtmlMark {
   "b" = "b",
@@ -93,11 +92,6 @@ export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement | any> => ({
   },
   fromHtmlElement: (el, slatePen) => {
     const type = el.nodeName.toLowerCase()
-
-    if (type === "span") {
-      const spanToParagraph = createSpanToParagraphPlugin().fromHtmlElement!(el, slatePen)
-      return spanToParagraph
-    }
 
     if (type in EHtmlBlock) {
       const children = slatePen.fromHtmlChildNodes(el.childNodes)

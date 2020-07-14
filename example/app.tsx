@@ -42,15 +42,6 @@ const SlateHtmlEditor: FC<{
         <Editable
           renderElement={slatePen.RenderElement}
           renderLeaf={slatePen.RenderLeaf}
-          onPasteCapture={(e) => {
-            // workaround for https://github.com/ianstormtaylor/slate/issues/3394
-            if (!isPasteCapture.current) return
-            const text = e.clipboardData.getData("text/plain")
-            if (text) {
-              e.preventDefault()
-              editor.insertText(text)
-            }
-          }}
           placeholder="Enter some rich text…"
           spellCheck
           className={classes.editable}

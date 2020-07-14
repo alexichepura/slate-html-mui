@@ -93,13 +93,13 @@ export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement | any> => ({
   fromHtmlElement: (el, slatePen) => {
     const type = el.nodeName.toLowerCase()
 
-    if (type in EHtmlBlock) {
+    if (type in EHtmlBlock || type === "span") {
       const children = slatePen.fromHtmlChildNodes(el.childNodes)
       const attributes = getAttributes(el)
       if (children.length === 0) {
         children.push({ text: "" })
       }
-      return { type, attributes, children }
+      return { type: type === "span" ? "p" : type, attributes, children }
     }
 
     if (type in EHtmlMark) {

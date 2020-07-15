@@ -67,6 +67,16 @@ const HtmlBlockElement: FC<RenderElementProps> = ({ attributes, children, elemen
 }
 HtmlBlockElement.displayName = "HtmlBlockElement"
 
+export const getBlockElement = (el: HTMLElement, type: EHtmlBlock, slatePen: SlatePen) => {
+  const children = slatePen.fromHtmlChildNodes(el.childNodes)
+  const attributes = getAttributes(el)
+
+  if (children.length === 0) {
+    children.push({ text: "" })
+  }
+  return { type, attributes, children }
+}
+
 export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement | any> => ({
   // TODO remove any (or split to htmlBlockPlugin and htmlMarkPlugin)
   toHtml: (node, slatePen) => {
@@ -94,12 +104,7 @@ export const createHtmlPlugin = (): TSlatePlugin<TSlateTypeElement | any> => ({
     const type = el.nodeName.toLowerCase()
 
     if (type in EHtmlBlock) {
-      const children = slatePen.fromHtmlChildNodes(el.childNodes)
-      const attributes = getAttributes(el)
-      if (children.length === 0) {
-        children.push({ text: "" })
-      }
-      return { type, attributes, children }
+      return getBlockElement(el, type as EHtmlBlock, slatePen)
     }
 
     if (type in EHtmlMark) {
